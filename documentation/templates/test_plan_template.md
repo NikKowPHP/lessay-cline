@@ -1,52 +1,24 @@
 # TEST PLAN TEMPLATE
-<!-- Document Version: 1.0 -->
-<!-- Last Updated: DATE -->
+<!-- Document Version: 1.1 -->
+<!-- Last Updated: 2025-06-10 -->
 
-## 1. Introduction
-### 1.1 Purpose
-<!-- Describe the purpose of this test plan -->
+[Existing sections...]
 
-### 1.2 Scope
-<!-- Define what's included/excluded from testing -->
+## 5. Payment Flow Tests
+### 5.1 Subscription Scenarios
+| Test Case | Steps | Expected Result |
+|-----------|-------|-----------------|
+| New Premium Subscription | 1. Select Premium plan<br>2. Enter valid card<br>3. Submit | - Status: active<br>- Features unlocked |
+| Payment Failure | 1. Use declined card<br>2. Attempt purchase | - Error message shown<br>- No access change |
+| Plan Upgrade | 1. From Free to Pro<br>2. Confirm prorated charge | - Immediate upgrade<br>- Correct charge |
 
-## 2. Test Objectives
-<!-- List key testing goals -->
+### 5.2 Webhook Tests
+- Payment success → DB updated
+- Payment failed → Retry logic
+- Subscription canceled → Access revoked
 
-## 3. Test Approach
-### 3.1 Test Levels
-- Unit Testing
-- Integration Testing
-- System Testing
-- Acceptance Testing
-
-### 3.2 Test Types
-- Functional Testing
-- Performance Testing
-- Security Testing
-- Usability Testing
-
-## 4. Test Scope
-### 4.1 Features to be Tested
-<!-- List features in scope -->
-
-### 4.2 Features Not to be Tested
-<!-- List out-of-scope features -->
-
-## 5. Test Resources
-### 5.1 Human Resources
-<!-- List team members and roles -->
-
-### 5.2 Test Environment
-<!-- Describe test environments -->
-
-### 5.3 Tools
-<!-- List testing tools/frameworks -->
-
-## 6. Test Schedule
-<!-- Include timeline/milestones -->
-
-## 7. Test Deliverables
-<!-- List expected test artifacts -->
-
-## 8. Risks & Mitigations
-<!-- Identify testing risks and plans -->
+## 6. Security Tests
+### 6.1 Payment Data
+- Card details never stored
+- Tokenization verified
+- PCI compliance checks

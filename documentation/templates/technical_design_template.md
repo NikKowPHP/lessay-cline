@@ -1,49 +1,94 @@
 # TECHNICAL DESIGN DOCUMENT
-<!-- Document Version: 1.0 -->
-<!-- Last Updated: DATE -->
+<!-- Document Version: 1.2 -->
+<!-- Last Updated: 2025-06-10 -->
 
 ## 1. Architecture Overview
 ### 1.1 System Context
-<!-- High-level system diagram and description -->
+```mermaid
+graph TD
+    A[Next.js Frontend] -->|API Routes| B[Next.js Backend]
+    B --> C[Prisma ORM]
+    B --> D[Supabase Auth]
+    B --> E[Supabase Storage]
+    B --> F[AIService]
+    C --> G[Supabase PostgreSQL]
+    F --> H[4B LLM Agent]
+    F --> I[Task Executor]
+```
 
-### 1.2 Architectural Patterns
-<!-- List key architectural decisions -->
+### 1.2 Key Features
+- **Language Learning Core**:
+  - Adaptive lesson generation
+  - Progress tracking
+  - Voice interaction handling
+- **AI Integration**:
+  - Autonomous development agent
+  - Content personalization
+  - Error correction
 
 ## 2. Component Design
-### 2.1 Component Diagram
-<!-- Mermaid/plantuml diagram of components -->
+### 2.1 Service Layer
+- **AuthService**:
+  - JWT verification
+  - Session management
+  - Mock auth implementation (`MOCK_AUTH=true`)
+  
+- **DataService**:
+  ```mermaid
+  flowchart LR
+      A[API Route] --> B[DataService]
+      B --> C[Prisma Client]
+      C --> D[(PostgreSQL)]
+      B --> E[Cache Layer]
+  ```
+  - Manages:
+    - User profiles
+    - Learning content
+    - Progress data
 
-### 2.2 Component Responsibilities
-- Component A: <Description>
-- Component B: <Description>
+- **AIService**:
+  - As previously detailed
 
 ## 3. Data Flow
-### 3.1 Data Flow Diagram
-<!-- Visualize key data flows -->
-
-### 3.2 Data Storage
-<!-- Describe database/file storage approach -->
+### 3.1 Key Flows
+```mermaid
+sequenceDiagram
+    User->>Frontend: Start Lesson
+    Frontend->>API: POST /api/lessons/start
+    API->>AIService: Generate lesson
+    AIService->>DataService: Get user progress
+    DataService-->>AIService: Progress data
+    AIService-->>API: Lesson content
+    API-->>Frontend: Lesson data
+```
 
 ## 4. Interface Specifications
-### 4.1 API Endpoints
+### 4.1 AI Endpoints
 | Method | Path | Description |
 |--------|------|-------------|
-| GET    | /api/v1/resource | <Description> |
-
-### 4.2 Message Formats
-<!-- Sample request/response payloads -->
+| POST   | /api/ai/generate-lesson | Create personalized lesson |
+| POST   | /api/ai/analyze-response | Evaluate user input |
 
 ## 5. Database Design
-### 5.1 Schema Diagram
-<!-- ER diagram or table structure -->
-
-### 5.2 Key Tables
-- Table1: <Description>
-- Table2: <Description>
+### 5.1 Extended Schema
+```prisma
+model Exercise {
+  id          String @id @default(uuid())
+  type        String // 'vocabulary', 'grammar', etc.
+  content     Json
+  difficulty  Int
+  language    String
+  tags        String[]
+}
+```
 
 ## 6. Non-Functional Considerations
-### 6.1 Performance
-<!-- Performance design decisions -->
+### 6.1 AI Performance
+- Model inference optimization
+- Async task processing
+- Rate limiting
 
-### 6.2 Security
-<!-- Security architecture details -->
+### 6.2 Language Processing
+- Multilingual support
+- Voice data handling
+- Real-time feedback

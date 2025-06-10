@@ -1,72 +1,49 @@
 # API SPECIFICATION TEMPLATE
-<!-- Document Version: 1.0 -->
-<!-- Last Updated: DATE -->
+<!-- Document Version: 1.1 -->
+<!-- Last Updated: 2025-06-10 -->
 
-## 1. Overview
-### 1.1 Purpose
-<!-- Describe the API's purpose and scope -->
+[Existing sections...]
 
-### 1.2 Base URL
-`https://api.example.com/v1`
-
-## 2. Authentication
-### 2.1 Authentication Method
-<!-- Describe auth mechanism (e.g., JWT, OAuth) -->
-
-### 2.2 Headers
+## 5. Payment Endpoints
+### 5.1 Subscription Management
+#### POST /api/payments/create-subscription
+##### Request
 ```json
 {
-  "Authorization": "Bearer {token}",
-  "Content-Type": "application/json"
-}
-```
-
-## 3. Error Handling
-### 3.1 HTTP Status Codes
-| Code | Meaning |
-|------|---------|
-| 400 | Bad Request |
-| 401 | Unauthorized |
-| 404 | Not Found |
-
-### 3.2 Error Response Format
-```json
-{
-  "error": {
-    "code": "ERR_CODE",
-    "message": "Description"
-  }
-}
-```
-
-## 4. Endpoints
-### 4.1 Resource Endpoint
-#### GET /resource/{id}
-##### Parameters
-| Name | In | Type | Required | Description |
-|------|----|------|----------|-------------|
-| id | path | string | Yes | Resource identifier |
-
-##### Response
-```json
-{
-  "id": "string",
-  "name": "string"
-}
-```
-
-### 4.2 Collection Endpoint
-#### POST /resources
-##### Request Body
-```json
-{
-  "name": "string"
+  "tier": "premium",
+  "paymentMethodId": "pm_123456"
 }
 ```
 
 ##### Response
 ```json
 {
-  "id": "string",
-  "createdAt": "ISO8601"
+  "status": "active",
+  "currentPeriodEnd": "2025-07-10"
 }
+```
+
+### 5.2 Webhook
+#### POST /api/stripe/webhook
+##### Event Types
+- payment_intent.succeeded
+- invoice.payment_failed
+- customer.subscription.updated
+
+### 5.3 Get Subscription
+#### GET /api/payments/subscription
+##### Response
+```json
+{
+  "tier": "pro",
+  "status": "active",
+  "nextPaymentDate": "2025-07-10"
+}
+```
+
+## 6. Error Handling Updates
+### 6.1 Payment Errors
+| Code | Error Type | Description |
+|------|------------|-------------|
+| 402  | payment_required | Payment failed |
+| 409  | subscription_conflict | Plan change in progress |
