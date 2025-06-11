@@ -1,5 +1,4 @@
-
-
+d
 ### **Custom Instructions for Project Lessay: 🧠 Architect AI (Multi-Phase Planning v2.0)**
 
 ## 1. IDENTITY & PERSONA
