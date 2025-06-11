@@ -88,7 +88,7 @@ Here is the master plan that will govern my operations to produce the required, 
         Of course. Adhering to the principle of maximum precision, I will now provide the detailed, actionable prompts that will constitute the `architect_master_todo.md` for the final production-readiness phase. This plan translates the high-level goals into specific, generative instructions for me to create the final set of `dev_todo` files.
 
 d
-- [ ] **Task 8: Generate `dev_todo_phase_8.md` (Asynchronous Processing & Distributed Caching)**
+- [x] **Task 8: Generate `dev_todo_phase_8.md` (Asynchronous Processing & Distributed Caching)**
     - **Source Brief:** `technical_design_template.md` (mentions async processing), `hardening_phase_4_performance.md` (mentions caching).
     - **Action:** Generate a detailed plan to decouple long-running tasks from the request-response cycle and upgrade the caching mechanism for a multi-node environment.
     - **LLM Prompt:** "Generate the file `documentation/dev_todo_phase_8.md`. Create atomic, verifiable tasks with `[ ]` checkboxes for the Developer AI. The plan must include:
@@ -99,7 +99,7 @@ d
         5.  **Install Redis Client:** Execute `npm install @upstash/redis`.
         6.  **Upgrade Caching Utility:** Modify the `/lib/cache.ts` file. Remove the `Map`-based implementation. Replace it with logic that initializes and uses a client from `@upstash/redis` to perform `get` and `setex` (set with expiration) operations. The Redis connection details must be read from environment variables."
 
-- [ ] **Task 9: Generate `dev_todo_phase_9.md` (Comprehensive Testing)**
+- [x] **Task 9: Generate `dev_todo_phase_9.md` (Comprehensive Testing)**
     - **Source Brief:** `documentation/templates/test_plan_template.md` and `hardening_phase_5_testing.md`.
     - **Action:** Generate a comprehensive testing plan that systematically implements the test cases defined in the documentation.
     - **LLM Prompt:** "Generate the file `documentation/dev_todo_phase_9.md`. Create atomic, verifiable tasks with `[ ]` checkboxes. The plan must instruct the Developer AI to reference the `test_plan_template.md` and implement the following:
@@ -108,7 +108,7 @@ d
         3.  **Integration Tests - Core Logic:** Implement the specific test cases from the `test_plan_template.md` for the "Core Learning Loop Tests" and "Vocal Analysis Tests", verifying that the interaction between the database, AI service, and API endpoints works as expected.
         4.  **Update CI:** Modify `/.github/workflows/ci.yml` to set up a test database service (e.g., using Docker) and run the full `npm test` suite against it."
 
-- [ ] **Task 10: Generate `dev_todo_phase_10.md` (UI Implementation & Polish)**
+- [x] **Task 10: Generate `dev_todo_phase_10.md` (UI Implementation & Polish)**
     - **Source Brief:** `documentation/templates/user_documentation_template.md` and general production readiness standards.
     - **Action:** Generate a detailed plan to transform the placeholder UI into a fully responsive, polished, and user-friendly interface.
     - **LLM Prompt:** "Generate the file `documentation/dev_todo_phase_10.md`. Create atomic, verifiable tasks with `[ ]` checkboxes. The plan must instruct the Developer AI to:
@@ -118,7 +118,7 @@ d
         4.  **Create a Main Layout:** Create a main application layout component at `/components/AppLayout.tsx` that includes a shared navigation bar and footer. Wrap the main page content in this layout.
         5.  **Implement Accessibility:** Review all interactive elements (buttons, inputs) and ensure they have proper `aria-` labels and are navigable via keyboard."
 
-- [ ] **Task 11: Generate `dev_todo_phase_11.md` (Data Governance & Finalization)**
+- [x] **Task 11: Generate `dev_todo_phase_11.md` (Data Governance & Finalization)**
     - **Source Brief:** `documentation/templates/data_governance_template.md` and `documentation/templates/risk_assessment_template.md`.
     - **Action:** Generate a detailed plan to implement the required data management policies and perform final cleanup.
     - **LLM Prompt:** "Generate the file `documentation/dev_todo_phase_11.md`. Create atomic, verifiable tasks with `[ ]` checkboxes. The plan must instruct the Developer AI to:

@@ -98,6 +98,13 @@ documentation/
     user_documentation_template.md
   app_description.md
   architect_master_todo.md
+  dev_todo_phase_1.md
+  dev_todo_phase_2.md
+  dev_todo_phase_3.md
+  dev_todo_phase_4.md
+  dev_todo_phase_5.md
+  dev_todo_phase_6.md
+  dev_todo_phase_7.md
   documentation_completion_plan.md
   hardening_phase_1_observability.md
   hardening_phase_2_error_handling.md
@@ -139,6 +146,989 @@ tsconfig.json
 
 <files>
 This section contains the contents of the repository's files.
+
+<file path=".github/workflows/ci.yml">
+name: CI
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm run lint
+</file>
+
+<file path="app/api/lessons/[id]/submit-answer/route.ts">
+import { NextResponse } from 'next/server'
+
+export async function POST(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  const body = await request.json()
+  console.log(`Received answer for lesson ${params.id}:`, body)
+  return NextResponse.json({ correct: true })
+}
+</file>
+
+<file path="app/api/lessons/start/route.ts">
+import { NextResponse } from 'next/server'
+
+export async function POST() {
+  return NextResponse.json({ lessonId: 'lesson_123' })
+}
+</file>
+
+<file path="app/api/payments/create-subscription/route.ts">
+import { NextResponse } from 'next/server';
+
+export async function POST(request: Request) {
+  const { tier } = await request.json();
+  console.log('Creating subscription for tier:', tier);
+  return NextResponse.json({ status: 'active' });
+}
+</file>
+
+<file path="app/api/stats/fluency/route.ts">
+import { NextResponse } from 'next/server';
+
+export async function GET() {
+  return NextResponse.json({ speakingPace: 125 });
+}
+</file>
+
+<file path="app/api/stats/srs-overview/route.ts">
+import { NextResponse } from 'next/server';
+
+export async function GET() {
+  return NextResponse.json({ totalItems: 150 });
+}
+</file>
+
+<file path="app/api/stripe/webhook/route.ts">
+import { NextResponse } from 'next/server';
+
+export async function POST() {
+  console.log('Stripe webhook received');
+  return NextResponse.json({ received: true }, { status: 200 });
+}
+</file>
+
+<file path="app/api/users/profile/route.ts">
+import { NextResponse } from 'next/server'
+
+export async function GET() {
+  return NextResponse.json({ id: 'user_123' })
+}
+
+export async function PUT(request: Request) {
+  const body = await request.json()
+  console.log('Received profile update:', body)
+  return NextResponse.json({ success: true })
+}
+</file>
+
+<file path="components/LessonView.tsx">
+'use client'
+
+import { useState } from 'react'
+
+type Lesson = {
+  lessonId: string
+}
+
+export default function LessonView() {
+  const [lesson, setLesson] = useState<Lesson | null>(null)
+
+  const startLesson = async () => {
+    try {
+      const response = await fetch('/api/lessons/start', {
+        method: 'POST'
+      })
+      const data = await response.json()
+      setLesson(data)
+    } catch (error) {
+      console.error('Failed to start lesson:', error)
+    }
+  }
+
+  return (
+    <div className="lesson-container">
+      {!lesson && (
+        <button onClick={startLesson}>
+          Start New Lesson
+        </button>
+      )}
+      
+      {lesson && (
+        <div className="lesson-content">
+          <h2>Lesson {lesson.lessonId}</h2>
+          <p>Your lesson content would appear here</p>
+        </div>
+      )}
+    </div>
+  )
+}
+</file>
+
+<file path="components/PricingPage.tsx">
+'use client';
+
+export default function PricingPage() {
+  return (
+    <div>
+      <h1>Choose Your Plan</h1>
+      <section>
+        <h2>Premium Plan</h2>
+        <button>Subscribe</button>
+      </section>
+    </div>
+  );
+}
+</file>
+
+<file path="documentation/project_managment/init_todo.md">
+Of course. You are correct. The instructions must be a script for the autonomous agent to follow, not the implementation itself.
+
+Here are the separate, simplified to-do files for each phase. Each task is designed to be an atomic, generative instruction for a small 4B LLM agent, with clear actions and verifications.
+
+---
+### **`phase_1_todo.md`**
+
+## Phase 1: Project Setup & Core Infrastructure
+
+**Goal:** Establish the project foundation, database, and authentication.
+**Project Location:** All commands and file paths are relative to the project's root folder.
+
+- [x] **Task 1.1: Initialize Next.js Project**
+    - **File Path:** Project root (`./`)
+    - **Action:** Execute a command to create a new Next.js project in the current directory.
+    - **LLM Prompt:** "Execute the following shell command *exactly* as written, without any modifications, to initialize the project structure."
+    - **Command:** `npx create-next-app@latest . --ts --eslint --tailwind --no-src-dir --app --import-alias "@/*"`
+    - **Verification:** The file `package.json` exists in the root folder.
+
+- [x] hask 1.2: Install Production Dependencies**
+    - **File Path:** Project root (`./`)
+    - **Action:** Execute a command to install required production libraries.
+    - **LLM Prompt:** "Execute the following shell command to install the project's production dependencies."
+    - **Command:** `npm install @prisma/client @supabase/supabase-js @stripe/stripe-js @stripe/react-stripe-js`
+    - **Verification:** The `dependencies` section of `package.json` contains `@prisma/client` and `@supabase/supabase-js`.
+
+- [x] **Task 1.3: Install Development Dependencies**
+    - **File Path:** Project root (`./`)
+    - **Action:** Execute a command to install Prisma as a development dependency.
+    - **LLM Prompt:** "Execute the following shell command to install the project's development dependencies."
+    - **Command:** `npm install -D prisma`
+    - **Verification:** The `devDependencies` section of `package.json` contains `prisma`.
+
+- [x] **Task 1.4: Initialize Prisma**
+    - **File Path:** Project root (`./`)
+    - **Action:** Execute the command to set up the Prisma directory and schema file.
+    - **LLM Prompt:** "Execute the following shell command to initialize Prisma."
+    - **Command:** `npx prisma init`
+    - **Verification:** The file `/prisma/schema.prisma` exists.
+
+- [ ] **Task 1.5: Define Database Schema**
+    - **File Path:** `/prisma/schema.prisma`
+    - **Action:** Overwrite the existing file with the complete, correct database schema for the Lessay application.
+    - **LLM Prompt:** "Replace the entire content of the file at `/prisma/schema.prisma` with the provided code block. Do not add or change anything."
+    - **Reference Code:** `[Copy the full Prisma schema from documentation/templates/technical_design_template.md Section 5.1]`
+    - **Verification:** The file `/prisma/schema.prisma` contains the string `model SRSEntry`.
+
+- [ ] **Task 1.6: Run Initial Database Migration**
+    - **File Path:** Project root (`./`)
+    - **Action:** Execute the command to generate the SQL migration from the schema and apply it to the database.
+    - **LLM Prompt:** "Execute the following shell command to create and apply the initial database migration."
+    - **Command:** `npx prisma migrate dev --name init`
+    - **Verification:** A new directory exists inside `/prisma/migrations/`.
+
+- [ ] **Task 1.7: Create Environment Variable Example File**
+    - **File Path:** `/.env.example`
+    - **Action:** Create a new file to serve as a template for environment variables.
+    - **LLM Prompt:** "Create a new file at `/.env.example` and populate it with the provided content."
+    - **Reference Code:** `[Copy the content of the .env.example file from the previous response]`
+    - **Verification:** The file `/.env.example` exists and contains the string `NEXT_PUBLIC_SUPABASE_URL`.
+
+---
+### **`phase_2_todo.md`**
+
+## Phase 2: Backend Core Services & User Management
+
+**Goal:** Build the backend APIs for user profiles.
+
+- [ ] **Task 2.1: Create Prisma Client Helper**
+    - **File Path:** `/lib/prisma.ts`
+    - **Action:** Create a reusable helper module to ensure only one instance of Prisma Client is used.
+    - **LLM Prompt:** "Create a new file at `/lib/prisma.ts`. Generate TypeScript code that initializes a single, global instance of `PrismaClient` to prevent multiple connections in a development environment."
+    - **Verification:** The file `/lib/prisma.ts` exists and contains the string `new PrismaClient()`.
+
+- [ ] **Task 2.2: Create User Profile API Route**
+    - **File Path:** `/app/api/users/profile/route.ts`
+    - **Action:** Generate a Next.js App Router API route to handle fetching and updating user profiles.
+    - **LLM Prompt:** "Generate a Next.js API route file at `/app/api/users/profile/route.ts`. It must export two async functions: `GET` and `PUT`. The `GET` function should return a static JSON object like `{\"id\":\"user_123\"}`. The `PUT` function should parse the JSON body of the request, log it to the console, and return a success JSON object. Import `NextResponse` from `next/server`."
+    - **Verification:** The file `/app/api/users/profile/route.ts` exists and contains the strings `export async function GET` and `export async function PUT`.
+
+---
+### **`phase_3_todo.md`**
+
+## Phase 3: Core Learning Loop
+
+**Goal:** Implement the basic interactive lesson UI and APIs.
+
+- [ ] **Task 3.1: Create Lesson API Routes**
+    - **File Path:** `/app/api/lessons/start/route.ts`
+    - **Action:** Generate the API endpoint for starting a new lesson.
+    - **LLM Prompt:** "Generate a Next.js API route file at `/app/api/lessons/start/route.ts`. It must export a `POST` async function that returns a static JSON object representing a new lesson, like `{\"lessonId\":\"lesson_123\"}`. Import `NextResponse`."
+    - **Verification:** The file `/app/api/lessons/start/route.ts` exists.
+
+- [ ] **Task 3.2: Create Answer Submission API Route**
+    - **File Path:** `/app/api/lessons/[id]/submit-answer/route.ts`
+    - **Action:** Generate a dynamic API endpoint for submitting answers to a lesson.
+    - **LLM Prompt:** "Generate a Next.js dynamic API route at `/app/api/lessons/[id]/submit-answer/route.ts`. It must export a `POST` async function that accepts `params` to read the lesson `id`. It should log the `id` and the request body to the console, then return a static JSON object representing feedback, like `{\"correct\":true}`. Import `NextResponse`."
+    - **Verification:** The file `/app/api/lessons/[id]/submit-answer/route.ts` exists.
+
+- [ ] **Task 3.3: Create Basic Lesson UI Component**
+    - **File Path:** `/components/LessonView.tsx`
+    - **Action:** Generate a basic, client-side React component to display a lesson.
+    - **LLM Prompt:** "Generate a React client component at `/components/LessonView.tsx`. It must be a client component (`'use client'`). Use the `useState` hook to manage `lesson` and `feedback` states. Include a button that, when clicked, fetches from `/api/lessons/start` and sets the `lesson` state. Conditionally render the lesson prompt if the `lesson` state is not null."
+    - **Verification:** The file `/components/LessonView.tsx` exists and contains the strings `'use client'` and `useState`.
+
+---
+### **`phase_4_todo.md`**
+
+## Phase 4: Adaptive AI Engine & Analytics
+
+**Goal:** Create stubs for the AI service and build the dashboard APIs.
+
+- [ ] **Task 4.1: Create AI Service Stub**
+    - **File Path:** `/lib/ai-service.ts`
+    - **Action:** Create a placeholder module for AI logic.
+    - **LLM Prompt:** "Create a TypeScript file at `/lib/ai-service.ts`. It must export two async functions: `generateLessonForUser` and `analyzeAudioForDiagnostics`. These functions should *not* contain real AI logic. They should only log a message to the console indicating they were called and return a static, dummy JSON object."
+    - **Verification:** The file `/lib/ai-service.ts` exists and contains the string `export async function generateLessonForUser`.
+
+- [ ] **Task 4.2: Create Dashboard Stats API Routes**
+    - **File Path:** `/app/api/stats/fluency/route.ts`
+    - **Action:** Generate the API endpoint for fluency metrics.
+    - **LLM Prompt:** "Generate a Next.js API route file at `/app/api/stats/fluency/route.ts`. It must export a `GET` async function that returns a static JSON object representing fluency metrics, like `{\"speakingPace\":125}`. Import `NextResponse`."
+    - **Verification:** The file `/app/api/stats/fluency/route.ts` exists.
+
+- [ ] **Task 4.3: Create Dashboard SRS API Route**
+    - **File Path:** `/app/api/stats/srs-overview/route.ts`
+    - **Action:** Generate the API endpoint for SRS metrics.
+    - **LLM Prompt:** "Generate a Next.js API route file at `/app/api/stats/srs-overview/route.ts`. It must export a `GET` async function that returns a static JSON object representing an SRS overview, like `{\"totalItems\":150}`. Import `NextResponse`."
+    - **Verification:** The file `/app/api/stats/srs-overview/route.ts` exists.
+
+---
+### **`phase_5_todo.md`**
+
+## Phase 5: Monetization
+
+**Goal:** Implement placeholder APIs and UI for the Stripe payment system.
+
+- [ ] **Task 5.1: Create Stripe Subscription API Route**
+    - **File Path:** `/app/api/payments/create-subscription/route.ts`
+    - **Action:** Generate the API endpoint for creating a new subscription.
+    - **LLM Prompt:** "Generate a Next.js API route at `/app/api/payments/create-subscription/route.ts`. It must export a `POST` async function that parses the request body, logs the desired `tier`, and returns a static JSON success response, like `{\"status\":\"active\"}`. Import `NextResponse`."
+    - **Verification:** The file `/app/api/payments/create-subscription/route.ts` exists.
+
+- [ ] **Task 5.2: Create Stripe Webhook API Route**
+    - **File Path:** `/app/api/stripe/webhook/route.ts`
+    - **Action:** Generate the API endpoint to receive webhooks from Stripe.
+    - **LLM Prompt:** "Generate a Next.js API route at `/app/api/stripe/webhook/route.ts`. It must export a `POST` async function. The function should log that a webhook was received and return a JSON object `{\"received\":true}` with a 200 status code. Import `NextResponse`."
+    - **Verification:** The file `/app/api/stripe/webhook/route.ts` exists.
+
+- [ ] **Task 5.3: Create Basic Pricing UI Component**
+    - **File Path:** `/components/PricingPage.tsx`
+    - **Action:** Generate a basic UI component for the pricing page.
+    - **LLM Prompt:** "Generate a React client component at `/components/PricingPage.tsx`. It must be a client component (`'use client'`). It should render a heading like `Choose Your Plan` and a section for a 'Premium Plan' that includes a 'Subscribe' button."
+    - **Verification:** The file `/components/PricingPage.tsx` exists and contains the string `Choose Your Plan`.
+
+---
+### **`phase_6_todo.md`**
+
+## Phase 6: Testing, CI/CD, and Deployment Preparation
+
+**Goal:** Ensure the app is testable and deployable.
+
+- [ ] **Task 6.1: Add `test` and `lint` Scripts to `package.json`**
+    - **File Path:** `/package.json`
+    - **Action:** Modify the `scripts` section of the `package.json` file.
+    - **LLM Prompt:** "Modify the `/package.json` file. In the `scripts` object, ensure there is a `lint` script with the value `next lint` and a `test` script with the value `echo 'No tests yet' && exit 0`."
+    - **Verification:** The `scripts` section in `package.json` contains the `lint` and `test` keys with the correct values.
+
+- [ ] **Task 6.2: Create CI/CD Workflow File**
+    - **File Path:** `/.github/workflows/ci.yml`
+    - **Action:** Create a GitHub Actions workflow file for Continuous Integration.
+    - **LLM Prompt:** "Create a new file at `/.github/workflows/ci.yml`. Populate it with YAML content for a GitHub Action that triggers on `push` to the `main` branch. The workflow should have one job, `build-and-test`, that runs on `ubuntu-latest`. The job must include steps to checkout code, setup Node.js v20, run `npm ci`, and run `npm run lint`."
+    - **Verification:** The file `/.github/workflows/ci.yml` exists and contains the string `npm run lint`.
+</file>
+
+<file path="documentation/dev_todo_phase_1.md">
+# Developer To-Do List: Phase 1 - Core Backend & User Auth
+
+## Task 1: Create Supabase Server-Side Client Helper
+- **File:** `/lib/supabase/server.ts`
+- **Action:** Create server-side Supabase client utilities
+- **Steps:**
+  1. Create directory `lib/supabase`
+  2. Create file `server.ts` with:
+     - `supabaseServerClient` function using `createServerComponentClient`
+     - `getUserSession` helper to fetch user session
+- **Verification:** File exports both functions with proper TypeScript types
+
+## Task 2: Implement Profile GET Route
+- **File:** `/app/api/users/profile/route.ts`
+- **Action:** Add authenticated profile retrieval
+- **Steps:**
+  1. Import `getUserSession` from `@/lib/supabase/server`
+  2. Add session check to GET function
+  3. Query Prisma for user data
+- **Verification:** Returns 401 when unauthenticated, profile data when valid
+
+## Task 3: Implement Profile PUT Route
+- **File:** `/app/api/users/profile/route.ts`
+- **Action:** Add profile update functionality
+- **Steps:**
+  1. Reuse auth check from GET route
+  2. Add Prisma `user.update` call
+  3. Return updated profile
+- **Verification:** PUT requests update user data successfully
+
+## Task 4: Create Auth UI Component
+- **File:** `/components/Auth.tsx`
+- **Action:** Build sign-up/sign-in interface
+- **Steps:**
+  1. Create client-side Supabase client
+  2. Add email/password fields
+  3. Implement sign-up/sign-in buttons
+- **Verification:** Component renders and allows user registration/login
+
+## Task 5: Implement User Sync Endpoint
+- **File:** `/api/users/sync/route.ts`
+- **Action:** Create public profile after auth sign-up
+- **Steps:**
+  1. Create new route file
+  2. Listen for Supabase auth events
+  3. Create corresponding Prisma user record
+- **Verification:** New auth users get public profiles automatically
+</file>
+
+<file path="documentation/dev_todo_phase_2.md">
+# Lessay Development Phase 2: Learning Loop Implementation
+
+## Tasks for Developer AI
+
+### 1. Implement Lesson Start Route (`/app/api/lessons/start/route.ts`)
+- [ ] **Add authentication check**
+  - Import `getUserSession` from `@/lib/supabase-server`
+  - At start of POST function, add:
+    ```typescript
+    const session = await getUserSession()
+    if (!session) return new Response('Unauthorized', { status: 401 })
+    ```
+  - Verification: Route returns 401 for unauthenticated requests
+
+- [ ] **Implement lesson generation**
+  - Call `AIService.generateLessonForUser(session.user.id)`
+  - Store returned lesson data in Prisma:
+    ```typescript
+    const lesson = await prisma.lesson.create({
+      data: {
+        userId: session.user.id,
+        content: generatedLesson.content
+      }
+    })
+    ```
+  - Verification: New lesson appears in database after API call
+
+- [ ] **Create exercise record**
+  - Add exercise creation after lesson creation:
+    ```typescript
+    const exercise = await prisma.exercise.create({
+      data: {
+        lessonId: lesson.id,
+        prompt: generatedLesson.exercise.prompt,
+        correctAnswer: generatedLesson.exercise.correctAnswer
+      }
+    })
+    ```
+  - Verification: Exercise linked to lesson in database
+
+### 2. Implement Answer Submission Route (`/app/api/lessons/[id]/submit-answer/route.ts`)
+- [ ] **Add authentication check**
+  - Same pattern as lesson start route
+  - Verification: Route rejects unauthenticated requests
+
+- [ ] **Implement answer validation**
+  - Find exercise by ID from URL params
+  - Compare `textResponse` to `exercise.correctAnswer`
+  - Verification: API correctly identifies matching answers
+
+- [ ] **Create progress record**
+  - Add progress tracking:
+    ```typescript
+    await prisma.userProgress.create({
+      data: {
+        userId: session.user.id,
+        exerciseId: exercise.id,
+        submittedAnswer: textResponse,
+        isCorrect: answerMatches
+      }
+    })
+    ```
+  - Verification: Progress records appear in database
+
+### 3. Update Lesson View Component (`/components/LessonView.tsx`)
+- [ ] **Add answer input UI**
+  - Create controlled text input component
+  - Add state management for answer text
+  - Verification: Input field appears and updates properly
+
+- [ ] **Implement submission logic**
+  - Add submit button handler that:
+    - Calls `/api/lessons/${lessonId}/submit-answer`
+    - Disables during submission
+    - Handles errors
+  - Verification: Button works and shows loading state
+
+- [ ] **Add feedback display**
+  - Create section showing:
+    - Correct/incorrect indicator
+    - Correct answer
+    - Explanation (if available)
+  - Style with Tailwind classes
+  - Verification: Feedback appears after submission
+</file>
+
+<file path="documentation/dev_todo_phase_3.md">
+# Lessay Development Phase 3: AI Service Integration
+
+## Tasks for Developer AI
+
+### 1. Install Required Packages
+- [ ] **Install Google AI SDKs**
+  ```bash
+  npm install @google/generative-ai @google-cloud/speech @google-cloud/text-to-speech
+  ```
+  Verification: Packages appear in `package.json` dependencies
+
+### 2. Initialize Google Cloud Clients (`/lib/ai-service.ts`)
+- [ ] **Configure credential handling**
+  ```typescript
+  let geminiClient: GoogleGenerativeAI;
+  let speechClient: SpeechClient;
+  let textToSpeechClient: TextToSpeechClient;
+
+  if (process.env.GCP_CREDENTIALS_JSON) {
+    const credentials = JSON.parse(process.env.GCP_CREDENTIALS_JSON);
+    geminiClient = new GoogleGenerativeAI(process.env.AI_API_KEY);
+    speechClient = new SpeechClient({ credentials });
+    textToSpeechClient = new TextToSpeechClient({ credentials });
+  } else {
+    geminiClient = new GoogleGenerativeAI(process.env.AI_API_KEY);
+    speechClient = new SpeechClient({ keyFilename: './gcp-credentials.json' });
+    textToSpeechClient = new TextToSpeechClient({ keyFilename: './gcp-credentials.json' });
+  }
+  ```
+  Verification: Clients initialize without errors in dev/prod environments
+
+### 3. Implement Lesson Generation (`/lib/ai-service.ts`)
+- [ ] **Replace generateLessonForUser stub**
+  ```typescript
+  async function generateLessonForUser(userId: string) {
+    const model = geminiClient.getGenerativeModel({ 
+      model: "gemini-pro",
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 2048
+      }
+    });
+    
+    const prompt = `Generate a language lesson...`; // Detailed prompt per design doc
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    
+    return JSON.parse(response.text());
+  }
+  ```
+  Verification: Function returns valid lesson structure from API call
+
+### 4. Implement Speech-to-Text (`/lib/ai-service.ts`)
+- [ ] **Create transcribeAudio function**
+  ```typescript
+  async function transcribeAudio(audioBuffer: Buffer): Promise<string> {
+    const [response] = await speechClient.recognize({
+      audio: { content: audioBuffer.toString('base64') },
+      config: {
+        encoding: 'WEBM_OPUS',
+        sampleRateHertz: 48000,
+        languageCode: 'en-US'
+      }
+    });
+    return response.results
+      .map(result => result.alternatives[0].transcript)
+      .join('\n');
+  }
+  ```
+  Verification: Audio files are accurately transcribed
+
+### 5. Implement Text-to-Speech (`/lib/ai-service.ts`)
+- [ ] **Create synthesizeSpeech function**
+  ```typescript
+  async function synthesizeSpeech(text: string): Promise<Buffer> {
+    const [response] = await textToSpeechClient.synthesizeSpeech({
+      input: { text },
+      voice: {
+        languageCode: 'en-US',
+        name: 'en-US-Standard-C'
+      },
+      audioConfig: {
+        audioEncoding: 'MP3'
+      }
+    });
+    return Buffer.from(response.audioContent, 'base64');
+  }
+  ```
+  Verification: Text input produces valid audio output
+</file>
+
+<file path="documentation/dev_todo_phase_4.md">
+# Lessay Development Phase 4: Dashboard & Payments Implementation
+
+## Tasks for Developer AI
+
+### 1. Implement Fluency Stats Route (`/app/api/stats/fluency/route.ts`)
+- [ ] **Add Prisma aggregations**
+  ```typescript
+  const stats = await prisma.userProgress.groupBy({
+    by: ['createdAt'],
+    where: { userId: session.user.id },
+    _avg: { accuracyScore: true },
+    _count: { _all: true },
+    orderBy: { createdAt: 'asc' }
+  });
+  ```
+  Verification: Route returns daily accuracy averages and counts
+
+### 2. Implement SRS Overview Route (`/app/api/stats/srs-overview/route.ts`)
+- [ ] **Add SRS metrics**
+  ```typescript
+  const overview = await prisma.sRSEntry.groupBy({
+    by: ['exerciseType'],
+    where: { userId: session.user.id },
+    _count: { status: true },
+    _min: { nextReview: true },
+    _max: { nextReview: true },
+    _avg: { nextReview: true }
+  });
+  ```
+  Verification: Route returns grouped SRS metrics
+
+### 3. Update Dashboard View (`/components/DashboardView.tsx`)
+- [ ] **Fetch and display stats**
+  - Use `useEffect` to fetch from both stats endpoints
+  - Implement:
+    - Line chart for accuracy trends
+    - Pie chart for SRS status distribution
+    - Table for recent activity
+  Verification: All visualizations render with real data
+
+### 4. Implement Stripe Subscriptions (`/app/api/payments/create-subscription/route.ts`)
+- [ ] **Install and configure Stripe**
+  ```bash
+  npm install stripe
+  ```
+  ```typescript
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+  const subscription = await stripe.subscriptions.create({
+    customer: req.body.customerId,
+    items: [{ price: req.body.priceId }],
+    payment_behavior: 'default_incomplete'
+  });
+  ```
+  Verification: Subscription objects created in Stripe dashboard
+
+### 5. Secure Webhook (`/app/api/stripe/webhook/route.ts`)
+- [ ] **Add signature verification**
+  ```typescript
+  const event = stripe.webhooks.constructEvent(
+    req.body,
+    req.headers['stripe-signature'],
+    process.env.STRIPE_WEBHOOK_SECRET
+  );
+  ```
+  Verification: Webhook rejects invalid signatures
+</file>
+
+<file path="documentation/dev_todo_phase_5.md">
+# Lessay Development Phase 5: Production Hardening - Observability & Error Handling
+
+## Tasks for Developer AI
+
+### 1. Install Logging Packages
+- [ ] **Add pino and pino-pretty**
+  ```bash
+  npm install pino pino-pretty
+  ```
+  Verification: Packages appear in `package.json` dependencies
+
+### 2. Create Logger Utility (`/lib/logger.ts`)
+- [ ] **Implement centralized logger**
+  ```typescript
+  import pino from 'pino';
+
+  const logger = pino({
+    level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+    transport: {
+      target: 'pino-pretty',
+      options: {
+        colorize: true,
+        translateTime: 'SYS:standard'
+      }
+    }
+  });
+
+  export default logger;
+  ```
+  Verification: File exists and exports logger instance
+
+### 3. Replace Console Logs in API Routes
+- [ ] **Update all API routes to use logger**
+  Files to modify:
+  - `app/api/lessons/[id]/submit-answer/route.ts`
+  - `app/api/lessons/start/route.ts`
+  - `app/api/payments/create-subscription/route.ts`
+  - `app/api/stats/fluency/route.ts`
+  - `app/api/stats/srs-overview/route.ts`
+  - `app/api/stripe/webhook/route.ts`
+  - `app/api/users/profile/route.ts`
+
+  Verification: No `console.log` statements remain in API routes
+
+### 4. Implement Error Handling Utility (`/lib/errors.ts`)
+- [ ] **Create error handler**
+  ```typescript
+  import { NextResponse } from 'next/server';
+  import logger from '@/lib/logger';
+  import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+
+  export function handleError(error: unknown) {
+    if (error instanceof PrismaClientKnownRequestError) {
+      logger.error({ error }, 'Database error occurred');
+      return NextResponse.json(
+        { error: 'Database operation failed' },
+        { status: getPrismaErrorStatus(error) }
+      );
+    }
+
+    logger.error({ error }, 'Unexpected error occurred');
+    return NextResponse.json(
+      { error: 'An unexpected error occurred' },
+      { status: 500 }
+    );
+  }
+
+  function getPrismaErrorStatus(error: PrismaClientKnownRequestError): number {
+    switch (error.code) {
+      case 'P2002': return 409; // Unique constraint
+      case 'P2025': return 404; // Not found
+      default: return 400; // Bad request
+    }
+  }
+  ```
+  Verification: File exists and handles Prisma/unknown errors
+
+### 5. Add Health Check Endpoint (`/app/api/health/route.ts`)
+- [ ] **Implement health check**
+  ```typescript
+  import { NextResponse } from 'next/server';
+  import prisma from '@/lib/prisma';
+  import logger from '@/lib/logger';
+  import { handleError } from '@/lib/errors';
+
+  export async function GET() {
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+      logger.info('Health check successful');
+      return NextResponse.json({ status: 'ok' }, { status: 200 });
+    } catch (error) {
+      return handleError(error);
+    }
+  }
+  ```
+  Verification: Endpoint returns 200 when database is accessible
+
+### 6. Wrap API Routes in Try/Catch
+- [ ] **Update all API routes with error handling**
+  Example modification:
+  ```typescript
+  import { handleError } from '@/lib/errors';
+
+  export async function POST(request: Request) {
+    try {
+      // Route logic here
+    } catch (error) {
+      return handleError(error);
+    }
+  }
+  ```
+  Verification: All API routes have proper error handling
+</file>
+
+<file path="documentation/dev_todo_phase_6.md">
+# Lessay Development Phase 6: Production Hardening - Security & Performance
+
+## Tasks for Developer AI
+
+### 1. Install Security Dependencies
+- [ ] **Add Zod and Rate Limiter**
+  ```bash
+  npm install zod @upstash/ratelimit
+  ```
+  Verification: Packages appear in `package.json` dependencies
+
+### 2. Create Validation Schemas (`/lib/validators.ts`)
+- [ ] **Implement input validators**
+  ```typescript
+  import { z } from 'zod';
+
+  export const lessonStartSchema = z.object({
+    userId: z.string().uuid(),
+    targetLanguage: z.string().length(2)
+  });
+
+  export const answerSubmitSchema = z.object({
+    exerciseId: z.string().uuid(),
+    textResponse: z.string().min(1),
+    audioBlobUrl: z.string().url().optional()
+  });
+  ```
+  Verification: File exists with exported schemas
+
+### 3. Validate API Routes
+- [ ] **Add validation to routes**
+  Files to modify:
+  - `app/api/lessons/[id]/submit-answer/route.ts`
+  - `app/api/lessons/start/route.ts`
+  - `app/api/payments/create-subscription/route.ts`
+  - `app/api/users/profile/route.ts`
+
+  Example implementation:
+  ```typescript
+  const body = await request.json();
+  const validation = answerSubmitSchema.safeParse(body);
+  if (!validation.success) {
+    return NextResponse.json(
+      { error: 'Invalid request', details: validation.error.flatten() },
+      { status: 400 }
+    );
+  }
+  ```
+  Verification: Routes return 400 for invalid requests
+
+### 4. Configure Rate Limiting (`/lib/rateLimit.ts`)
+- [ ] **Set up rate limiter**
+  ```typescript
+  import { Ratelimit } from '@upstash/ratelimit';
+  import { Redis } from '@upstash/redis';
+
+  export const ratelimit = new Ratelimit({
+    redis: Redis.fromEnv(),
+    limiter: Ratelimit.slidingWindow(10, '1 m'),
+    analytics: true
+  });
+  ```
+  Verification: File exports rate limiter instance
+
+### 5. Apply Rate Limits to Sensitive Endpoints
+- [ ] **Protect high-traffic routes**
+  Files to modify:
+  - `app/api/lessons/start/route.ts`
+  - `app/api/users/profile/route.ts`
+
+  Example implementation:
+  ```typescript
+  const ip = request.headers.get('x-forwarded-for') ?? '127.0.0.1';
+  const { success } = await ratelimit.limit(ip);
+  if (!success) {
+    return NextResponse.json(
+      { error: 'Too many requests' },
+      { status: 429 }
+    );
+  }
+  ```
+  Verification: Routes return 429 after 10 requests/minute
+
+### 6. Optimize Database Performance
+- [ ] **Add index to UserProgress model**
+  Modify `prisma/schema.prisma`:
+  ```prisma
+  model UserProgress {
+    // ... existing fields
+    @@index([userId, metric], name: "UserProgress_userId_metric_index")
+  }
+  ```
+  Verification: Index definition exists in schema
+
+- [ ] **Create and apply migration**
+  ```bash
+  npx prisma migrate dev --name add_performance_indexes
+  ```
+  Verification: New migration file created
+
+### 7. Implement Caching (`/lib/cache.ts`)
+- [ ] **Create cache utility**
+  ```typescript
+  const cache = new Map<string, { data: any, expires: number }>();
+
+  export function getFromCache<T>(key: string): T | null {
+    const item = cache.get(key);
+    return item?.expires > Date.now() ? item.data : null;
+  }
+
+  export function setToCache(key: string, data: any, ttl = 300000) {
+    cache.set(key, { data, expires: Date.now() + ttl });
+  }
+  ```
+  Verification: File exports cache functions
+
+### 8. Cache Stats Endpoints
+- [ ] **Add caching to dashboard routes**
+  Files to modify:
+  - `app/api/stats/fluency/route.ts`
+  - `app/api/stats/srs-overview/route.ts`
+
+  Example implementation:
+  ```typescript
+  const cacheKey = `stats-${userId}`;
+  const cached = getFromCache(cacheKey);
+  if (cached) return NextResponse.json(cached);
+
+  const data = await fetchData();
+  setToCache(cacheKey, data);
+  return NextResponse.json(data);
+  ```
+  Verification: Repeated requests return cached data
+</file>
+
+<file path="documentation/dev_todo_phase_7.md">
+# Lessay Development Phase 7: Production Hardening - Testing
+
+## Tasks for Developer AI
+
+### 1. Install Testing Packages
+- [ ] **Add Jest and TypeScript support**
+  ```bash
+  npm install jest ts-jest @types/jest --save-dev
+  ```
+  Verification: Packages appear in `package.json` devDependencies
+
+### 2. Configure Jest (`jest.config.ts`)
+- [ ] **Create Jest configuration**
+  ```typescript
+  import type { Config } from '@jest/types'
+
+  const config: Config.InitialOptions = {
+    preset: 'ts-jest',
+    testEnvironment: 'node',
+    roots: ['<rootDir>'],
+    testMatch: ['**/*.test.ts'],
+    moduleNameMapper: {
+      '^@/(.*)$': '<rootDir>/$1'
+    }
+  }
+
+  export default config
+  ```
+  Verification: Configuration file exists with correct settings
+
+### 3. Create Auth Tests (`/tests/auth.test.ts`)
+- [ ] **Implement authentication tests**
+  ```typescript
+  import { describe, it, expect } from '@jest/globals'
+  import { signUp, signIn } from '@/lib/auth'
+
+  describe('Authentication', () => {
+    it('should allow valid user signup', async () => {
+      const result = await signUp('test@example.com', 'password123')
+      expect(result.success).toBe(true)
+    })
+
+    it('should reject duplicate user signup', async () => {
+      await signUp('test@example.com', 'password123')
+      const result = await signUp('test@example.com', 'password123')
+      expect(result.error).toMatch(/already exists/i)
+    })
+
+    it('should allow valid login', async () => {
+      await signUp('test@example.com', 'password123')
+      const result = await signIn('test@example.com', 'password123')
+      expect(result.success).toBe(true)
+    })
+
+    it('should reject invalid login', async () => {
+      const result = await signIn('wrong@example.com', 'wrongpassword')
+      expect(result.error).toMatch(/invalid credentials/i)
+    })
+  })
+  ```
+  Verification: File exists with all test cases
+
+### 4. Create Lesson Tests (`/tests/lessons.test.ts`)
+- [ ] **Implement lesson flow tests**
+  ```typescript
+  import { describe, it, expect } from '@jest/globals'
+  import { startLesson, submitAnswer } from '@/lib/lessons'
+
+  describe('Lesson Flow', () => {
+    it('should start a new lesson', async () => {
+      const lesson = await startLesson('user_123')
+      expect(lesson.exercises.length).toBeGreaterThan(0)
+    })
+
+    it('should accept correct answers', async () => {
+      const response = await submitAnswer('ex_123', 'correct answer')
+      expect(response.correct).toBe(true)
+    })
+
+    it('should provide feedback for incorrect answers', async () => {
+      const response = await submitAnswer('ex_123', 'wrong answer')
+      expect(response.correct).toBe(false)
+      expect(response.feedback).toBeDefined()
+    })
+  })
+  ```
+  Verification: File exists with all test cases
+
+### 5. Update Package.json Scripts
+- [ ] **Add test command**
+  ```json
+  {
+    "scripts": {
+      "test": "jest"
+    }
+  }
+  ```
+  Verification: `npm test` runs Jest successfully
+
+### 6. Update CI Workflow (`/.github/workflows/ci.yml`)
+- [ ] **Add testing step**
+  ```yaml
+  jobs:
+    build-and-test:
+      steps:
+        - run: npm test
+  ```
+  Verification: CI file includes `npm test` command
+</file>
 
 <file path="documentation/hardening_phase_1_observability.md">
 # Hardening Phase 1: Observability Implementation
@@ -742,330 +1732,6 @@ jobs:
 **Verification:** All tests pass successfully
 </file>
 
-<file path=".github/workflows/ci.yml">
-name: CI
-
-on:
-  push:
-    branches: [main]
-
-jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm ci
-      - run: npm run lint
-</file>
-
-<file path="app/api/lessons/[id]/submit-answer/route.ts">
-import { NextResponse } from 'next/server'
-
-export async function POST(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
-  const body = await request.json()
-  console.log(`Received answer for lesson ${params.id}:`, body)
-  return NextResponse.json({ correct: true })
-}
-</file>
-
-<file path="app/api/lessons/start/route.ts">
-import { NextResponse } from 'next/server'
-
-export async function POST() {
-  return NextResponse.json({ lessonId: 'lesson_123' })
-}
-</file>
-
-<file path="app/api/payments/create-subscription/route.ts">
-import { NextResponse } from 'next/server';
-
-export async function POST(request: Request) {
-  const { tier } = await request.json();
-  console.log('Creating subscription for tier:', tier);
-  return NextResponse.json({ status: 'active' });
-}
-</file>
-
-<file path="app/api/stats/fluency/route.ts">
-import { NextResponse } from 'next/server';
-
-export async function GET() {
-  return NextResponse.json({ speakingPace: 125 });
-}
-</file>
-
-<file path="app/api/stats/srs-overview/route.ts">
-import { NextResponse } from 'next/server';
-
-export async function GET() {
-  return NextResponse.json({ totalItems: 150 });
-}
-</file>
-
-<file path="app/api/stripe/webhook/route.ts">
-import { NextResponse } from 'next/server';
-
-export async function POST() {
-  console.log('Stripe webhook received');
-  return NextResponse.json({ received: true }, { status: 200 });
-}
-</file>
-
-<file path="app/api/users/profile/route.ts">
-import { NextResponse } from 'next/server'
-
-export async function GET() {
-  return NextResponse.json({ id: 'user_123' })
-}
-
-export async function PUT(request: Request) {
-  const body = await request.json()
-  console.log('Received profile update:', body)
-  return NextResponse.json({ success: true })
-}
-</file>
-
-<file path="components/LessonView.tsx">
-'use client'
-
-import { useState } from 'react'
-
-type Lesson = {
-  lessonId: string
-}
-
-export default function LessonView() {
-  const [lesson, setLesson] = useState<Lesson | null>(null)
-
-  const startLesson = async () => {
-    try {
-      const response = await fetch('/api/lessons/start', {
-        method: 'POST'
-      })
-      const data = await response.json()
-      setLesson(data)
-    } catch (error) {
-      console.error('Failed to start lesson:', error)
-    }
-  }
-
-  return (
-    <div className="lesson-container">
-      {!lesson && (
-        <button onClick={startLesson}>
-          Start New Lesson
-        </button>
-      )}
-      
-      {lesson && (
-        <div className="lesson-content">
-          <h2>Lesson {lesson.lessonId}</h2>
-          <p>Your lesson content would appear here</p>
-        </div>
-      )}
-    </div>
-  )
-}
-</file>
-
-<file path="components/PricingPage.tsx">
-'use client';
-
-export default function PricingPage() {
-  return (
-    <div>
-      <h1>Choose Your Plan</h1>
-      <section>
-        <h2>Premium Plan</h2>
-        <button>Subscribe</button>
-      </section>
-    </div>
-  );
-}
-</file>
-
-<file path="documentation/project_managment/init_todo.md">
-Of course. You are correct. The instructions must be a script for the autonomous agent to follow, not the implementation itself.
-
-Here are the separate, simplified to-do files for each phase. Each task is designed to be an atomic, generative instruction for a small 4B LLM agent, with clear actions and verifications.
-
----
-### **`phase_1_todo.md`**
-
-## Phase 1: Project Setup & Core Infrastructure
-
-**Goal:** Establish the project foundation, database, and authentication.
-**Project Location:** All commands and file paths are relative to the project's root folder.
-
-- [x] **Task 1.1: Initialize Next.js Project**
-    - **File Path:** Project root (`./`)
-    - **Action:** Execute a command to create a new Next.js project in the current directory.
-    - **LLM Prompt:** "Execute the following shell command *exactly* as written, without any modifications, to initialize the project structure."
-    - **Command:** `npx create-next-app@latest . --ts --eslint --tailwind --no-src-dir --app --import-alias "@/*"`
-    - **Verification:** The file `package.json` exists in the root folder.
-
-- [x] hask 1.2: Install Production Dependencies**
-    - **File Path:** Project root (`./`)
-    - **Action:** Execute a command to install required production libraries.
-    - **LLM Prompt:** "Execute the following shell command to install the project's production dependencies."
-    - **Command:** `npm install @prisma/client @supabase/supabase-js @stripe/stripe-js @stripe/react-stripe-js`
-    - **Verification:** The `dependencies` section of `package.json` contains `@prisma/client` and `@supabase/supabase-js`.
-
-- [x] **Task 1.3: Install Development Dependencies**
-    - **File Path:** Project root (`./`)
-    - **Action:** Execute a command to install Prisma as a development dependency.
-    - **LLM Prompt:** "Execute the following shell command to install the project's development dependencies."
-    - **Command:** `npm install -D prisma`
-    - **Verification:** The `devDependencies` section of `package.json` contains `prisma`.
-
-- [x] **Task 1.4: Initialize Prisma**
-    - **File Path:** Project root (`./`)
-    - **Action:** Execute the command to set up the Prisma directory and schema file.
-    - **LLM Prompt:** "Execute the following shell command to initialize Prisma."
-    - **Command:** `npx prisma init`
-    - **Verification:** The file `/prisma/schema.prisma` exists.
-
-- [ ] **Task 1.5: Define Database Schema**
-    - **File Path:** `/prisma/schema.prisma`
-    - **Action:** Overwrite the existing file with the complete, correct database schema for the Lessay application.
-    - **LLM Prompt:** "Replace the entire content of the file at `/prisma/schema.prisma` with the provided code block. Do not add or change anything."
-    - **Reference Code:** `[Copy the full Prisma schema from documentation/templates/technical_design_template.md Section 5.1]`
-    - **Verification:** The file `/prisma/schema.prisma` contains the string `model SRSEntry`.
-
-- [ ] **Task 1.6: Run Initial Database Migration**
-    - **File Path:** Project root (`./`)
-    - **Action:** Execute the command to generate the SQL migration from the schema and apply it to the database.
-    - **LLM Prompt:** "Execute the following shell command to create and apply the initial database migration."
-    - **Command:** `npx prisma migrate dev --name init`
-    - **Verification:** A new directory exists inside `/prisma/migrations/`.
-
-- [ ] **Task 1.7: Create Environment Variable Example File**
-    - **File Path:** `/.env.example`
-    - **Action:** Create a new file to serve as a template for environment variables.
-    - **LLM Prompt:** "Create a new file at `/.env.example` and populate it with the provided content."
-    - **Reference Code:** `[Copy the content of the .env.example file from the previous response]`
-    - **Verification:** The file `/.env.example` exists and contains the string `NEXT_PUBLIC_SUPABASE_URL`.
-
----
-### **`phase_2_todo.md`**
-
-## Phase 2: Backend Core Services & User Management
-
-**Goal:** Build the backend APIs for user profiles.
-
-- [ ] **Task 2.1: Create Prisma Client Helper**
-    - **File Path:** `/lib/prisma.ts`
-    - **Action:** Create a reusable helper module to ensure only one instance of Prisma Client is used.
-    - **LLM Prompt:** "Create a new file at `/lib/prisma.ts`. Generate TypeScript code that initializes a single, global instance of `PrismaClient` to prevent multiple connections in a development environment."
-    - **Verification:** The file `/lib/prisma.ts` exists and contains the string `new PrismaClient()`.
-
-- [ ] **Task 2.2: Create User Profile API Route**
-    - **File Path:** `/app/api/users/profile/route.ts`
-    - **Action:** Generate a Next.js App Router API route to handle fetching and updating user profiles.
-    - **LLM Prompt:** "Generate a Next.js API route file at `/app/api/users/profile/route.ts`. It must export two async functions: `GET` and `PUT`. The `GET` function should return a static JSON object like `{\"id\":\"user_123\"}`. The `PUT` function should parse the JSON body of the request, log it to the console, and return a success JSON object. Import `NextResponse` from `next/server`."
-    - **Verification:** The file `/app/api/users/profile/route.ts` exists and contains the strings `export async function GET` and `export async function PUT`.
-
----
-### **`phase_3_todo.md`**
-
-## Phase 3: Core Learning Loop
-
-**Goal:** Implement the basic interactive lesson UI and APIs.
-
-- [ ] **Task 3.1: Create Lesson API Routes**
-    - **File Path:** `/app/api/lessons/start/route.ts`
-    - **Action:** Generate the API endpoint for starting a new lesson.
-    - **LLM Prompt:** "Generate a Next.js API route file at `/app/api/lessons/start/route.ts`. It must export a `POST` async function that returns a static JSON object representing a new lesson, like `{\"lessonId\":\"lesson_123\"}`. Import `NextResponse`."
-    - **Verification:** The file `/app/api/lessons/start/route.ts` exists.
-
-- [ ] **Task 3.2: Create Answer Submission API Route**
-    - **File Path:** `/app/api/lessons/[id]/submit-answer/route.ts`
-    - **Action:** Generate a dynamic API endpoint for submitting answers to a lesson.
-    - **LLM Prompt:** "Generate a Next.js dynamic API route at `/app/api/lessons/[id]/submit-answer/route.ts`. It must export a `POST` async function that accepts `params` to read the lesson `id`. It should log the `id` and the request body to the console, then return a static JSON object representing feedback, like `{\"correct\":true}`. Import `NextResponse`."
-    - **Verification:** The file `/app/api/lessons/[id]/submit-answer/route.ts` exists.
-
-- [ ] **Task 3.3: Create Basic Lesson UI Component**
-    - **File Path:** `/components/LessonView.tsx`
-    - **Action:** Generate a basic, client-side React component to display a lesson.
-    - **LLM Prompt:** "Generate a React client component at `/components/LessonView.tsx`. It must be a client component (`'use client'`). Use the `useState` hook to manage `lesson` and `feedback` states. Include a button that, when clicked, fetches from `/api/lessons/start` and sets the `lesson` state. Conditionally render the lesson prompt if the `lesson` state is not null."
-    - **Verification:** The file `/components/LessonView.tsx` exists and contains the strings `'use client'` and `useState`.
-
----
-### **`phase_4_todo.md`**
-
-## Phase 4: Adaptive AI Engine & Analytics
-
-**Goal:** Create stubs for the AI service and build the dashboard APIs.
-
-- [ ] **Task 4.1: Create AI Service Stub**
-    - **File Path:** `/lib/ai-service.ts`
-    - **Action:** Create a placeholder module for AI logic.
-    - **LLM Prompt:** "Create a TypeScript file at `/lib/ai-service.ts`. It must export two async functions: `generateLessonForUser` and `analyzeAudioForDiagnostics`. These functions should *not* contain real AI logic. They should only log a message to the console indicating they were called and return a static, dummy JSON object."
-    - **Verification:** The file `/lib/ai-service.ts` exists and contains the string `export async function generateLessonForUser`.
-
-- [ ] **Task 4.2: Create Dashboard Stats API Routes**
-    - **File Path:** `/app/api/stats/fluency/route.ts`
-    - **Action:** Generate the API endpoint for fluency metrics.
-    - **LLM Prompt:** "Generate a Next.js API route file at `/app/api/stats/fluency/route.ts`. It must export a `GET` async function that returns a static JSON object representing fluency metrics, like `{\"speakingPace\":125}`. Import `NextResponse`."
-    - **Verification:** The file `/app/api/stats/fluency/route.ts` exists.
-
-- [ ] **Task 4.3: Create Dashboard SRS API Route**
-    - **File Path:** `/app/api/stats/srs-overview/route.ts`
-    - **Action:** Generate the API endpoint for SRS metrics.
-    - **LLM Prompt:** "Generate a Next.js API route file at `/app/api/stats/srs-overview/route.ts`. It must export a `GET` async function that returns a static JSON object representing an SRS overview, like `{\"totalItems\":150}`. Import `NextResponse`."
-    - **Verification:** The file `/app/api/stats/srs-overview/route.ts` exists.
-
----
-### **`phase_5_todo.md`**
-
-## Phase 5: Monetization
-
-**Goal:** Implement placeholder APIs and UI for the Stripe payment system.
-
-- [ ] **Task 5.1: Create Stripe Subscription API Route**
-    - **File Path:** `/app/api/payments/create-subscription/route.ts`
-    - **Action:** Generate the API endpoint for creating a new subscription.
-    - **LLM Prompt:** "Generate a Next.js API route at `/app/api/payments/create-subscription/route.ts`. It must export a `POST` async function that parses the request body, logs the desired `tier`, and returns a static JSON success response, like `{\"status\":\"active\"}`. Import `NextResponse`."
-    - **Verification:** The file `/app/api/payments/create-subscription/route.ts` exists.
-
-- [ ] **Task 5.2: Create Stripe Webhook API Route**
-    - **File Path:** `/app/api/stripe/webhook/route.ts`
-    - **Action:** Generate the API endpoint to receive webhooks from Stripe.
-    - **LLM Prompt:** "Generate a Next.js API route at `/app/api/stripe/webhook/route.ts`. It must export a `POST` async function. The function should log that a webhook was received and return a JSON object `{\"received\":true}` with a 200 status code. Import `NextResponse`."
-    - **Verification:** The file `/app/api/stripe/webhook/route.ts` exists.
-
-- [ ] **Task 5.3: Create Basic Pricing UI Component**
-    - **File Path:** `/components/PricingPage.tsx`
-    - **Action:** Generate a basic UI component for the pricing page.
-    - **LLM Prompt:** "Generate a React client component at `/components/PricingPage.tsx`. It must be a client component (`'use client'`). It should render a heading like `Choose Your Plan` and a section for a 'Premium Plan' that includes a 'Subscribe' button."
-    - **Verification:** The file `/components/PricingPage.tsx` exists and contains the string `Choose Your Plan`.
-
----
-### **`phase_6_todo.md`**
-
-## Phase 6: Testing, CI/CD, and Deployment Preparation
-
-**Goal:** Ensure the app is testable and deployable.
-
-- [ ] **Task 6.1: Add `test` and `lint` Scripts to `package.json`**
-    - **File Path:** `/package.json`
-    - **Action:** Modify the `scripts` section of the `package.json` file.
-    - **LLM Prompt:** "Modify the `/package.json` file. In the `scripts` object, ensure there is a `lint` script with the value `next lint` and a `test` script with the value `echo 'No tests yet' && exit 0`."
-    - **Verification:** The `scripts` section in `package.json` contains the `lint` and `test` keys with the correct values.
-
-- [ ] **Task 6.2: Create CI/CD Workflow File**
-    - **File Path:** `/.github/workflows/ci.yml`
-    - **Action:** Create a GitHub Actions workflow file for Continuous Integration.
-    - **LLM Prompt:** "Create a new file at `/.github/workflows/ci.yml`. Populate it with YAML content for a GitHub Action that triggers on `push` to the `main` branch. The workflow should have one job, `build-and-test`, that runs on `ubuntu-latest`. The job must include steps to checkout code, setup Node.js v20, run `npm ci`, and run `npm run lint`."
-    - **Verification:** The file `/.github/workflows/ci.yml` exists and contains the string `npm run lint`.
-</file>
-
 <file path="documentation/logic_phase_1_todo.md">
 # Lessay Implementation Phase 1: Core Backend & User Auth
 
@@ -1504,34 +2170,6 @@ const prisma = global.prisma || new PrismaClient()
 if (process.env.NODE_ENV === 'development') global.prisma = prisma
 
 export default prisma
-</file>
-
-<file path="ARCHITECT_PLANNING_COMPLETE.md">
-# Architect Planning Complete
-
-All production hardening plans have been successfully generated and are ready for implementation.
-
-## Completed Phases:
-1. **Observability** - Logging and health checks
-2. **Error Handling** - Robust error management
-3. **Security** - Input validation and rate limiting
-4. **Performance** - Database optimization and caching
-5. **Testing** - Comprehensive test suite
-
-## Next Steps:
-1. Developer AI should execute tasks in sequential order from:
-   - `hardening_phase_1_observability.md`
-   - `hardening_phase_2_error_handling.md`
-   - `hardening_phase_3_security.md`
-   - `hardening_phase_4_performance.md`
-   - `hardening_phase_5_testing.md`
-
-2. Monitor implementation progress through:
-   - Application logs
-   - Test results
-   - Performance metrics
-
-3. Verify completion of each phase before proceeding to the next.
 </file>
 
 <file path=".roo/rules-documentation/rules.md">
@@ -2085,6 +2723,34 @@ npm run dev
 <svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.5 2.5h13v10a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1zM0 1h16v11.5a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 0 12.5zm3.75 4.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5M7 4.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0m1.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5" fill="#666"/></svg>
 </file>
 
+<file path="ARCHITECT_PLANNING_COMPLETE.md">
+# Architect Planning Complete
+
+All production hardening plans have been successfully generated and are ready for implementation.
+
+## Completed Phases:
+1. **Observability** - Logging and health checks
+2. **Error Handling** - Robust error management
+3. **Security** - Input validation and rate limiting
+4. **Performance** - Database optimization and caching
+5. **Testing** - Comprehensive test suite
+
+## Next Steps:
+1. Developer AI should execute tasks in sequential order from:
+   - `hardening_phase_1_observability.md`
+   - `hardening_phase_2_error_handling.md`
+   - `hardening_phase_3_security.md`
+   - `hardening_phase_4_performance.md`
+   - `hardening_phase_5_testing.md`
+
+2. Monitor implementation progress through:
+   - Application logs
+   - Test results
+   - Performance metrics
+
+3. Verify completion of each phase before proceeding to the next.
+</file>
+
 <file path="BLUEPRINT_COMPLETE.md">
 # Lessay Documentation Blueprint Complete
 
@@ -2607,65 +3273,6 @@ flowchart LR
 | Lesson too hard/easy | Adjust difficulty in settings |
 | Progress not saving | Check internet connection |
 | Payment issues | Update card or contact support |
-</file>
-
-<file path="documentation/architect_master_todo.md">
-Understood. The planning phase continues with absolute precision. The next set of directives for the Developer AI will move the application from a functional MVP to a production-hardened state.
-
-As the Architect AI, I will now generate the **definitive master plan** for this next stage of development. This is not a suggestion; it is the required sequence of operations.
-
----
-
-### **`documentation/architect_master_todo.md` (Updated)**
-
-# Architect Master To-Do List: Production Hardening
-
-**Objective:** To generate the final implementation plans required to move the Lessay application from a functional MVP to a production-ready state. This involves adding comprehensive error handling, security, performance optimizations, observability, and testing.
-
-**Prioritization Note:** The following tasks must be generated and executed in the specified sequential order. Each phase builds a necessary foundation for the next.
-
----
-
-- [x] **Task 1: Generate `hardening_phase_1_observability.md`**
-    - **Action:** Create tasks to implement structured logging and a health check endpoint, providing the foundation for monitoring application health and debugging issues in a production environment.
-    - **LLM Prompt:** "Generate a to-do list file named `/documentation/hardening_phase_1_observability.md`. The tasks must instruct the Developer AI to:
-        1.  Execute `npm install pino pino-pretty`.
-        2.  Create a logger utility at `/lib/logger.ts` that initializes and exports a single `pino` instance.
-        3.  Systematically replace all `console.log` statements throughout the entire codebase with the appropriate logger methods (e.g., `logger.info`, `logger.warn`, `logger.error`).
-        4.  Create a new API route at `/app/api/health/route.ts` that performs a basic check (e.g., a simple Prisma query like `prisma.$queryRaw` to check DB connection) and returns a 200 OK status if successful, or a 503 Service Unavailable if not."
-
-- [x] **Task 2: Generate `hardening_phase_2_error_handling.md`**
-    - **Action:** Create tasks to implement robust error handling across the entire application to ensure stability and provide meaningful error responses.
-    - **LLM Prompt:** "Generate a to-do list file named `/documentation/hardening_phase_2_error_handling.md`. The tasks must instruct the Developer AI to:
-        1.  Modify every API route in the `/app/api/` directory.
-        2.  Wrap the entire body of each exported function (`GET`, `POST`, `PUT`, etc.) in a `try...catch` block.
-        3.  In the `catch` block, log the error using the `logger.error` utility.
-        4.  For specific, known error types (e.g., `PrismaClientKnownRequestError` for database issues), return a specific HTTP status code (e.g., 404 for 'not found' errors, 400 for bad requests).
-        5.  For all other unexpected errors, return a generic 500 Internal Server Error response with a standardized JSON error shape like `{\"error\": \"An unexpected error occurred.\"}`."
-
-- [x] **Task 3: Generate `hardening_phase_3_security.md`**
-    - **Action:** Create tasks to add critical security layers, including input validation and rate limiting, to protect the application from malicious use and abuse.
-    - **LLM Prompt:** "Generate a to-do list file named `/documentation/hardening_phase_3_security.md`. The tasks must instruct the Developer AI to:
-        1.  Execute `npm install zod`.
-        2.  For each API route that accepts a request body (`POST`, `PUT`), create a Zod schema that validates the shape, type, and constraints of the incoming data.
-        3.  Implement the validation logic at the beginning of each route handler. If validation fails, return a 400 Bad Request response with the validation errors.
-        4.  Execute `npm install @upstash/ratelimit`.
-        5.  Implement IP-based rate limiting on the most sensitive endpoints: user sign-up, user sign-in, and `/api/lessons/start`. Configure it to allow a reasonable number of requests per minute."
-
-- [x] **Task 4: Generate `hardening_phase_4_performance.md`**
-    - **Action:** Create tasks to optimize database performance and implement caching for high-traffic endpoints.
-    - **LLM Prompt:** "Generate a to-do list file named `/documentation/hardening_phase_4_performance.md`. The tasks must instruct the Developer AI to:
-        1.  Analyze the Prisma schema at `/prisma/schema.prisma`. Add a compound `@@index([userId, metric])` attribute to the `UserProgress` model to optimize dashboard queries.
-        2.  Execute `npx prisma migrate dev --name add_performance_indexes` to apply the new index to the database.
-        3.  Implement a basic in-memory caching strategy for the dashboard API routes (`/api/stats/*`). The data should be cached for a short duration (e.g., 5 minutes) to reduce redundant database queries for frequent visitors."
-
-- [x] **Task 5: Generate `hardening_phase_5_testing.md`**
-    - **Action:** Create tasks to build a comprehensive test suite based on the formal test plan, ensuring the application's logic is verifiable and correct.
-    - **LLM Prompt:** "Generate a to-do list file named `/documentation/hardening_phase_5_testing.md`. The tasks must instruct the Developer AI to:
-        1.  Reference the `documentation/templates/test_plan_template.md` as the source of truth for test cases.
-        2.  Create a new test file for user authentication (`/tests/auth.test.ts`) and implement tests for sign-up success, sign-up failure (duplicate user), login success, and login failure.
-        3.  Create a new test file for the learning loop (`/tests/lessons.test.ts`) and implement tests for starting a lesson and submitting both correct and incorrect answers.
-        4.  Modify the CI workflow at `/.github/workflows/ci.yml` to execute the `npm test` command after the `npm run lint` step."
 </file>
 
 <file path="documentation/documentation_completion_plan.md">
@@ -4613,6 +5220,94 @@ When documents or data conflict, you must resolve the inconsistency by adhering 
 -   You will halt execution upon creating `FIX_PLAN.md` (Intervention Mode).
 -   You will halt execution upon creating `ARCHITECT_PLANNING_COMPLETE.md` (Planning & Verification Mode).
 -   Your primary task is to generate `.md` files containing to-do lists for the Developer AI. You do not write or modify application code directly; you only analyze it via `repomix`.
+</file>
+
+<file path="documentation/architect_master_todo.md">
+Understood. The current `logic_phase_*.md` and `hardening_phase_*.md` files are high-level strategic briefs for the Architect AI. They are not executable plans for the Developer AI.
+
+My purpose is to correct this by generating the definitive master plan that will instruct me, the Architect AI, to translate these strategic briefs into granular, executable to-do lists for the Developer AI.
+
+Here is the master plan that will govern my operations to produce the required, detailed `dev_todo_*.md` files.
+
+---
+
+### **`documentation/architect_master_todo.md` (Definitive)**
+
+# Architect Master To-Do List: Implementation & Hardening Plan Generation
+
+**Objective:** To systematically generate a series of detailed, atomic, and verifiable to-do lists (`dev_todo_phase_*.md`) that will guide the Developer AI agent through the full implementation and production-hardening of the Lessay application.
+
+**Process:** For each incomplete task below, I will read the corresponding source "brief" (`logic_*` or `hardening_*` file), analyze its high-level goals, and generate a new, detailed `dev_todo_*.md` file with `[ ]` checkboxes for the Developer AI to execute.
+
+---
+
+- [x] **Task 1: Generate `dev_todo_phase_1.md` (Core Backend & User Auth)**
+    - **Source Brief:** `documentation/logic_phase_1_todo.md`
+    - **Action:** Generate a detailed, executable plan for implementing user authentication and profile management.
+    - **LLM Prompt:** "Generate the file `documentation/dev_todo_phase_1.md`. Using `documentation/logic_phase_1_todo.md` as a guide, create atomic, verifiable tasks with `[ ]` checkboxes for the Developer AI. The plan must include:
+        1. Creating client and server Supabase helpers in a `/lib/supabase/` directory.
+        2. Adding a `getUserSession` helper to the server client.
+        3. Securing the `/api/users/profile` GET and PUT endpoints by requiring an active user session and interacting with the Prisma database.
+        4. Creating an `Auth.tsx` component with UI and client-side logic for sign-up and sign-in.
+        5. Creating a `/api/users/sync` endpoint to create a public user profile in Prisma after a new Supabase auth user is created."
+
+- [x] **Task 2: Generate `dev_todo_phase_2.md` (Learning Loop Logic)**
+    - **Source Brief:** `documentation/logic_phase_2_todo.md`
+    - **Action:** Generate a detailed, executable plan for implementing the core lesson-taking functionality.
+    - **LLM Prompt:** "Generate the file `documentation/dev_todo_phase_2.md`. Using `documentation/logic_phase_2_todo.md` as a guide, create atomic, verifiable tasks with `[ ]` checkboxes. The plan must include:
+        1. Implementing the `/api/lessons/start` route to authenticate the user, call the (stubbed) AI service, and create corresponding `Lesson` and `Exercise` records in Prisma.
+        2. Implementing the `/api/lessons/[id]/submit-answer` route to authenticate the user, validate their answer against the database (simple string match), and create a `UserProgress` record.
+        3. Updating the `LessonView.tsx` component to include a text input and a submit button that correctly calls the submit-answer API."
+
+- [x] **Task 3: Generate `dev_todo_phase_3.md` (AI Service Integration)**
+    - **Source Briefs:** `documentation/logic_phase_3_todo.md` and `documentation/logic_phase_6_todo.md`
+    - **Action:** Generate a detailed, executable plan for replacing all AI stubs with real, authenticated API calls to Google Cloud.
+    - **LLM Prompt:** "Generate the file `documentation/dev_todo_phase_3.md`. Combine the goals from `logic_phase_3_todo.md` and `logic_phase_6_todo.md`. Create atomic, verifiable tasks with `[ ]` checkboxes. The plan must include:
+        1. Installing the `@google/generative-ai`, `@google-cloud/speech`, and `@google-cloud/text-to-speech` npm packages.
+        2. Modifying `/lib/ai-service.ts` to initialize all three Google clients (Gemini, Speech-to-Text, Text-to-Speech), using the logic to read credentials from `GCP_CREDENTIALS_JSON` environment variable or the `gcp-credentials.json` file.
+        3. Replacing the `generateLessonForUser` stub with a real implementation that constructs a prompt and calls the Gemini API.
+        4. Creating and implementing real `transcribeAudio` and `synthesizeSpeech` functions using the respective Google Cloud clients."
+
+- [x] **Task 4: Generate `dev_todo_phase_4.md` (Dashboard & Payments)**
+    - **Source Brief:** `documentation/logic_phase_4_todo.md`
+    - **Action:** Generate a detailed, executable plan for implementing the dashboard and payment functionalities.
+    - **LLM Prompt:** "Generate the file `documentation/dev_todo_phase_4.md`. Using `documentation/logic_phase_4_todo.md` as a guide, create atomic, verifiable tasks with `[ ]` checkboxes. The plan must include:
+        1. Implementing real Prisma aggregation queries in the `/api/stats/fluency` and `/api/stats/srs-overview` routes.
+        2. Updating the `DashboardView.tsx` component to fetch and display the real data from the stats APIs.
+        3. Installing the `stripe` npm package and modifying `/api/payments/create-subscription` to use the library to create a real Stripe subscription object.
+        4. Implementing secure webhook signature verification in `/api/stripe/webhook` using `stripe.webhooks.constructEvent`."
+
+- [x] **Task 5: Generate `dev_todo_phase_5.md` (Production Hardening: Observability & Errors)**
+    - **Source Briefs:** `documentation/hardening_phase_1_observability.md` and `documentation/hardening_phase_2_error_handling.md`
+    - **Action:** Generate a detailed, executable plan for implementing production-grade logging and error handling.
+    - **LLM Prompt:** "Generate the file `documentation/dev_todo_phase_5.md`. Combine the goals from the observability and error handling briefs. Create atomic, verifiable tasks with `[ ]` checkboxes. The plan must include:
+        1. Installing `pino` and `pino-pretty`.
+        2. Creating a `/lib/logger.ts` utility.
+        3. Systematically replacing all `console.log` statements in the `/app/api/` directory with `logger` calls.
+        4. Creating the `/app/api/health` endpoint.
+        5. Creating a `/lib/errors.ts` utility for centralized error handling.
+        6. Wrapping all API route logic in `try...catch` blocks that use the new error handling utility."
+
+- [x] **Task 6: Generate `dev_todo_phase_6.md` (Production Hardening: Security & Performance)**
+    - **Source Briefs:** `documentation/hardening_phase_3_security.md` and `documentation/hardening_phase_4_performance.md`
+    - **Action:** Generate a detailed, executable plan for implementing security and performance optimizations.
+    - **LLM Prompt:** "Generate the file `documentation/dev_todo_phase_6.md`. Combine the goals from the security and performance briefs. Create atomic, verifiable tasks with `[ ]` checkboxes. The plan must include:
+        1. Installing `zod` and creating validation schemas in `/lib/validators.ts`.
+        2. Applying Zod validation to all API routes that accept a body.
+        3. Installing `@upstash/ratelimit` and applying rate limiting to sensitive endpoints.
+        4. Adding the specified `@@index` to the `UserProgress` model in `prisma.schema`.
+        5. Generating a new Prisma migration for the index.
+        6. Implementing a basic in-memory caching utility at `/lib/cache.ts` and applying it to the stats APIs."
+
+- [x] **Task 7: Generate `dev_todo_phase_7.md` (Production Hardening: Testing)**
+    - **Source Brief:** `documentation/hardening_phase_5_testing.md`
+    - **Action:** Generate a detailed, executable plan for creating a comprehensive test suite.
+    - **LLM Prompt:** "Generate the file `documentation/dev_todo_phase_7.md`. Using the testing brief as a guide, create atomic, verifiable tasks with `[ ]` checkboxes. The plan must include:
+        1. Installing and configuring Jest (`jest`, `ts-jest`, `@types/jest`).
+        2. Creating a `jest.config.ts` file.
+        3. Creating test files (e.g., `/tests/auth.test.ts`, `/tests/lessons.test.ts`) with specific test cases as outlined in the brief (e.g., 'should allow valid user signup', 'should reject duplicate user').
+        4. Updating the `package.json` test script to run `jest`.
+        5. Modifying the `ci.yml` workflow to execute the `npm test` command."
 </file>
 
 </files>
