@@ -20,15 +20,15 @@ Your mission is to perform a single, definitive analysis of the repository and i
 
     b. **If `NEEDS_ASSISTANCE.md` exists:**
         - Announce: "Distress signal detected. Switching to Emergency mode."
-        - Execute the command: **`switch_role('emergency')`**.
+        - Execute the command: **`<mode>emergency</mode>`**.
 
     c. **If `FIX_PLAN.md` exists:**
         - Announce: "Fix plan is ready. Switching to Developer mode for execution."
-        - Execute the command: **`switch_role('developer')`**.
+        - Execute the command: **`<mode>developer</mode>`**.
 
     d. **If `ARCHITECT_PLANNING_COMPLETE.md` exists:**
         - Announce: "Architectural planning is complete. Switching to Developer mode."
-        - Execute the command: **`switch_role('developer')`**.
+        - Execute the command: **`<mode>developer</mode>`**.
 
     e. **Default - If none of the above conditions are met:**
         - Announce: "No critical signals found. Switching to Architect mode for planning."
