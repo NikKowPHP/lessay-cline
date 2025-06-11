@@ -99,6 +99,11 @@ documentation/
   app_description.md
   architect_master_todo.md
   documentation_completion_plan.md
+  hardening_phase_1_observability.md
+  hardening_phase_2_error_handling.md
+  hardening_phase_3_security.md
+  hardening_phase_4_performance.md
+  hardening_phase_5_testing.md
   human_todo.md
   logic_phase_1_todo.md
   logic_phase_2_todo.md
@@ -134,6 +139,608 @@ tsconfig.json
 
 <files>
 This section contains the contents of the repository's files.
+
+<file path="documentation/hardening_phase_1_observability.md">
+# Hardening Phase 1: Observability Implementation
+
+## Tasks for Developer AI
+
+### 1. Install Logging Dependencies
+**File Path:** Project root (`./`)
+**Action:** Execute command to install pino and pino-pretty
+**LLM Prompt:** "Execute the following shell command to install logging dependencies:"
+**Command:** `npm install pino pino-pretty`
+**Verification:** `pino` and `pino-pretty` appear in `package.json` dependencies
+
+---
+
+### 2. Create Logger Utility
+**File Path:** `/lib/logger.ts`
+**Action:** Create a centralized logger instance
+**LLM Prompt:** "Create a new file at `/lib/logger.ts` with the following content:"
+```typescript
+import pino from 'pino'
+
+const logger = pino({
+  level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+  transport: {
+    target: 'pino-pretty',
+    options: {
+      colorize: true,
+      translateTime: 'SYS:standard'
+    }
+  }
+})
+
+export default logger
+```
+**Verification:** File exists and exports a `logger` instance
+
+---
+
+### 3. Replace Console Logs in API Routes
+**Action:** Update all API routes to use the new logger
+**Files to Modify:**
+- `app/api/lessons/[id]/submit-answer/route.ts`
+- `app/api/lessons/start/route.ts`
+- `app/api/payments/create-subscription/route.ts`
+- `app/api/stripe/webhook/route.ts`
+- `app/api/users/profile/route.ts`
+
+**LLM Prompt:** "In each specified API route file, replace all `console.log` statements with appropriate logger methods (`logger.info`, `logger.error`, etc.)"
+**Verification:** No `console.log` statements remain in API route files
+
+---
+
+### 4. Implement Health Check Endpoint
+**File Path:** `/app/api/health/route.ts`
+**Action:** Create a health check API route
+**LLM Prompt:** "Create a new file at `/app/api/health/route.ts` with the following content:"
+```typescript
+import { NextResponse } from 'next/server'
+import prisma from '@/lib/prisma'
+import logger from '@/lib/logger'
+
+export async function GET() {
+  try {
+    await prisma.$queryRaw`SELECT 1`
+    logger.info('Health check successful')
+    return NextResponse.json({ status: 'ok' }, { status: 200 })
+  } catch (error) {
+    logger.error('Health check failed', error)
+    return NextResponse.json(
+      { status: 'error', message: 'Database connection failed' },
+      { status: 503 }
+    )
+  }
+}
+```
+**Verification:** File exists and returns 200 OK when database is accessible
+
+---
+
+### 5. Verify Logging Implementation
+**Action:** Test the logging functionality
+**LLM Prompt:** "Execute the following command to test the application and verify logs are being generated:"
+**Command:** `npm run dev`
+**Verification:** Application starts and logs appear in the console with proper formatting
+</file>
+
+<file path="documentation/hardening_phase_2_error_handling.md">
+# Hardening Phase 2: Error Handling Implementation
+
+## Tasks for Developer AI
+
+### 1. Prepare Error Handling Utilities
+**File Path:** `/lib/errors.ts`
+**Action:** Create error handling utilities
+**LLM Prompt:** "Create a new file at `/lib/errors.ts` with the following content:"
+```typescript
+import { NextResponse } from 'next/server'
+import logger from '@/lib/logger'
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
+
+export function handleError(error: unknown) {
+  if (error instanceof PrismaClientKnownRequestError) {
+    logger.error({ error }, 'Database error occurred')
+    return NextResponse.json(
+      { error: 'Database operation failed' },
+      { status: getPrismaErrorStatus(error) }
+    )
+  }
+
+  logger.error({ error }, 'Unexpected error occurred')
+  return NextResponse.json(
+    { error: 'An unexpected error occurred' },
+    { status: 500 }
+  )
+}
+
+function getPrismaErrorStatus(error: PrismaClientKnownRequestError): number {
+  switch (error.code) {
+    case 'P2002': return 409 // Unique constraint violation
+    case 'P2025': return 404 // Record not found
+    default: return 400 // Bad request
+  }
+}
+```
+**Verification:** File exists and exports `handleError` function
+
+---
+
+### 2. Update API Routes with Error Handling
+**Action:** Modify all API routes to use structured error handling
+**Files to Modify:**
+- `app/api/lessons/[id]/submit-answer/route.ts`
+- `app/api/lessons/start/route.ts`
+- `app/api/payments/create-subscription/route.ts`
+- `app/api/stats/fluency/route.ts`
+- `app/api/stats/srs-overview/route.ts`
+- `app/api/stripe/webhook/route.ts`
+- `app/api/users/profile/route.ts`
+
+**LLM Prompt:** "For each specified API route file:
+1. Wrap the entire exported function body in a try/catch block
+2. Use the handleError utility from '@/lib/errors' in catch blocks
+3. Ensure all errors are properly logged
+4. Maintain existing functionality"
+
+**Example Modification:**
+```typescript
+// Before
+export async function POST(request: Request) {
+  const { tier } = await request.json()
+  console.log('Creating subscription for tier:', tier)
+  return NextResponse.json({ status: 'active' })
+}
+
+// After
+import { handleError } from '@/lib/errors'
+
+export async function POST(request: Request) {
+  try {
+    const { tier } = await request.json()
+    logger.info('Creating subscription for tier:', { tier })
+    return NextResponse.json({ status: 'active' })
+  } catch (error) {
+    return handleError(error)
+  }
+}
+```
+**Verification:** All API routes have try/catch blocks and use handleError
+
+---
+
+### 3. Add Health Check Error Handling
+**File Path:** `/app/api/health/route.ts`
+**Action:** Update health check to use new error handler
+**LLM Prompt:** "Modify `/app/api/health/route.ts` to use the handleError utility:"
+```typescript
+import { NextResponse } from 'next/server'
+import prisma from '@/lib/prisma'
+import logger from '@/lib/logger'
+import { handleError } from '@/lib/errors'
+
+export async function GET() {
+  try {
+    await prisma.$queryRaw`SELECT 1`
+    logger.info('Health check successful')
+    return NextResponse.json({ status: 'ok' }, { status: 200 })
+  } catch (error) {
+    return handleError(error)
+  }
+}
+```
+**Verification:** Health check uses handleError and maintains functionality
+
+---
+
+### 4. Verify Error Handling
+**Action:** Test error scenarios
+**LLM Prompt:** "Execute the following command to test the application and verify error handling:"
+**Command:** `npm run dev`
+**Verification:**
+1. Trigger intentional errors in API routes
+2. Confirm proper error responses (status codes and JSON format)
+3. Check that errors appear in logs with appropriate levels
+</file>
+
+<file path="documentation/hardening_phase_3_security.md">
+# Hardening Phase 3: Security Implementation
+
+## Tasks for Developer AI
+
+### 1. Install Zod for Validation
+**File Path:** Project root (`./`)
+**Action:** Execute command to install Zod
+**LLM Prompt:** "Execute the following shell command to install Zod:"
+**Command:** `npm install zod`
+**Verification:** `zod` appears in `package.json` dependencies
+
+---
+
+### 2. Create Validation Schemas
+**File Path:** `/lib/validators.ts`
+**Action:** Create shared validation schemas
+**LLM Prompt:** "Create a new file at `/lib/validators.ts` with the following content:"
+```typescript
+import { z } from 'zod'
+
+export const lessonStartSchema = z.object({
+  userId: z.string().uuid(),
+  targetLanguage: z.string().length(2)
+})
+
+export const answerSubmitSchema = z.object({
+  exerciseId: z.string().uuid(),
+  textResponse: z.string().min(1),
+  audioBlobUrl: z.string().url().optional()
+})
+
+export const subscriptionSchema = z.object({
+  tier: z.enum(['free', 'premium', 'pro']),
+  paymentMethodId: z.string()
+})
+```
+**Verification:** File exists and exports validation schemas
+
+---
+
+### 3. Implement Route Validation
+**Action:** Add validation to API routes with request bodies
+**Files to Modify:**
+- `app/api/lessons/[id]/submit-answer/route.ts`
+- `app/api/lessons/start/route.ts`
+- `app/api/payments/create-subscription/route.ts`
+- `app/api/users/profile/route.ts`
+
+**LLM Prompt:** "For each specified API route:
+1. Import appropriate validator from '@/lib/validators'
+2. Validate request body at start of handler
+3. Return 400 with validation errors if invalid
+4. Maintain existing functionality"
+
+**Example Modification:**
+```typescript
+import { NextResponse } from 'next/server'
+import { answerSubmitSchema } from '@/lib/validators'
+import { handleError } from '@/lib/errors'
+
+export async function POST(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const body = await request.json()
+    const validation = answerSubmitSchema.safeParse(body)
+    
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: 'Invalid request', details: validation.error.flatten() },
+        { status: 400 }
+      )
+    }
+
+    // Existing handler logic...
+  } catch (error) {
+    return handleError(error)
+  }
+}
+```
+**Verification:** Routes return 400 for invalid requests with error details
+
+---
+
+### 4. Install Rate Limiting Package
+**File Path:** Project root (`./`)
+**Action:** Execute command to install rate limiter
+**LLM Prompt:** "Execute the following shell command to install rate limiting:"
+**Command:** `npm install @upstash/ratelimit`
+**Verification:** `@upstash/ratelimit` appears in `package.json` dependencies
+
+---
+
+### 5. Configure Rate Limiting
+**File Path:** `/lib/rateLimit.ts`
+**Action:** Create rate limiting configuration
+**LLM Prompt:** "Create a new file at `/lib/rateLimit.ts` with the following content:"
+```typescript
+import { Ratelimit } from '@upstash/ratelimit'
+import { Redis } from '@upstash/redis'
+
+export const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(10, '1 m'),
+  analytics: true
+})
+```
+**Verification:** File exists and exports rate limiter instance
+
+---
+
+### 6. Apply Rate Limiting to Sensitive Endpoints
+**Action:** Add rate limiting to high-risk routes
+**Files to Modify:**
+- `app/api/lessons/start/route.ts`
+- `app/api/users/profile/route.ts`
+
+**LLM Prompt:** "For each specified API route:
+1. Import rate limiter from '@/lib/rateLimit'
+2. Get client IP from headers (request.headers.get('x-forwarded-for'))
+3. Check rate limit at start of handler
+4. Return 429 if limit exceeded
+5. Maintain existing functionality"
+
+**Example Modification:**
+```typescript
+import { ratelimit } from '@/lib/rateLimit'
+
+export async function POST(request: Request) {
+  const ip = request.headers.get('x-forwarded-for') ?? '127.0.0.1'
+  const { success } = await ratelimit.limit(ip)
+  
+  if (!success) {
+    return NextResponse.json(
+      { error: 'Too many requests' },
+      { status: 429 }
+    )
+  }
+
+  // Existing handler logic...
+}
+```
+**Verification:** Routes return 429 after exceeding request limits
+
+---
+
+### 7. Verify Security Features
+**Action:** Test validation and rate limiting
+**LLM Prompt:** "Execute the following command to test the security features:"
+**Command:** `npm run dev`
+**Verification:**
+1. Invalid requests return 400 with error details
+2. Excessive requests to limited endpoints return 429
+3. Valid requests function normally
+</file>
+
+<file path="documentation/hardening_phase_4_performance.md">
+# Hardening Phase 4: Performance Optimization
+
+## Tasks for Developer AI
+
+### 1. Add Database Indexes
+**File Path:** `/prisma/schema.prisma`
+**Action:** Add compound index to UserProgress model
+**LLM Prompt:** "Modify the UserProgress model in `/prisma/schema.prisma` to add a compound index:"
+```prisma
+model UserProgress {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  metric      String
+  score       Float
+  lastUpdated DateTime @default(now())
+
+  @@index([userId, metric], name: "UserProgress_userId_metric_index")
+}
+```
+**Verification:** Index definition exists in schema.prisma
+
+---
+
+### 2. Apply Database Migration
+**File Path:** Project root (`./`)
+**Action:** Create and apply migration
+**LLM Prompt:** "Execute the following command to create and apply the migration:"
+**Command:** `npx prisma migrate dev --name add_performance_indexes`
+**Verification:** New migration file exists in prisma/migrations directory
+
+---
+
+### 3. Implement Basic Caching
+**File Path:** `/lib/cache.ts`
+**Action:** Create caching utility
+**LLM Prompt:** "Create a new file at `/lib/cache.ts` with the following content:"
+```typescript
+const cache = new Map<string, { data: any, expires: number }>()
+
+export function getFromCache<T>(key: string): T | null {
+  const item = cache.get(key)
+  if (!item || item.expires < Date.now()) {
+    return null
+  }
+  return item.data as T
+}
+
+export function setToCache(key: string, data: any, ttl: number = 300000) {
+  cache.set(key, {
+    data,
+    expires: Date.now() + ttl
+  })
+}
+
+export function clearCache(key: string) {
+  cache.delete(key)
+}
+```
+**Verification:** File exists and exports cache functions
+
+---
+
+### 4. Add Caching to Stats Endpoints
+**Action:** Implement caching in dashboard routes
+**Files to Modify:**
+- `app/api/stats/fluency/route.ts`
+- `app/api/stats/srs-overview/route.ts`
+
+**LLM Prompt:** "For each specified stats route:
+1. Import cache functions from '@/lib/cache'
+2. Generate cache key based on user ID and route
+3. Check cache before querying database
+4. Store results in cache after querying
+5. Maintain existing functionality"
+
+**Example Modification:**
+```typescript
+import { getFromCache, setToCache } from '@/lib/cache'
+
+export async function GET(request: Request) {
+  const cacheKey = `stats-fluency-${userId}`
+  const cached = getFromCache(cacheKey)
+  if (cached) {
+    return NextResponse.json(cached)
+  }
+
+  const data = await fetchDataFromDB() // Existing logic
+  
+  setToCache(cacheKey, data)
+  return NextResponse.json(data)
+}
+```
+**Verification:** Repeated requests within 5 minutes return cached data
+
+---
+
+### 5. Verify Performance Improvements
+**Action:** Test database and caching changes
+**LLM Prompt:** "Execute the following command to test performance features:"
+**Command:** `npm run dev`
+**Verification:**
+1. Database queries for stats are faster with indexes
+2. Repeated stat requests return cached data
+3. Data updates reflect after cache expires
+</file>
+
+<file path="documentation/hardening_phase_5_testing.md">
+# Hardening Phase 5: Testing Implementation
+
+## Tasks for Developer AI
+
+### 1. Install Testing Dependencies
+**File Path:** Project root (`./`)
+**Action:** Execute command to install Jest and related packages
+**LLM Prompt:** "Execute the following shell command to install testing dependencies:"
+**Command:** `npm install jest ts-jest @types/jest --save-dev`
+**Verification:** Packages appear in `package.json` devDependencies
+
+---
+
+### 2. Configure Jest for TypeScript
+**File Path:** `jest.config.ts`
+**Action:** Create Jest configuration file
+**LLM Prompt:** "Create a new file at `jest.config.ts` with the following content:"
+```typescript
+import type { Config } from '@jest/types'
+
+const config: Config.InitialOptions = {
+  preset: 'ts-jest',
+  testEnvironment: 'node',
+  roots: ['<rootDir>'],
+  testMatch: ['**/*.test.ts'],
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/$1'
+  }
+}
+
+export default config
+```
+**Verification:** Configuration file exists with correct settings
+
+---
+
+### 3. Create Auth Test File
+**File Path:** `/tests/auth.test.ts`
+**Action:** Implement authentication tests
+**LLM Prompt:** "Create a new file at `/tests/auth.test.ts` with the following content:"
+```typescript
+import { describe, it, expect } from '@jest/globals'
+import { signUp, signIn } from '@/lib/auth'
+
+describe('Authentication', () => {
+  it('should allow valid user signup', async () => {
+    const result = await signUp('test@example.com', 'password123')
+    expect(result.success).toBe(true)
+  })
+
+  it('should reject duplicate user signup', async () => {
+    await signUp('test@example.com', 'password123')
+    const result = await signUp('test@example.com', 'password123')
+    expect(result.error).toMatch(/already exists/i)
+  })
+
+  it('should allow valid login', async () => {
+    await signUp('test@example.com', 'password123')
+    const result = await signIn('test@example.com', 'password123')
+    expect(result.success).toBe(true)
+  })
+
+  it('should reject invalid login', async () => {
+    const result = await signIn('wrong@example.com', 'wrongpassword')
+    expect(result.error).toMatch(/invalid credentials/i)
+  })
+})
+```
+**Verification:** File exists with all test cases
+
+---
+
+### 4. Create Lesson Test File
+**File Path:** `/tests/lessons.test.ts`
+**Action:** Implement lesson flow tests
+**LLM Prompt:** "Create a new file at `/tests/lessons.test.ts` with the following content:"
+```typescript
+import { describe, it, expect } from '@jest/globals'
+import { startLesson, submitAnswer } from '@/lib/lessons'
+
+describe('Lesson Flow', () => {
+  it('should start a new lesson', async () => {
+    const lesson = await startLesson('user_123')
+    expect(lesson.exercises.length).toBeGreaterThan(0)
+  })
+
+  it('should accept correct answers', async () => {
+    const response = await submitAnswer('ex_123', 'correct answer')
+    expect(response.correct).toBe(true)
+  })
+
+  it('should provide feedback for incorrect answers', async () => {
+    const response = await submitAnswer('ex_123', 'wrong answer')
+    expect(response.correct).toBe(false)
+    expect(response.feedback).toBeDefined()
+  })
+})
+```
+**Verification:** File exists with all test cases
+
+---
+
+### 5. Update CI Workflow
+**File Path:** `/.github/workflows/ci.yml`
+**Action:** Add test step to CI pipeline
+**LLM Prompt:** "Modify the CI workflow to include testing:"
+```yaml
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+```
+**Verification:** CI file includes `npm test` command
+
+---
+
+### 6. Verify Test Suite
+**Action:** Run the test suite
+**LLM Prompt:** "Execute the following command to run tests:"
+**Command:** `npm test`
+**Verification:** All tests pass successfully
+</file>
 
 <file path=".github/workflows/ci.yml">
 name: CI
@@ -902,16 +1509,29 @@ export default prisma
 <file path="ARCHITECT_PLANNING_COMPLETE.md">
 # Architect Planning Complete
 
-All phased implementation plans have been generated and are ready for execution.
+All production hardening plans have been successfully generated and are ready for implementation.
 
-Next steps:
-1. Human operator completes credentials setup per `documentation/human_todo.md`
-2. Developer AI executes tasks in sequential order from:
-   - `logic_phase_1_todo.md`
-   - `logic_phase_2_todo.md` 
-   - `logic_phase_3_todo.md`
-   - `logic_phase_4_todo.md`
-   - `logic_phase_5_todo.md`
+## Completed Phases:
+1. **Observability** - Logging and health checks
+2. **Error Handling** - Robust error management
+3. **Security** - Input validation and rate limiting
+4. **Performance** - Database optimization and caching
+5. **Testing** - Comprehensive test suite
+
+## Next Steps:
+1. Developer AI should execute tasks in sequential order from:
+   - `hardening_phase_1_observability.md`
+   - `hardening_phase_2_error_handling.md`
+   - `hardening_phase_3_security.md`
+   - `hardening_phase_4_performance.md`
+   - `hardening_phase_5_testing.md`
+
+2. Monitor implementation progress through:
+   - Application logs
+   - Test results
+   - Performance metrics
+
+3. Verify completion of each phase before proceeding to the next.
 </file>
 
 <file path=".roo/rules-documentation/rules.md">
@@ -1366,74 +1986,6 @@ For example, if the analysis showed a user struggles with the "ch" sound in Germ
 *   Actively recall the review vocabulary ('Bahnhof', 'Ticket').
 
 This integrated **Capture -> Analyze -> Plan (with SRS) -> Create** cycle ensures the user is always working on a balanced mix of retaining old knowledge, fixing current weaknesses, and learning new material in the most efficient way possible.
-</file>
-
-<file path="documentation/architect_master_todo.md">
-You have pointed out an excellent and critical gap in the documentation and planning files. This is a perfect example of why rigorous documentation is necessary before implementation.
-
-Here is a breakdown of the situation and a plan to correct it.
-
-### Analysis of the Current State
-
-**1. Is the need for Google TTS/STT specified?**
-
-**Yes, it is.** The core vision document, which is the highest source of truth, explicitly states the requirement.
-
-*   In `documentation/app_description.md`, under section "3. How Lessay Works: The Technology", we have:
-    *   **The Ears (Speech Recognition & Capture):** "It uses a high-speed API (**Google's Speech-to-Text technology**) to instantly convert speech to text..."
-    *   **The Voice (Text-to-Speech):** "The app's "Voice" (powered by **Google TTS** and AWS Polly) converts all lesson text into natural-sounding audio..."
-
-So, the *requirement* is clear. The app MUST use these Google services.
-
-**2. Where are the credential placeholders?**
-
-**They are missing.** You are correct. This is the gap.
-
-*   The `documentation/human_todo.md` and `documentation/templates/deployment_playbook_template.md` only account for a single, generic `AI_API_KEY`. This is sufficient for the Google Gemini (LLM) part of the AI service.
-*   However, Google Cloud services like Speech-to-Text and Text-to-Speech typically use a different authentication method: a **Service Account Key (a JSON file)**, not a simple API key string.
-
-The current plans have not accounted for gathering or using these specific credentials.
-
-### Architect's Action Plan to Fix the Gap
-
-As the Architect AI, my immediate priority is to correct this oversight in the blueprint before the Developer AI begins implementation. I will now generate the plan to update our documentation.
-
----
-
-### **To-Do List for Architect AI: Add Google Cloud Credentials to Blueprint** [x]
-
-**Objective:** To update all relevant documentation to include the requirement for Google Cloud TTS/STT service account credentials and create tasks for their implementation.
-
-#### **Task 1: Update Human Onboarding Instructions**
-
-*   **File to Modify:** `documentation/human_todo.md`
-*   **Action:** Add a new, detailed section for Google Cloud credentials.
-*   **LLM Prompt:** "Modify the file `documentation/human_todo.md`. Add a new '4. Google Cloud (for TTS/STT)' section. This section must instruct the human operator to:
-    1.  Go to the Google Cloud Console.
-    2.  Create a new Service Account.
-    3.  Enable the 'Cloud Text-to-Speech API' and 'Cloud Speech-to-Text API' for the project.
-    4.  Grant the Service Account the necessary roles (e.g., 'Cloud AI Service User').
-    5.  Create and download a JSON key for the service account.
-    6.  Instruct them to place this file in the project root and name it `gcp-credentials.json`.
-    7.  Add `gcp-credentials.json` to the list of secrets to be placed in the `.env.local` file (e.g., as `GCP_CREDENTIALS_JSON` for production environments).
-    8.  Reiterate the warning **NOT** to commit this file."
-
-#### **Task 2: Update Deployment & Secrets Documentation**
-
-*   **File to Modify:** `documentation/templates/deployment_playbook_template.md`
-*   **Action:** Update the "Secrets Management" section to reflect the new credential type.
-*   **LLM Prompt:** "Modify the file `documentation/templates/deployment_playbook_template.md`. In Section 6 'Secrets Management', update the examples to show how the Google Cloud credential will be handled. Add a subsection explaining that for local development, the app will read the `gcp-credentials.json` file, but for production environments (like Vercel or Docker), the *entire contents* of the JSON file should be stored as a single, multi-line environment variable named `GCP_CREDENTIALS_JSON`."
-
-#### **Task 3: Update the Implementation Plan**
-
-*   **File to Create/Modify:** A new `logic_phase_6_todo.md` or append to `logic_phase_3_todo.md`.
-*   **Action:** Create new tasks for the Developer AI to install the correct SDKs and implement the authentication.
-*   **LLM Prompt:** "Generate a new task for the appropriate logic implementation phase. The task should instruct the Developer AI to:
-    1.  Execute `npm install @google-cloud/speech @google-cloud/text-to-speech`.
-    2.  Modify the `/lib/ai-service.ts` file.
-    3.  In this file, add logic to initialize the `SpeechClient` and `TextToSpeechClient` from the Google Cloud SDKs.
-    4.  The initialization logic must check for the `GCP_CREDENTIALS_JSON` environment variable first (for production). If it doesn't exist, it should fall back to reading the `gcp-credentials.json` file from the project root (for local development). The credentials from one of these sources must be passed to the client constructors.
-    5.  Replace the `console.log` placeholders for voice analysis with actual calls to the newly authenticated clients."
 </file>
 
 <file path="documentation/human_todo.md">
@@ -2055,6 +2607,65 @@ flowchart LR
 | Lesson too hard/easy | Adjust difficulty in settings |
 | Progress not saving | Check internet connection |
 | Payment issues | Update card or contact support |
+</file>
+
+<file path="documentation/architect_master_todo.md">
+Understood. The planning phase continues with absolute precision. The next set of directives for the Developer AI will move the application from a functional MVP to a production-hardened state.
+
+As the Architect AI, I will now generate the **definitive master plan** for this next stage of development. This is not a suggestion; it is the required sequence of operations.
+
+---
+
+### **`documentation/architect_master_todo.md` (Updated)**
+
+# Architect Master To-Do List: Production Hardening
+
+**Objective:** To generate the final implementation plans required to move the Lessay application from a functional MVP to a production-ready state. This involves adding comprehensive error handling, security, performance optimizations, observability, and testing.
+
+**Prioritization Note:** The following tasks must be generated and executed in the specified sequential order. Each phase builds a necessary foundation for the next.
+
+---
+
+- [x] **Task 1: Generate `hardening_phase_1_observability.md`**
+    - **Action:** Create tasks to implement structured logging and a health check endpoint, providing the foundation for monitoring application health and debugging issues in a production environment.
+    - **LLM Prompt:** "Generate a to-do list file named `/documentation/hardening_phase_1_observability.md`. The tasks must instruct the Developer AI to:
+        1.  Execute `npm install pino pino-pretty`.
+        2.  Create a logger utility at `/lib/logger.ts` that initializes and exports a single `pino` instance.
+        3.  Systematically replace all `console.log` statements throughout the entire codebase with the appropriate logger methods (e.g., `logger.info`, `logger.warn`, `logger.error`).
+        4.  Create a new API route at `/app/api/health/route.ts` that performs a basic check (e.g., a simple Prisma query like `prisma.$queryRaw` to check DB connection) and returns a 200 OK status if successful, or a 503 Service Unavailable if not."
+
+- [x] **Task 2: Generate `hardening_phase_2_error_handling.md`**
+    - **Action:** Create tasks to implement robust error handling across the entire application to ensure stability and provide meaningful error responses.
+    - **LLM Prompt:** "Generate a to-do list file named `/documentation/hardening_phase_2_error_handling.md`. The tasks must instruct the Developer AI to:
+        1.  Modify every API route in the `/app/api/` directory.
+        2.  Wrap the entire body of each exported function (`GET`, `POST`, `PUT`, etc.) in a `try...catch` block.
+        3.  In the `catch` block, log the error using the `logger.error` utility.
+        4.  For specific, known error types (e.g., `PrismaClientKnownRequestError` for database issues), return a specific HTTP status code (e.g., 404 for 'not found' errors, 400 for bad requests).
+        5.  For all other unexpected errors, return a generic 500 Internal Server Error response with a standardized JSON error shape like `{\"error\": \"An unexpected error occurred.\"}`."
+
+- [x] **Task 3: Generate `hardening_phase_3_security.md`**
+    - **Action:** Create tasks to add critical security layers, including input validation and rate limiting, to protect the application from malicious use and abuse.
+    - **LLM Prompt:** "Generate a to-do list file named `/documentation/hardening_phase_3_security.md`. The tasks must instruct the Developer AI to:
+        1.  Execute `npm install zod`.
+        2.  For each API route that accepts a request body (`POST`, `PUT`), create a Zod schema that validates the shape, type, and constraints of the incoming data.
+        3.  Implement the validation logic at the beginning of each route handler. If validation fails, return a 400 Bad Request response with the validation errors.
+        4.  Execute `npm install @upstash/ratelimit`.
+        5.  Implement IP-based rate limiting on the most sensitive endpoints: user sign-up, user sign-in, and `/api/lessons/start`. Configure it to allow a reasonable number of requests per minute."
+
+- [x] **Task 4: Generate `hardening_phase_4_performance.md`**
+    - **Action:** Create tasks to optimize database performance and implement caching for high-traffic endpoints.
+    - **LLM Prompt:** "Generate a to-do list file named `/documentation/hardening_phase_4_performance.md`. The tasks must instruct the Developer AI to:
+        1.  Analyze the Prisma schema at `/prisma/schema.prisma`. Add a compound `@@index([userId, metric])` attribute to the `UserProgress` model to optimize dashboard queries.
+        2.  Execute `npx prisma migrate dev --name add_performance_indexes` to apply the new index to the database.
+        3.  Implement a basic in-memory caching strategy for the dashboard API routes (`/api/stats/*`). The data should be cached for a short duration (e.g., 5 minutes) to reduce redundant database queries for frequent visitors."
+
+- [x] **Task 5: Generate `hardening_phase_5_testing.md`**
+    - **Action:** Create tasks to build a comprehensive test suite based on the formal test plan, ensuring the application's logic is verifiable and correct.
+    - **LLM Prompt:** "Generate a to-do list file named `/documentation/hardening_phase_5_testing.md`. The tasks must instruct the Developer AI to:
+        1.  Reference the `documentation/templates/test_plan_template.md` as the source of truth for test cases.
+        2.  Create a new test file for user authentication (`/tests/auth.test.ts`) and implement tests for sign-up success, sign-up failure (duplicate user), login success, and login failure.
+        3.  Create a new test file for the learning loop (`/tests/lessons.test.ts`) and implement tests for starting a lesson and submitting both correct and incorrect answers.
+        4.  Modify the CI workflow at `/.github/workflows/ci.yml` to execute the `npm test` command after the `npm run lint` step."
 </file>
 
 <file path="documentation/documentation_completion_plan.md">
@@ -3908,29 +4519,34 @@ next-env.d.ts
 </file>
 
 <file path=".roo/rules-architect/rules.md">
-d
-### **Custom Instructions for Project Lessay: 🧠 Architect AI (Multi-Phase Planning v2.0)**
+Of course. Here are the modified rules for the Architect AI, incorporating the `repomix` workflow for codebase analysis and iterative planning.
+
+The core change is the evolution of the "PLANNING MODE" into a more dynamic "PLANNING & VERIFICATION MODE". This new mode uses a real-time snapshot of the codebase to generate smarter, context-aware development plans.
+
+---
+
+### **Custom Instructions for 🧠 Architect AI (Code-Aware Planning v3.0)**
 
 ## 1. IDENTITY & PERSONA
 
-You are the **Architect AI for Project Lessay**, designated as **🧠 Architect**. You are the master strategist and planner for the entire software development lifecycle. You operate in two distinct modes: **PLANNING** (for generating development roadmaps) and **INTERVENTION** (for fixing development failures). Your purpose is to provide a flawless, executable plan for the Developer AI.
+You are the **Architect AI**, designated as **🧠 Architect**. You are the master strategist and planner for the entire software development lifecycle. You operate in two distinct modes: **PLANNING & VERIFICATION** (for generating and refining development roadmaps based on the current codebase) and **INTERVENTION** (for fixing explicit development failures). Your purpose is to provide a flawless, context-aware, and executable plan for the Developer AI.
 
 ## 2. THE CORE MISSION
 
-Your mission is to guide the Developer AI through the entire build process by generating a series of phased to-do lists. You will create the initial blueprint, then create the detailed implementation plans, and finally, fix any issues that arise during development.
+Your mission is to guide the Developer AI through the entire build process by generating a series of phased to-do lists. You will analyze the existing code, create detailed implementation plans based on that analysis, and fix any critical issues that arise during development.
 
-## 3. THE AUTONOMOUS OPERATIONAL LOOP (MULTI-PHASE)
+## 3. THE AUTONOMOUS OPERATIONAL LOOP
 
 Upon initiation, you must first determine your operational mode.
 
 1.  **Check for Distress Signal:** Look for the existence of a `NEEDS_ASSISTANCE.md` file in the project's root directory.
 2.  **Select Mode:**
     *   If `NEEDS_ASSISTANCE.md` **exists**, enter **INTERVENTION MODE** (Rule 3.1).
-    *   If `NEEDS_ASSISTANCE.md` **does not exist**, enter **PLANNING MODE** (Rule 3.2).
+    *   If `NEEDS_ASSISTANCE.md` **does not exist**, enter **PLANNING & VERIFICATION MODE** (Rule 3.2).
 
 ### 3.1. INTERVENTION MODE (Fixing a Broken Plan)
 
-*(This section remains unchanged from your provided v3.0 example. It's a robust process for handling failures.)*
+*(This mode is for handling explicit failures reported by the Developer AI and remains unchanged.)*
 
 1.  **Read Distress Signal:** Open and parse `NEEDS_ASSISTANCE.md`.
 2.  **Diagnose the Problem:** Analyze the report to determine the failure type (Atomic vs. Integration).
@@ -3940,50 +4556,63 @@ Upon initiation, you must first determine your operational mode.
 4.  **Prepare for Retry:** The final step in `FIX_PLAN.md` must be a task to delete `NEEDS_ASSISTANCE.md`.
 5.  **Halt for Review:** After creating `FIX_PLAN.md`, halt your execution for human review and approval.
 
-### 3.2. PLANNING MODE (Generating the Phased Blueprint)
+### 3.2. PLANNING & VERIFICATION MODE (Generating the Code-Aware Blueprint)
 
-This mode guides the entire project from inception to completion by generating a sequence of to-do list files.
+This mode is a continuous cycle of analyzing the current code and generating the next set of tasks.
 
-1.  **Identify Current Master Task:** Open and read `documentation/architect_master_todo.md`. Identify the first task that is not marked as complete (`[ ]`). This file dictates which to-do list you will generate next.
+1.  **Step 1: Codebase Analysis.**
+    *   **Execute Command:** Run the following terminal command to generate a complete snapshot of the current project codebase: `repomix > repomix-output.xml`.
+    *   **Ingest Snapshot:** Read and parse the generated `repomix-output.xml` file. This file is now your primary source of truth for the **current state of the implementation**.
 
-2.  **Execute Master Task (Generate a To-Do List):**
-    *   Read the description of the active master task. For example: "Generate `logic_phase_1_todo.md` (Core Backend & User Auth)".
-    *   Based on this description and your comprehensive knowledge of the Lessay documentation, generate the full content for the specified to-do list file (e.g., `documentation/logic_phase_1_todo.md`).
-    *   The generated to-do list must contain a series of simple, atomic, generative prompts for the **Developer AI**. Each task must be a clear instruction to create or modify a specific file with specific content.
+2.  **Step 2: Identify Current Master Task.**
+    *   Open and read `documentation/architect_master_todo.md`.
+    *   Identify the first task that is not marked as complete (`[ ]`). This is your **Active Master Task** and dictates the high-level goal for this cycle.
 
-3.  **Update Master Plan:** After successfully generating the to-do list file, update `/documentation/architect_master_todo.md` by marking the corresponding task as complete (`[x]`).
+3.  **Step 3: Generate Context-Aware To-Do List.**
+    *   **Analyze Goal vs. Reality:**
+        *   Read the description of the Active Master Task (e.g., "Generate `logic_phase_1_todo.md` (Core Backend & User Auth)").
+        *   Cross-reference this goal with your understanding of the codebase from `repomix-output.xml` and the project's design documents (see Hierarchy of Truth, Rule 5).
+        *   Determine what files and functions already exist, which need modification, and which need to be created from scratch to fulfill the Active Master Task.
+    *   **Generate Detailed Plan:**
+        *   Create the full content for the to-do list file specified in the master task (e.g., `documentation/logic_phase_1_todo.md`).
+        *   This to-do list must be a series of simple, atomic, generative prompts for the **Developer AI**.
+        *   **Crucially, these prompts must be code-aware.** For example, instead of "Create file `user.ts`," your analysis might lead to a more specific prompt like, "Modify the existing file `src/models/user.ts` to add a `passwordHash` field to the User schema, as it is currently missing."
 
-4.  **Loop or Conclude:**
-    *   If there are more incomplete tasks in `architect_master_todo.md`, repeat from Step 1.
+4.  **Step 4: Update Master Plan.**
+    *   After successfully generating the detailed, code-aware to-do list, update `/documentation/architect_master_todo.md` by marking the Active Master Task as complete (`[x]`). This signals that the plan for this phase is now ready for the Developer AI to execute.
+
+5.  **Step 5: Loop or Conclude.**
+    *   If there are more incomplete tasks in `architect_master_todo.md`, the loop will repeat on the next run, starting with a fresh codebase analysis via `repomix`.
     *   If all tasks in `architect_master_todo.md` are complete, your planning work is finished. Create a final file named `ARCHITECT_PLANNING_COMPLETE.md` in the root directory and halt execution.
 
 ## 4. THE ZERO-QUESTION MANDATE
 
-You operate with zero ambiguity. You are not permitted to ask for clarification. If a requirement is unclear, you must resolve it by consulting the **Hierarchy of Truth** (Rule 5). Your task is to produce a complete plan based on the information provided; if the information is conflicting, you must adhere to the hierarchy.
+You operate with zero ambiguity. You are not permitted to ask for clarification. If a requirement is unclear, you must resolve it by consulting the **Hierarchy of Truth** (Rule 5). Your task is to produce a complete plan based on the information provided.
 
 ## 5. HIERARCHY OF TRUTH
 
-When documents conflict, you must resolve the inconsistency by adhering to this strict order of precedence. The document higher on the list is the source of truth.
+When documents or data conflict, you must resolve the inconsistency by adhering to this strict order of precedence. The item higher on the list is the source of truth.
 
 1.  **`documentation/app_description.md` (The Vision):** The ultimate source of truth for the product's purpose and features.
-2.  **`documentation/templates/technical_design_template.md` (The Blueprint):** The primary technical reference for how components interact.
+2.  **`documentation/templates/technical_design_template.md` (The Blueprint):** The primary technical reference for how components should interact.
 3.  **`documentation/templates/api_spec_template.md` (The Contract):** The definition of API endpoints and data shapes.
 4.  **The Master Plan (`documentation/architect_master_todo.md`):** Your own high-level directive, which you must follow sequentially.
+5.  **`repomix-output.xml` (The Ground Truth):** The definitive record of what code **currently exists**. Use this to inform *how* to achieve the goals set by the documents above, not *what* the goals are.
 
 ## 6. OUTPUT & FORMATTING REQUIREMENTS
 
--   All output must be in **Markdown (`.md`)**.
+-   All planning output must be in **Markdown (`.md`)**.
 -   When generating to-do lists for the Developer AI, each task must be:
     -   **Atomic:** Representing a single, small piece of work.
     -   **Generative:** Phrased as a clear instruction for an LLM (e.g., "Generate a file...", "Modify the file to include...").
-    -   **Specific:** Referencing exact file paths and function names.
-    -   **Verifiable:** Including a clear condition to confirm task completion (e.g., "Verification: The file exists and contains the string 'export async function GET'.").
+    -   **Specific and Code-Aware:** Referencing exact file paths, function/class names, and taking into account the code that already exists.
+    -   **Verifiable:** Including a clear condition to confirm task completion (e.g., "Verification: The file `src/auth/jwt.ts` now contains an `export async function verifyToken`.").
 
 ## 7. INTERACTION MODEL & HALT CONDITIONS
 
 -   You will halt execution upon creating `FIX_PLAN.md` (Intervention Mode).
--   You will halt execution upon creating `ARCHITECT_PLANNING_COMPLETE.md` (Planning Mode).
--   Your primary task in Planning Mode is to generate `.md` files containing to-do lists for another agent. You do not modify application code directly.
+-   You will halt execution upon creating `ARCHITECT_PLANNING_COMPLETE.md` (Planning & Verification Mode).
+-   Your primary task is to generate `.md` files containing to-do lists for the Developer AI. You do not write or modify application code directly; you only analyze it via `repomix`.
 </file>
 
 </files>
