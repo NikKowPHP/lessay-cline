@@ -1,0 +1,47 @@
+# Developer To-Do List: Phase 1 - Core Backend & User Auth
+
+## Task 1: Create Supabase Server-Side Client Helper
+- **File:** `/lib/supabase/server.ts`
+- **Action:** Create server-side Supabase client utilities
+- **Steps:**
+  1. Create directory `lib/supabase`
+  2. Create file `server.ts` with:
+     - `supabaseServerClient` function using `createServerComponentClient`
+     - `getUserSession` helper to fetch user session
+- **Verification:** File exports both functions with proper TypeScript types
+
+## Task 2: Implement Profile GET Route
+- **File:** `/app/api/users/profile/route.ts`
+- **Action:** Add authenticated profile retrieval
+- **Steps:**
+  1. Import `getUserSession` from `@/lib/supabase/server`
+  2. Add session check to GET function
+  3. Query Prisma for user data
+- **Verification:** Returns 401 when unauthenticated, profile data when valid
+
+## Task 3: Implement Profile PUT Route
+- **File:** `/app/api/users/profile/route.ts`
+- **Action:** Add profile update functionality
+- **Steps:**
+  1. Reuse auth check from GET route
+  2. Add Prisma `user.update` call
+  3. Return updated profile
+- **Verification:** PUT requests update user data successfully
+
+## Task 4: Create Auth UI Component
+- **File:** `/components/Auth.tsx`
+- **Action:** Build sign-up/sign-in interface
+- **Steps:**
+  1. Create client-side Supabase client
+  2. Add email/password fields
+  3. Implement sign-up/sign-in buttons
+- **Verification:** Component renders and allows user registration/login
+
+## Task 5: Implement User Sync Endpoint
+- **File:** `/api/users/sync/route.ts`
+- **Action:** Create public profile after auth sign-up
+- **Steps:**
+  1. Create new route file
+  2. Listen for Supabase auth events
+  3. Create corresponding Prisma user record
+- **Verification:** New auth users get public profiles automatically
