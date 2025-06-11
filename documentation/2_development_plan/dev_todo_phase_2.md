@@ -3,13 +3,13 @@
 ## Tasks for Developer AI
 
 ### 1. Implement Lesson Schema
-- **File:** `/prisma/schema.prisma`
-- **Action:** Add Lesson and Progress models
-- **Steps:**
+- [x] **File:** `/prisma/schema.prisma`
+- [x] **Action:** Add Lesson and Progress models
+- [x] **Steps:**
   1. Add Lesson model with fields: id, title, content, difficulty
   2. Add Progress model linking users to lessons
   3. Run `npx prisma migrate dev` to create migration
-- **Verification:** New models exist in schema and migration file created
+- [x] **Verification:** New models exist in schema and migration file created
 
 ### 2. Create Lesson API Endpoints
 - **File:** `/app/api/lessons/start/route.ts`

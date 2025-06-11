@@ -2,7 +2,7 @@
 FROM node:20.11-alpine3.19
 
 # 1) Install psql (PostgreSQL client)
-RUN apk add --no-cache postgresql-client
+RUN apk add --no-cache postgresql-client git
 
 # 2) Set workdir and install app deps
 WORKDIR /app
