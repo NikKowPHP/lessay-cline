@@ -26,7 +26,7 @@ Here is the master plan that will govern my operations to produce the required, 
         4. Creating an `Auth.tsx` component with UI and client-side logic for sign-up and sign-in.
         5. Creating a `/api/users/sync` endpoint to create a public user profile in Prisma after a new Supabase auth user is created."
 
-- [ ] **Task 2: Generate `dev_todo_phase_2.md` (Learning Loop Logic)**
+- [x] **Task 2: Generate `dev_todo_phase_2.md` (Learning Loop Logic)**
     - **Source Brief:** `documentation/logic_phase_2_todo.md`
     - **Action:** Generate a detailed, executable plan for implementing the core lesson-taking functionality.
     - **LLM Prompt:** "Generate the file `documentation/dev_todo_phase_2.md`. Using `documentation/logic_phase_2_todo.md` as a guide, create atomic, verifiable tasks with `[ ]` checkboxes. The plan must include:
@@ -34,7 +34,7 @@ Here is the master plan that will govern my operations to produce the required, 
         2. Implementing the `/api/lessons/[id]/submit-answer` route to authenticate the user, validate their answer against the database (simple string match), and create a `UserProgress` record.
         3. Updating the `LessonView.tsx` component to include a text input and a submit button that correctly calls the submit-answer API."
 
-- [ ] **Task 3: Generate `dev_todo_phase_3.md` (AI Service Integration)**
+- [x] **Task 3: Generate `dev_todo_phase_3.md` (AI Service Integration)**
     - **Source Briefs:** `documentation/logic_phase_3_todo.md` and `documentation/logic_phase_6_todo.md`
     - **Action:** Generate a detailed, executable plan for replacing all AI stubs with real, authenticated API calls to Google Cloud.
     - **LLM Prompt:** "Generate the file `documentation/dev_todo_phase_3.md`. Combine the goals from `logic_phase_3_todo.md` and `logic_phase_6_todo.md`. Create atomic, verifiable tasks with `[ ]` checkboxes. The plan must include:
@@ -43,7 +43,7 @@ Here is the master plan that will govern my operations to produce the required, 
         3. Replacing the `generateLessonForUser` stub with a real implementation that constructs a prompt and calls the Gemini API.
         4. Creating and implementing real `transcribeAudio` and `synthesizeSpeech` functions using the respective Google Cloud clients."
 
-- [ ] **Task 4: Generate `dev_todo_phase_4.md` (Dashboard & Payments)**
+- [x] **Task 4: Generate `dev_todo_phase_4.md` (Dashboard & Payments)**
     - **Source Brief:** `documentation/logic_phase_4_todo.md`
     - **Action:** Generate a detailed, executable plan for implementing the dashboard and payment functionalities.
     - **LLM Prompt:** "Generate the file `documentation/dev_todo_phase_4.md`. Using `documentation/logic_phase_4_todo.md` as a guide, create atomic, verifiable tasks with `[ ]` checkboxes. The plan must include:
@@ -52,7 +52,7 @@ Here is the master plan that will govern my operations to produce the required, 
         3. Installing the `stripe` npm package and modifying `/api/payments/create-subscription` to use the library to create a real Stripe subscription object.
         4. Implementing secure webhook signature verification in `/api/stripe/webhook` using `stripe.webhooks.constructEvent`."
 
-- [ ] **Task 5: Generate `dev_todo_phase_5.md` (Production Hardening: Observability & Errors)**
+- [x] **Task 5: Generate `dev_todo_phase_5.md` (Production Hardening: Observability & Errors)**
     - **Source Briefs:** `documentation/hardening_phase_1_observability.md` and `documentation/hardening_phase_2_error_handling.md`
     - **Action:** Generate a detailed, executable plan for implementing production-grade logging and error handling.
     - **LLM Prompt:** "Generate the file `documentation/dev_todo_phase_5.md`. Combine the goals from the observability and error handling briefs. Create atomic, verifiable tasks with `[ ]` checkboxes. The plan must include:
@@ -63,7 +63,7 @@ Here is the master plan that will govern my operations to produce the required, 
         5. Creating a `/lib/errors.ts` utility for centralized error handling.
         6. Wrapping all API route logic in `try...catch` blocks that use the new error handling utility."
 
-- [ ] **Task 6: Generate `dev_todo_phase_6.md` (Production Hardening: Security & Performance)**
+- [x] **Task 6: Generate `dev_todo_phase_6.md` (Production Hardening: Security & Performance)**
     - **Source Briefs:** `documentation/hardening_phase_3_security.md` and `documentation/hardening_phase_4_performance.md`
     - **Action:** Generate a detailed, executable plan for implementing security and performance optimizations.
     - **LLM Prompt:** "Generate the file `documentation/dev_todo_phase_6.md`. Combine the goals from the security and performance briefs. Create atomic, verifiable tasks with `[ ]` checkboxes. The plan must include:
@@ -74,7 +74,7 @@ Here is the master plan that will govern my operations to produce the required, 
         5. Generating a new Prisma migration for the index.
         6. Implementing a basic in-memory caching utility at `/lib/cache.ts` and applying it to the stats APIs."
 
-- [ ] **Task 7: Generate `dev_todo_phase_7.md` (Production Hardening: Testing)**
+- [x] **Task 7: Generate `dev_todo_phase_7.md` (Production Hardening: Testing)**
     - **Source Brief:** `documentation/hardening_phase_5_testing.md`
     - **Action:** Generate a detailed, executable plan for creating a comprehensive test suite.
     - **LLM Prompt:** "Generate the file `documentation/dev_todo_phase_7.md`. Using the testing brief as a guide, create atomic, verifiable tasks with `[ ]` checkboxes. The plan must include:
