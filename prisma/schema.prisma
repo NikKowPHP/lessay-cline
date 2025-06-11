@@ -17,16 +17,21 @@ model User {
   srsEntries   SRSEntry[]
   lessons      Lesson[]
   voiceAnalyses VoiceAnalysis[]
+  progressRecords Progress[]
   createdAt    DateTime @default(now())
 }
 
 model Lesson {
   id          String @id @default(uuid())
+  title       String
+  content     String
+  difficulty  Int
   userId      String
   user        User @relation(fields: [userId], references: [id])
   exercises   Exercise[]
   completedAt DateTime?
   analysis    VoiceAnalysis[]
+  progress    Progress[]
 }
 
 model Exercise {
@@ -47,6 +52,18 @@ model UserProgress {
   metric      String // 'vocabulary', 'grammar', etc.
   score       Float
   lastUpdated DateTime @default(now())
+}
+
+model Progress {
+  id          String @id @default(uuid())
+  userId      String
+  user        User @relation(fields: [userId], references: [id])
+  lessonId    String
+  lesson      Lesson @relation(fields: [lessonId], references: [id])
+  completed   Boolean @default(false)
+  score       Float?
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
 }
 
 model SRSEntry {

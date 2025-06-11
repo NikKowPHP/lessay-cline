@@ -26,7 +26,7 @@ Your operation follows a two-tiered loop. Adherence is mandatory.
 1.  Within the **Active Plan**, identify the very first incomplete task (`[ ]`).
 2.  **TRY:**
     a. Read the `LLM Prompt` or `Command` for the task.
-    b. **Execute the action within the Docker environment.** Prefix commands with `docker-compose  exec app ...`.
+    b. **Execute the db within the Docker environment.** Prefix commands with `docker-compose  exec app ...`. (if `docker-compose` command is not working try `docker compose`)
     c. Perform the `(Verification)` check as specified. **This may be a simple check OR a `repomix`-based check** (see Rule 5).
 3.  **ON SUCCESS:**
     a. If verification succeeds, mark the task as `[x]`, save the **Active Plan** file.
