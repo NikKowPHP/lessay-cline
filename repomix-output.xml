@@ -99,12 +99,16 @@ documentation/
   app_description.md
   architect_master_todo.md
   dev_todo_phase_1.md
+  dev_todo_phase_10.md
+  dev_todo_phase_11.md
   dev_todo_phase_2.md
   dev_todo_phase_3.md
   dev_todo_phase_4.md
   dev_todo_phase_5.md
   dev_todo_phase_6.md
   dev_todo_phase_7.md
+  dev_todo_phase_8.md
+  dev_todo_phase_9.md
   documentation_completion_plan.md
   hardening_phase_1_observability.md
   hardening_phase_2_error_handling.md
@@ -519,6 +523,101 @@ Here are the separate, simplified to-do files for each phase. Each task is desig
   2. Listen for Supabase auth events
   3. Create corresponding Prisma user record
 - **Verification:** New auth users get public profiles automatically
+</file>
+
+<file path="documentation/dev_todo_phase_10.md">
+# Developer To-Do List: Phase 10 - UI Implementation & Polish
+
+**Objective:** Transform placeholder UI into a polished, responsive, and accessible interface.
+
+## Tasks
+
+- [ ] **1. Style Auth Component**
+  - File: `/components/Auth.tsx`
+  - Requirements:
+    - Tailwind CSS styling for all states (default, loading, error)
+    - Clear visual feedback for form validation
+    - Responsive design for mobile/desktop
+  - Verification: Component matches design specs in user documentation.
+
+- [ ] **2. Implement Lesson UI**
+  - File: `/components/LessonView.tsx`
+  - Requirements:
+    - Visual cues for listening/processing states
+    - Clear answer feedback display
+    - Responsive layout adjustments
+  - Verification: All interaction states implemented per docs.
+
+- [ ] **3. Build Dashboard Visualizations**
+  - Install: `npm install recharts`
+  - File: `/components/DashboardView.tsx`
+  - Requirements:
+    - SRS pie chart (knowledge retention)
+    - Fluency line chart (progress over time)
+    - Loading skeletons for async data
+  - Verification: Charts match documentation examples.
+
+- [ ] **4. Create Main Layout**
+  - File: `/components/AppLayout.tsx`
+  - Requirements:
+    - Shared header with navigation
+    - Consistent footer
+    - Responsive breakpoints
+  - Verification: All pages wrapped in layout.
+
+- [ ] **5. Implement Accessibility**
+  - Requirements:
+    - ARIA labels for all interactive elements
+    - Keyboard navigation support
+    - Color contrast checks
+  - Verification: Passes basic a11y audits.
+</file>
+
+<file path="documentation/dev_todo_phase_11.md">
+# Developer To-Do List: Phase 11 - Data Governance & Finalization
+
+**Objective:** Implement data management policies and perform final project cleanup.
+
+## Tasks
+
+- [ ] **1. Implement Audio Retention Policy**
+  - Create Inngest cron job in `/app/inngest/functions.ts`:
+    ```typescript
+    inngest.createFunction(
+      { id: 'audio-retention' },
+      { cron: '0 0 * * *' }, // Daily at midnight
+      async () => {
+        // Query VoiceAnalysis records older than 30 days
+        // Delete associated audio files from Supabase Storage
+        // Delete database records
+      }
+    )
+    ```
+  - Verification: Function exists with correct schedule.
+
+- [ ] **2. Implement Account Deletion**
+  - Create endpoint: `/app/api/users/delete-account/route.ts`
+    - Require re-authentication
+    - Delete all user-related data
+    - Handle foreign key constraints
+  - Verification: Endpoint securely deletes all user data.
+
+- [ ] **3. Add Environment Check**
+  - Update `package.json`:
+    ```json
+    "scripts": {
+      "check:env": "node scripts/check-env.js",
+      "build": "npm run check:env && next build"
+    }
+    ```
+  - Create `scripts/check-env.js` to validate all required variables.
+  - Verification: Build fails if any variables are missing.
+
+- [ ] **4. Final Documentation Review**
+  - Audit all JSDoc comments
+  - Ensure API routes have proper documentation
+  - Verify component prop types
+  - Verification: All major components and functions documented.
 </file>
 
 <file path="documentation/dev_todo_phase_2.md">
@@ -1128,6 +1227,169 @@ Here are the separate, simplified to-do files for each phase. Each task is desig
         - run: npm test
   ```
   Verification: CI file includes `npm test` command
+</file>
+
+<file path="documentation/dev_todo_phase_8.md">
+# Developer To-Do List: Phase 8 - Asynchronous Processing & Distributed Caching
+
+**Objective:** Decouple long-running AI analysis tasks from request-response cycle and implement production-grade distributed caching.
+
+## Tasks
+
+- [ ] **1. Install Inngest**
+  - Execute: `npm install inngest`
+  - Initialize: `npx inngest-cli init`
+  - Verification: `package.json` includes `"inngest"` in dependencies.
+
+- [ ] **2. Create Inngest Function Handler**
+  - Create file: `/app/inngest/route.ts`
+    ```typescript
+    import { serve } from 'inngest/next'
+    import { functions } from './functions'
+
+    export const { GET, POST, PUT } = serve({
+      clientId: process.env.INNGEST_CLIENT_ID,
+      functions,
+    })
+    ```
+  - Create file: `/app/inngest/functions.ts`
+    ```typescript
+    import { inngest } from './client'
+    import { analyzeSession } from '../lib/ai-service'
+
+    export const functions = [
+      inngest.createFunction(
+        { id: 'post-session-analysis' },
+        { event: 'ai/post-session-analysis' },
+        async ({ event }) => {
+          const { lessonId, audioUrl } = event.data
+          return analyzeSession(lessonId, audioUrl)
+        }
+      )
+    ]
+    ```
+  - Verification: Both files exist with correct content.
+
+- [ ] **3. Refactor Submit Answer Endpoint**
+  - Modify: `/app/api/lessons/[id]/submit-answer/route.ts`
+    - Remove synchronous AI analysis call
+    - Add Inngest send:
+      ```typescript
+      import { inngest } from '../../../lib/inngest'
+
+      // After returning initial response
+      await inngest.send({
+        name: 'ai/post-session-analysis',
+        data: { lessonId, audioUrl }
+      })
+      ```
+  - Verification: Submit answer endpoint no longer contains direct AI analysis calls.
+
+- [ ] **4. Implement Background Analysis Logic**
+  - Move existing analysis logic from submit endpoint to:
+    ```typescript
+    // /lib/ai-service.ts
+    export async function analyzeSession(lessonId: string, audioUrl: string) {
+      // Existing analysis logic
+      // Update SRS scores
+      // Save VoiceAnalysis records
+    }
+    ```
+  - Verification: All analysis logic resides in `analyzeSession` function.
+
+- [ ] **5. Install Redis Client**
+  - Execute: `npm install @upstash/redis`
+  - Verification: `package.json` includes `"@upstash/redis"`.
+
+- [ ] **6. Upgrade Cache Utility**
+  - Modify: `/lib/cache.ts`
+    - Replace `Map` with Redis client:
+      ```typescript
+      import { Redis } from '@upstash/redis'
+      
+      const redis = new Redis({
+        url: process.env.REDIS_URL,
+        token: process.env.REDIS_TOKEN,
+      })
+      
+      export const cache = {
+        get: (key: string) => redis.get(key),
+        set: (key: string, value: any, ttl: number) => 
+          redis.setex(key, ttl, value)
+      }
+      ```
+  - Verification: Cache utility uses Redis methods instead of in-memory Map.
+</file>
+
+<file path="documentation/dev_todo_phase_9.md">
+# Developer To-Do List: Phase 9 - Comprehensive Testing
+
+**Objective:** Implement a complete test suite covering core functionality, edge cases, and integration points.
+
+## Tasks
+
+- [ ] **1. Install Testing Dependencies**
+  - Execute: `npm install jest ts-jest @types/jest --save-dev`
+  - Verification: `package.json` includes these packages in devDependencies.
+
+- [ ] **2. Configure Jest**
+  - Create file: `jest.config.ts`
+    ```typescript
+    import type { Config } from '@jest/types'
+
+    const config: Config.InitialOptions = {
+      preset: 'ts-jest',
+      testEnvironment: 'node',
+      testMatch: ['**/tests/**/*.test.ts'],
+      setupFilesAfterEnv: ['./tests/setup.ts'],
+    }
+    export default config
+    ```
+  - Verification: File exists with correct content.
+
+- [ ] **3. Create Core Test Files**
+  - Create directory: `/tests`
+  - Create files:
+    - `auth.test.ts` (User auth flows)
+    - `lessons.test.ts` (Lesson generation/submission)
+    - `ai-service.test.ts` (AI integration)
+    - `dashboard.test.ts` (Stats/analytics)
+    - `payments.test.ts` (Subscription flows)
+  - Verification: All test files exist in `/tests`.
+
+- [ ] **4. Implement Core Learning Loop Tests**
+  - In `lessons.test.ts`:
+    - Test SRS-driven content generation
+    - Test difficulty adjustment after failed exercises
+    - Test real-time feedback accuracy
+  - Verification: Tests cover all cases from test plan section 1.
+
+- [ ] **5. Implement Vocal Analysis Tests**
+  - In `ai-service.test.ts`:
+    - Test pronunciation scoring accuracy
+    - Test fluency metrics (hesitation, pace)
+    - Test filler word detection
+  - Verification: Tests cover all cases from test plan section 2.
+
+- [ ] **6. Implement Dashboard Tests**
+  - In `dashboard.test.ts`:
+    - Test SRS overview accuracy
+    - Test error pattern detection
+    - Test fluency trend visualization
+  - Verification: Tests cover all cases from test plan section 3.
+
+- [ ] **7. Implement Payment Flow Tests**
+  - In `payments.test.ts`:
+    - Test subscription scenarios (new, upgrade, failure)
+    - Test webhook handling (success, failure, cancellation)
+    - Test security measures (tokenization, PCI compliance)
+  - Verification: Tests cover all cases from test plan section 5-6.
+
+- [ ] **8. Update CI Workflow**
+  - Modify: `/.github/workflows/ci.yml`
+    - Add test command: `npm test`
+    - Configure test database service
+  - Verification: CI file includes test step and database setup.
 </file>
 
 <file path="documentation/hardening_phase_1_observability.md">
@@ -2723,34 +2985,6 @@ npm run dev
 <svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.5 2.5h13v10a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1zM0 1h16v11.5a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 0 12.5zm3.75 4.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5M7 4.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0m1.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5" fill="#666"/></svg>
 </file>
 
-<file path="ARCHITECT_PLANNING_COMPLETE.md">
-# Architect Planning Complete
-
-All production hardening plans have been successfully generated and are ready for implementation.
-
-## Completed Phases:
-1. **Observability** - Logging and health checks
-2. **Error Handling** - Robust error management
-3. **Security** - Input validation and rate limiting
-4. **Performance** - Database optimization and caching
-5. **Testing** - Comprehensive test suite
-
-## Next Steps:
-1. Developer AI should execute tasks in sequential order from:
-   - `hardening_phase_1_observability.md`
-   - `hardening_phase_2_error_handling.md`
-   - `hardening_phase_3_security.md`
-   - `hardening_phase_4_performance.md`
-   - `hardening_phase_5_testing.md`
-
-2. Monitor implementation progress through:
-   - Application logs
-   - Test results
-   - Performance metrics
-
-3. Verify completion of each phase before proceeding to the next.
-</file>
-
 <file path="BLUEPRINT_COMPLETE.md">
 # Lessay Documentation Blueprint Complete
 
@@ -3620,6 +3854,26 @@ model VoiceAnalysis {
   audioUrl  String
   createdAt DateTime @default(now())
 }
+</file>
+
+<file path="ARCHITECT_PLANNING_COMPLETE.md">
+# Architect Planning Complete
+
+All phases of the development plan have been successfully generated. The following `dev_todo_phase_*.md` files are ready for implementation:
+
+- dev_todo_phase_1.md (Core Backend & User Auth)
+- dev_todo_phase_2.md (Learning Loop Logic)
+- dev_todo_phase_3.md (AI Service Integration)
+- dev_todo_phase_4.md (Dashboard & Payments)
+- dev_todo_phase_5.md (Production Hardening: Observability & Errors)
+- dev_todo_phase_6.md (Production Hardening: Security & Performance)
+- dev_todo_phase_7.md (Production Hardening: Testing)
+- dev_todo_phase_8.md (Asynchronous Processing & Distributed Caching)
+- dev_todo_phase_9.md (Comprehensive Testing)
+- dev_todo_phase_10.md (UI Implementation & Polish)
+- dev_todo_phase_11.md (Data Governance & Finalization)
+
+The Developer AI can now proceed with implementing these phases in order.
 </file>
 
 <file path="documentation/templates/api_spec_template.md">
@@ -5307,7 +5561,50 @@ Here is the master plan that will govern my operations to produce the required, 
         2. Creating a `jest.config.ts` file.
         3. Creating test files (e.g., `/tests/auth.test.ts`, `/tests/lessons.test.ts`) with specific test cases as outlined in the brief (e.g., 'should allow valid user signup', 'should reject duplicate user').
         4. Updating the `package.json` test script to run `jest`.
-        5. Modifying the `ci.yml` workflow to execute the `npm test` command."
+        5. Modifying the `ci.yml` workflow to execute the `npm test` command."o
+
+
+        Of course. Adhering to the principle of maximum precision, I will now provide the detailed, actionable prompts that will constitute the `architect_master_todo.md` for the final production-readiness phase. This plan translates the high-level goals into specific, generative instructions for me to create the final set of `dev_todo` files.
+
+d
+- [x] **Task 8: Generate `dev_todo_phase_8.md` (Asynchronous Processing & Distributed Caching)**
+    - **Source Brief:** `technical_design_template.md` (mentions async processing), `hardening_phase_4_performance.md` (mentions caching).
+    - **Action:** Generate a detailed plan to decouple long-running tasks from the request-response cycle and upgrade the caching mechanism for a multi-node environment.
+    - **LLM Prompt:** "Generate the file `documentation/dev_todo_phase_8.md`. Create atomic, verifiable tasks with `[ ]` checkboxes for the Developer AI. The plan must include:
+        1.  **Install Inngest:** Execute `npm install inngest` and `npx inngest-cli init`.
+        2.  **Create Inngest Function:** Create a file at `/app/inngest/route.ts` to serve as the Inngest handler. Create a new file at `/app/inngest/functions.ts` to define an Inngest function named `[AI] Post-Session Analysis`. This function will accept a `lessonId` and `audioUrl` as input.
+        3.  **Refactor Submit Answer Endpoint:** Modify the `/app/api/lessons/[id]/submit-answer/route.ts` endpoint. Remove the *synchronous* call to the diagnostic AI analysis. Instead, after returning the initial feedback to the user, it must call `inngest.send()` to trigger the `[AI] Post-Session Analysis` background job with the `lessonId` and `audioUrl`.
+        4.  **Implement Background Job Logic:** Move the AI diagnostic logic (calling the AI service, updating SRS scores, saving `VoiceAnalysis` records) into the `[AI] Post-Session Analysis` Inngest function.
+        5.  **Install Redis Client:** Execute `npm install @upstash/redis`.
+        6.  **Upgrade Caching Utility:** Modify the `/lib/cache.ts` file. Remove the `Map`-based implementation. Replace it with logic that initializes and uses a client from `@upstash/redis` to perform `get` and `setex` (set with expiration) operations. The Redis connection details must be read from environment variables."
+
+- [x] **Task 9: Generate `dev_todo_phase_9.md` (Comprehensive Testing)**
+    - **Source Brief:** `documentation/templates/test_plan_template.md` and `hardening_phase_5_testing.md`.
+    - **Action:** Generate a comprehensive testing plan that systematically implements the test cases defined in the documentation.
+    - **LLM Prompt:** "Generate the file `documentation/dev_todo_phase_9.md`. Create atomic, verifiable tasks with `[ ]` checkboxes. The plan must instruct the Developer AI to reference the `test_plan_template.md` and implement the following:
+        1.  **Unit Tests:** Create a test file for each major utility in `/lib` (e.g., `/lib/cache.test.ts`, `/lib/logger.test.ts`). Write unit tests that mock any external dependencies and verify the function's logic in isolation.
+        2.  **Integration Tests - API:** Create a test file for each API endpoint (e.g., `/tests/api/profile.test.ts`). These tests will need a test database setup. They must test the full request-response cycle, including authentication checks, input validation (Zod), and database state changes.
+        3.  **Integration Tests - Core Logic:** Implement the specific test cases from the `test_plan_template.md` for the "Core Learning Loop Tests" and "Vocal Analysis Tests", verifying that the interaction between the database, AI service, and API endpoints works as expected.
+        4.  **Update CI:** Modify `/.github/workflows/ci.yml` to set up a test database service (e.g., using Docker) and run the full `npm test` suite against it."
+
+- [x] **Task 10: Generate `dev_todo_phase_10.md` (UI Implementation & Polish)**
+    - **Source Brief:** `documentation/templates/user_documentation_template.md` and general production readiness standards.
+    - **Action:** Generate a detailed plan to transform the placeholder UI into a fully responsive, polished, and user-friendly interface.
+    - **LLM Prompt:** "Generate the file `documentation/dev_todo_phase_10.md`. Create atomic, verifiable tasks with `[ ]` checkboxes. The plan must instruct the Developer AI to:
+        1.  **Implement the Auth UI:** Fully style the `/components/Auth.tsx` component using Tailwind CSS, including distinct styles for loading states and error messages.
+        2.  **Implement the Lesson UI:** Fully style the `/components/LessonView.tsx` component. Implement clear visual cues for when the app is listening, processing, and displaying feedback. Ensure the layout is responsive on mobile and desktop.
+        3.  **Implement the Dashboard UI:** Fully style the `/components/DashboardView.tsx` component. Use a charting library (e.g., `recharts` - instruct to install it) to implement the data visualizations described in the user documentation (e.g., pie chart for SRS, line chart for fluency). Add loading skeleton components to prevent layout shift while data is being fetched.
+        4.  **Create a Main Layout:** Create a main application layout component at `/components/AppLayout.tsx` that includes a shared navigation bar and footer. Wrap the main page content in this layout.
+        5.  **Implement Accessibility:** Review all interactive elements (buttons, inputs) and ensure they have proper `aria-` labels and are navigable via keyboard."
+
+- [x] **Task 11: Generate `dev_todo_phase_11.md` (Data Governance & Finalization)**
+    - **Source Brief:** `documentation/templates/data_governance_template.md` and `documentation/templates/risk_assessment_template.md`.
+    - **Action:** Generate a detailed plan to implement the required data management policies and perform final cleanup.
+    - **LLM Prompt:** "Generate the file `documentation/dev_todo_phase_11.md`. Create atomic, verifiable tasks with `[ ]` checkboxes. The plan must instruct the Developer AI to:
+        1.  **Implement Audio Data Retention Policy:** Create a new Inngest cron job function in `/app/inngest/functions.ts` scheduled to run daily (`cron: '0 0 * * *'`). This job must query the `VoiceAnalysis` table for records older than 30 days, retrieve their `audioUrl`, delete the corresponding files from Supabase Storage, and then delete the database records.
+        2.  **Implement User Data Deletion Endpoint:** Create a new API endpoint at `/api/users/delete-account/route.ts`. This endpoint must be highly secure, requiring the user to re-authenticate. Upon success, it must delete all associated user data from all tables (lessons, progress, SRS entries, etc.) and then delete the user record itself, respecting database foreign key constraints.
+        3.  **Environment Variable Check:** Create a new script in `package.json` called `check:env`. This script will check that all required environment variables listed in `.env.example` are present in the current environment and will exit with an error if any are missing. This should be added as the first step in the `build` script.
+        4.  **Final Documentation Review:** Add a task to review all JSDoc comments across the codebase for accuracy and completeness."
 </file>
 
 </files>
