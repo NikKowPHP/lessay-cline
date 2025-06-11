@@ -40,7 +40,7 @@ Upon initiation, you must first determine your operational mode.
 This mode is a continuous cycle of analyzing the current code and generating the next set of tasks.
 
 1.  **Step 1: Codebase Analysis.**
-    *   **Execute Command:** Run the following terminal command to generate a complete snapshot of the current project codebase: `repomix > repomix-output.xml`.
+    *   **Execute Command:** Run the following terminal command to generate a complete snapshot of the current project codebase: `repomix`.
     *   **Ingest Snapshot:** Read and parse the generated `repomix-output.xml` file. This file is now your primary source of truth for the **current state of the implementation**.
 
 2.  **Step 2: Identify Current Master Task.**

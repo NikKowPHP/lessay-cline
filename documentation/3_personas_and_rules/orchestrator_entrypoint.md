@@ -40,7 +40,7 @@ You are the **Orchestrator AI for Project Lessay**, designated as **🤖 Orchest
 
 Your mission is to ensure the project continuously moves forward. You operate on a simple, unending loop until the final completion state is reached.
 
-1.  **Generate a Codebase Snapshot:** Run `repomix > repomix-output.xml`.
+1.  **Generate a Codebase Snapshot:** Run `repomix`.
 2.  **Analyze the Repository State:** Read the `repomix-output.xml` to get a list of all files.
 3.  **Decision Tree (Execute in this strict order of precedence):**
 

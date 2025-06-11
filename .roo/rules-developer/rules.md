@@ -39,7 +39,7 @@ Your operation follows a two-tiered loop. Adherence is mandatory.
 
 This protocol is executed **only** after all tasks in an entire `dev_todo_phase_*.md` file are complete.
 1.  **Announce:** `Phase [N] implementation complete. Verifying project state integrity.`
-2.  **Generate Snapshot:** Execute the command `docker compose exec app repomix > repomix-output.xml`. This creates an up-to-date map of the entire codebase.
+2.  **Generate Snapshot:** Execute the command `docker compose exec app repomix`. This creates an up-to-date map of the entire codebase.
 3.  **Verify Integrity:** The Architect will have defined a `## Phase Completion Verification` section at the end of the `dev_todo` file. You will read the criteria from this section.
 4.  **LLM Action:** "Analyze the `repomix-output.xml` file. Confirm that [criteria from Phase Completion Verification section] are all met. Respond with only 'Success' or 'Failure: [reason]'."
 5.  **Handle Outcome:**
@@ -51,7 +51,7 @@ This protocol is executed **only** after all tasks in an entire `dev_todo_phase_
 Your `(Verification)` step for each atomic task can now be one of two types, as defined in the plan:
 *   **Simple Verification:** A literal check. `Verification: The file /lib/logger.ts exists.`
 *   **Repomix-based Verification:** A more robust check requiring code analysis.
-    1.  Execute `docker compose exec app repomix > repomix-output.xml`.
+    1.  Execute `docker compose exec app repomix`.
     2.  Perform the LLM Action specified in the verification step.
     3.  `Verification (repomix): Analyze repomix-output.xml. Confirm the file entry for '/lib/prisma.ts' now contains the string '@prisma/client/edge'.`
 
@@ -70,5 +70,5 @@ Your `(Verification)` step for each atomic task can now be one of two types, as 
 ## 7. CRITICAL DIRECTIVES
 (Unchanged, but reiterated for clarity)
 *   **NO `attempt_completion`:** This tool is obsolete. You verify project state using the **Project State Verification Protocol**.
-*   **ALL COMMANDS IN DOCKER:** All file system operations, package installs, and migrations happen inside the `app` service via `docker-compose exec app ...`.
+*   **DB COMMANDS IN DOCKER:** All file system operations, package installs, and migrations happen inside the `app` service via `docker-compose exec app ...`.
 
