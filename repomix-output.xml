@@ -105,6 +105,7 @@ documentation/
   logic_phase_3_todo.md
   logic_phase_4_todo.md
   logic_phase_5_todo.md
+  logic_phase_6_todo.md
   todo.md
 lib/
   ai-service.ts
@@ -458,147 +459,6 @@ Here are the separate, simplified to-do files for each phase. Each task is desig
     - **Verification:** The file `/.github/workflows/ci.yml` exists and contains the string `npm run lint`.
 </file>
 
-<file path="documentation/architect_master_todo.md">
-Excellent. This is the correct next step. We will now generate the plan for the **real work**.
-
-The strategy is as follows:
-1.  **Human Task:** Create a `human_todo.md` for gathering all necessary credentials. The AI will not see or handle these.
-2.  **Architect's Task:** The Architect AI will generate a new set of phased to-do lists (`logic_phase_1_todo.md`, etc.). These will instruct the Developer AI to replace the stubbed-out code from the "scaffolding" phase with real, functional logic.
-3.  **Developer's Environment:** The Developer AI will work in a local dev environment using the `docker-compose.mac.yml` and a local `.env.local` file with placeholder credentials, but the code will be written to use them as if they were real.
-
-Here is the to-do list for your **Architect LLM** to create the implementation tasks for the small Developer LLM.
-
----
-
-### **To-Do List for Lessay Architect Agent: Generate Implementation Plan**
-
-**Objective:** To generate a complete set of phased to-do lists that will guide the Developer AI agent in transforming the "scaffolded" application into a fully functional, logic-complete application ready for local testing.
-
-**Prioritization Note:** You will generate one `human_todo.md` file and multiple `logic_phase_X_todo.md` files. This plan must be executed sequentially.
-
----
-
-### **Phase A: Human Onboarding Plan Generation**
-
-*Goal: Create the instructions for the human operator.*
-
-1.  **[x] Generate `human_todo.md`:**
-    *   **File Path:** `/documentation/human_todo.md`
-    *   **Action:** Create a clear, secure checklist for the human operator to gather all necessary API keys and credentials. Emphasize that these secrets should **NEVER** be committed to the repository.
-    *   **LLM Prompt:** "Create a new file at `/documentation/human_todo.md`. The file should instruct a human user on how to gather all the necessary API keys for the Lessay project and where to place them for local development. It must include sections for Supabase, Stripe, and a generic AI Service (like Google AI). It must explicitly warn the user **NOT** to commit the `.env.local` file."
-
----
-
-### **Phase B: Implementation Plan Generation (The "Real Work")**
-
-*Goal: Generate the sequential to-do lists that will instruct the Developer AI to implement the application's logic.*
-
-1.  **[x] Generate `logic_phase_1_todo.md` (Core Backend & User Auth):**
-    *   **File Path:** `/documentation/logic_phase_1_todo.md`
-    *   **Action:** Create tasks to replace authentication stubs with real Supabase Auth logic.
-    *   **LLM Prompt:** "Generate a to-do list file named `/documentation/logic_phase_1_todo.md`. The tasks should instruct the Developer AI to:
-        1.  Create a Supabase server-side client helper at `/lib/supabase-server.ts`.
-        2.  Modify the `/app/api/users/profile/route.ts` `GET` function to: get the current user session from the server-side Supabase client, and if a user exists, fetch their profile from the Prisma database using the user's ID. Handle the case where there is no user (return 401 Unauthorized).
-        3.  Modify the `/app/api/users/profile/route.ts` `PUT` function to do the same authentication check and then update the user's data in Prisma based on the request body.
-        4.  Create a sign-up and sign-in UI component at `/components/Auth.tsx` with email and password fields, and buttons that use the client-side Supabase client to perform `signUp` and `signInWithPassword`."
-
-2.  **[x] Generate `logic_phase_2_todo.md` (Learning Loop Logic):**
-    *   **File Path:** `/documentation/logic_phase_2_todo.md`
-    *   **Action:** Create tasks to implement the core logic of lesson delivery and answer submission.
-    *   **LLM Prompt:** "Generate a to-do list file named `/documentation/logic_phase_2_todo.md`. The tasks should instruct the Developer AI to:
-        1.  Modify the `/app/api/lessons/start/route.ts` `POST` function to: authenticate the user, call the (still stubbed) `AIService.generateLessonForUser` function, and save the generated lesson and exercises to the database using Prisma.
-        2.  Modify the `/app/api/lessons/[id]/submit-answer/route.ts` `POST` function to: authenticate the user, find the relevant exercise in the database, compare the user's `textResponse` to the correct answer (simple string comparison for now), create a `UserProgress` entry in the database, and return real feedback.
-        3.  Modify the `/components/LessonView.tsx` to handle a text input field and a submit button, which calls the submit-answer API with the user's text."
-
-3.  **[x] Generate `logic_phase_3_todo.md` (AI Service Integration):**
-    *   **File Path:** `/documentation/logic_phase_3_todo.md`
-    *   **Action:** Create tasks to replace the AI service stubs with real API calls.
-    *   **LLM Prompt:** "Generate a to-do list file named `/documentation/logic_phase_3_todo.md`. The tasks should instruct the Developer AI to:
-        1.  Install the Google AI SDK (`@google/generative-ai`).
-        2.  Modify the `/lib/ai-service.ts` file to import and initialize the Google AI client using the `AI_API_KEY` environment variable.
-        3.  Replace the stubbed `generateLessonForUser` function with a real implementation that constructs a detailed prompt (based on the `documentation/templates/technical_design_template.md` examples) and sends it to the Gemini model. It should then parse the model's JSON response.
-        4.  Replace the stubbed `analyzeAudioForDiagnostics` function with a placeholder that logs 'Real audio analysis will be implemented here' but connects to the real `VoiceAnalysis` model in Prisma to save dummy metrics."
-
-4.  **[x] Generate `logic_phase_4_todo.md` (Dashboard & Payments Integration):**
-    *   **File Path:** `/documentation/logic_phase_4_todo.md`
-    *   **Action:** Create tasks to connect the dashboard and payment systems to real backend logic.
-    *   **LLM Prompt:** "Generate a to-do list file named `/documentation/logic_phase_4_todo.md`. The tasks should instruct the Developer AI to:
-        1.  Modify the dashboard API routes (`/app/api/stats/fluency/route.ts` and `/app/api/stats/srs-overview/route.ts`) to authenticate the user and perform real Prisma aggregation queries on the `UserProgress` and `SRSEntry` tables to calculate and return actual statistics.
-        2.  Modify the `/components/DashboardView.tsx` to fetch data from these two endpoints and display it.
-        3.  Modify the `/app/api/payments/create-subscription/route.ts` to import the official `stripe` library, initialize it with the secret key, and use it to create a real Stripe `subscription` object.
-        4.  Modify the `/app/api/stripe/webhook/route.ts` to use `stripe.webhooks.constructEvent` to securely verify the incoming webhook signature before processing the event."
-
-5.  **[x] Generate `logic_phase_5_todo.md` (Testing & Finalization):**
-    *   **File Path:** `/documentation/logic_phase_5_todo.md`
-    *   **Action:** Create tasks for writing tests and cleaning up the codebase.
-    *   **LLM Prompt:** "Generate a to-do list file named `/documentation/logic_phase_5_todo.md`. The tasks should instruct the Developer AI to:
-        1.  Install `jest` and `ts-jest` as development dependencies.
-        2.  Create a unit test file for a simple function, like `/lib/utils.test.ts`, and write a basic test to ensure the testing framework is configured correctly.
-        3.  Modify the `package.json` `test` script to run `jest`.
-        4.  Review all created files and add JSDoc comments to all exported functions explaining their purpose, parameters, and return values."
-</file>
-
-<file path="documentation/human_todo.md">
-# Human Operator Checklist for Lessay Project Credentials
-
-**IMPORTANT SECURITY NOTICE:**  
-⚠️ **NEVER** commit any `.env.local` file or any file containing API keys to the repository.  
-⚠️ Keep all credentials secure and never share them publicly.
-
----
-
-## Required Credentials
-
-### 1. Supabase
-- [ ] Create a Supabase project at https://supabase.com
-- [ ] Obtain your:
-  - `SUPABASE_URL`
-  - `SUPABASE_ANON_KEY`
-  - `SUPABASE_SERVICE_ROLE_KEY` (for server-side operations)
-
-### 2. Stripe
-- [ ] Create a Stripe account at https://stripe.com
-- [ ] Obtain your:
-  - `STRIPE_SECRET_KEY`
-  - `STRIPE_WEBHOOK_SECRET`
-  - `STRIPE_PUBLISHABLE_KEY` (for client-side)
-
-### 3. AI Service (Google AI)
-- [ ] Create a Google AI account at https://ai.google.dev
-- [ ] Obtain your:
-  - `AI_API_KEY`
-
----
-
-## Setup Instructions
-
-1. Create a `.env.local` file in the project root
-2. Add the credentials in this format:
-```bash
-# Supabase
-SUPABASE_URL=your_url_here
-SUPABASE_ANON_KEY=your_key_here
-SUPABASE_SERVICE_ROLE_KEY=your_key_here
-
-# Stripe
-STRIPE_SECRET_KEY=your_key_here
-STRIPE_WEBHOOK_SECRET=your_secret_here
-STRIPE_PUBLISHABLE_KEY=your_key_here
-
-# Google AI
-AI_API_KEY=your_key_here
-```
-
-3. **DO NOT** add `.env.local` to git - it's already in `.gitignore`
-
----
-
-## Verification
-- [ ] Confirm all credentials are working by running the development server:
-```bash
-npm run dev
-</file>
-
 <file path="documentation/logic_phase_1_todo.md">
 # Lessay Implementation Phase 1: Core Backend & User Auth
 
@@ -932,6 +792,84 @@ npm install jest ts-jest @types/jest --save-dev
 - `@example` usage if applicable
 
 **Verification:** All exports have complete documentation
+</file>
+
+<file path="documentation/logic_phase_6_todo.md">
+# Logic Implementation Phase 6: Google Cloud TTS/STT Integration
+
+## Task 1: Install Required SDKs
+- Execute `npm install @google-cloud/speech @google-cloud/text-to-speech`
+
+## Task 2: Initialize Google Cloud Clients
+- Modify `/lib/ai-service.ts` to:
+  1. Import the required modules:
+     ```typescript
+     import { SpeechClient } from '@google-cloud/speech';
+     import { TextToSpeechClient } from '@google-cloud/text-to-speech';
+     ```
+  2. Initialize the clients with proper credentials handling:
+     ```typescript
+     let speechClient: SpeechClient;
+     let textToSpeechClient: TextToSpeechClient;
+
+     if (process.env.GCP_CREDENTIALS_JSON) {
+       // Production environment - use env variable
+       const credentials = JSON.parse(process.env.GCP_CREDENTIALS_JSON);
+       speechClient = new SpeechClient({ credentials });
+       textToSpeechClient = new TextToSpeechClient({ credentials });
+     } else {
+       // Local development - use file
+       speechClient = new SpeechClient({
+         keyFilename: './gcp-credentials.json'
+       });
+       textToSpeechClient = new TextToSpeechClient({
+         keyFilename: './gcp-credentials.json'
+       });
+     }
+     ```
+
+## Task 3: Implement Speech-to-Text
+- Replace placeholder console.logs with actual STT implementation:
+  ```typescript
+  async function transcribeAudio(audioBuffer: Buffer): Promise<string> {
+    const [response] = await speechClient.recognize({
+      audio: {
+        content: audioBuffer.toString('base64'),
+      },
+      config: {
+        encoding: 'WEBM_OPUS',
+        sampleRateHertz: 48000,
+        languageCode: 'en-US',
+      },
+    });
+    return response.results
+      .map(result => result.alternatives[0].transcript)
+      .join('\n');
+  }
+  ```
+
+## Task 4: Implement Text-to-Speech
+- Replace placeholder console.logs with actual TTS implementation:
+  ```typescript
+  async function synthesizeSpeech(text: string): Promise<Buffer> {
+    const [response] = await textToSpeechClient.synthesizeSpeech({
+      input: { text },
+      voice: {
+        languageCode: 'en-US',
+        name: 'en-US-Standard-C'
+      },
+      audioConfig: {
+        audioEncoding: 'MP3'
+      }
+    });
+    return Buffer.from(response.audioContent, 'base64');
+  }
+  ```
+
+## Verification
+- The file `/lib/ai-service.ts` exists and contains the new implementations
+- The Google Cloud clients are properly initialized with credentials
+- The app can successfully transcribe audio and synthesize speech
 </file>
 
 <file path="lib/ai-service.ts">
@@ -1430,6 +1368,151 @@ For example, if the analysis showed a user struggles with the "ch" sound in Germ
 This integrated **Capture -> Analyze -> Plan (with SRS) -> Create** cycle ensures the user is always working on a balanced mix of retaining old knowledge, fixing current weaknesses, and learning new material in the most efficient way possible.
 </file>
 
+<file path="documentation/architect_master_todo.md">
+You have pointed out an excellent and critical gap in the documentation and planning files. This is a perfect example of why rigorous documentation is necessary before implementation.
+
+Here is a breakdown of the situation and a plan to correct it.
+
+### Analysis of the Current State
+
+**1. Is the need for Google TTS/STT specified?**
+
+**Yes, it is.** The core vision document, which is the highest source of truth, explicitly states the requirement.
+
+*   In `documentation/app_description.md`, under section "3. How Lessay Works: The Technology", we have:
+    *   **The Ears (Speech Recognition & Capture):** "It uses a high-speed API (**Google's Speech-to-Text technology**) to instantly convert speech to text..."
+    *   **The Voice (Text-to-Speech):** "The app's "Voice" (powered by **Google TTS** and AWS Polly) converts all lesson text into natural-sounding audio..."
+
+So, the *requirement* is clear. The app MUST use these Google services.
+
+**2. Where are the credential placeholders?**
+
+**They are missing.** You are correct. This is the gap.
+
+*   The `documentation/human_todo.md` and `documentation/templates/deployment_playbook_template.md` only account for a single, generic `AI_API_KEY`. This is sufficient for the Google Gemini (LLM) part of the AI service.
+*   However, Google Cloud services like Speech-to-Text and Text-to-Speech typically use a different authentication method: a **Service Account Key (a JSON file)**, not a simple API key string.
+
+The current plans have not accounted for gathering or using these specific credentials.
+
+### Architect's Action Plan to Fix the Gap
+
+As the Architect AI, my immediate priority is to correct this oversight in the blueprint before the Developer AI begins implementation. I will now generate the plan to update our documentation.
+
+---
+
+### **To-Do List for Architect AI: Add Google Cloud Credentials to Blueprint** [x]
+
+**Objective:** To update all relevant documentation to include the requirement for Google Cloud TTS/STT service account credentials and create tasks for their implementation.
+
+#### **Task 1: Update Human Onboarding Instructions**
+
+*   **File to Modify:** `documentation/human_todo.md`
+*   **Action:** Add a new, detailed section for Google Cloud credentials.
+*   **LLM Prompt:** "Modify the file `documentation/human_todo.md`. Add a new '4. Google Cloud (for TTS/STT)' section. This section must instruct the human operator to:
+    1.  Go to the Google Cloud Console.
+    2.  Create a new Service Account.
+    3.  Enable the 'Cloud Text-to-Speech API' and 'Cloud Speech-to-Text API' for the project.
+    4.  Grant the Service Account the necessary roles (e.g., 'Cloud AI Service User').
+    5.  Create and download a JSON key for the service account.
+    6.  Instruct them to place this file in the project root and name it `gcp-credentials.json`.
+    7.  Add `gcp-credentials.json` to the list of secrets to be placed in the `.env.local` file (e.g., as `GCP_CREDENTIALS_JSON` for production environments).
+    8.  Reiterate the warning **NOT** to commit this file."
+
+#### **Task 2: Update Deployment & Secrets Documentation**
+
+*   **File to Modify:** `documentation/templates/deployment_playbook_template.md`
+*   **Action:** Update the "Secrets Management" section to reflect the new credential type.
+*   **LLM Prompt:** "Modify the file `documentation/templates/deployment_playbook_template.md`. In Section 6 'Secrets Management', update the examples to show how the Google Cloud credential will be handled. Add a subsection explaining that for local development, the app will read the `gcp-credentials.json` file, but for production environments (like Vercel or Docker), the *entire contents* of the JSON file should be stored as a single, multi-line environment variable named `GCP_CREDENTIALS_JSON`."
+
+#### **Task 3: Update the Implementation Plan**
+
+*   **File to Create/Modify:** A new `logic_phase_6_todo.md` or append to `logic_phase_3_todo.md`.
+*   **Action:** Create new tasks for the Developer AI to install the correct SDKs and implement the authentication.
+*   **LLM Prompt:** "Generate a new task for the appropriate logic implementation phase. The task should instruct the Developer AI to:
+    1.  Execute `npm install @google-cloud/speech @google-cloud/text-to-speech`.
+    2.  Modify the `/lib/ai-service.ts` file.
+    3.  In this file, add logic to initialize the `SpeechClient` and `TextToSpeechClient` from the Google Cloud SDKs.
+    4.  The initialization logic must check for the `GCP_CREDENTIALS_JSON` environment variable first (for production). If it doesn't exist, it should fall back to reading the `gcp-credentials.json` file from the project root (for local development). The credentials from one of these sources must be passed to the client constructors.
+    5.  Replace the `console.log` placeholders for voice analysis with actual calls to the newly authenticated clients."
+</file>
+
+<file path="documentation/human_todo.md">
+# Human Operator Checklist for Lessay Project Credentials
+
+**IMPORTANT SECURITY NOTICE:**  
+⚠️ **NEVER** commit any `.env.local` file or any file containing API keys to the repository.  
+⚠️ Keep all credentials secure and never share them publicly.
+
+---
+
+## Required Credentials
+
+### 1. Supabase
+- [ ] Create a Supabase project at https://supabase.com
+- [ ] Obtain your:
+  - `SUPABASE_URL`
+  - `SUPABASE_ANON_KEY`
+  - `SUPABASE_SERVICE_ROLE_KEY` (for server-side operations)
+
+### 2. Stripe
+- [ ] Create a Stripe account at https://stripe.com
+- [ ] Obtain your:
+  - `STRIPE_SECRET_KEY`
+  - `STRIPE_WEBHOOK_SECRET`
+  - `STRIPE_PUBLISHABLE_KEY` (for client-side)
+
+### 3. AI Service (Google AI)
+- [ ] Create a Google AI account at https://ai.google.dev
+- [ ] Obtain your:
+  - `AI_API_KEY`
+
+### 4. Google Cloud (for TTS/STT)
+- [ ] Go to the Google Cloud Console at https://console.cloud.google.com
+- [ ] Create a new Service Account
+- [ ] Enable the following APIs for the project:
+  - Cloud Text-to-Speech API
+  - Cloud Speech-to-Text API
+- [ ] Grant the Service Account the 'Cloud AI Service User' role
+- [ ] Create and download a JSON key for the service account
+- [ ] Place this file in the project root and name it `gcp-credentials.json`
+- [ ] Add the following to your `.env.local` file:
+  ```bash
+  # Google Cloud TTS/STT
+  GCP_CREDENTIALS_JSON='paste_the_entire_json_content_here'
+  ```
+- [ ] **DO NOT** commit `gcp-credentials.json` to the repository
+
+---
+
+## Setup Instructions
+
+1. Create a `.env.local` file in the project root
+2. Add the credentials in this format:
+```bash
+# Supabase
+SUPABASE_URL=your_url_here
+SUPABASE_ANON_KEY=your_key_here
+SUPABASE_SERVICE_ROLE_KEY=your_key_here
+
+# Stripe
+STRIPE_SECRET_KEY=your_key_here
+STRIPE_WEBHOOK_SECRET=your_secret_here
+STRIPE_PUBLISHABLE_KEY=your_key_here
+
+# Google AI
+AI_API_KEY=your_key_here
+```
+
+3. **DO NOT** add `.env.local` to git - it's already in `.gitignore`
+
+---
+
+## Verification
+- [ ] Confirm all credentials are working by running the development server:
+```bash
+npm run dev
+</file>
+
 <file path="public/file.svg">
 <svg fill="none" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M14.5 13.5V5.41a1 1 0 0 0-.3-.7L9.8.29A1 1 0 0 0 9.08 0H1.5v13.5A2.5 2.5 0 0 0 4 16h8a2.5 2.5 0 0 0 2.5-2.5m-1.5 0v-7H8v-5H3v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1M9.5 5V2.12L12.38 5zM5.13 5h-.62v1.25h2.12V5zm-.62 3h7.12v1.25H4.5zm.62 3h-.62v1.25h7.12V11z" clip-rule="evenodd" fill="#666" fill-rule="evenodd"/></svg>
 </file>
@@ -1767,185 +1850,6 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
 }
-</file>
-
-<file path="documentation/templates/deployment_playbook_template.md">
-# DEPLOYMENT PLAYBOOK TEMPLATE
-<!-- Document Version: 1.1 -->
-<!-- Last Updated: 2025-06-11 -->
-
-## 1. Local Development (Mac)
-### 1.1 Docker Setup
-```yaml
-# docker-compose.mac.yml
-version: '3.8'
-services:
-  postgres:
-    image: postgres:17
-    environment:
-      POSTGRES_PASSWORD: lessay
-    ports:
-      - "5432:5432"
-  
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile.mac
-    ports:
-      - "3000:3000"
-    environment:
-      MOCK_AUTH: "true"
-```
-
-### 1.2 Initial Setup
-```bash
-docker-compose -f docker-compose.mac.yml up -d
-```
-
-## 2. Staging Environment
-### 2.1 Configuration
-```yaml
-# docker-compose.stage.yml
-version: '3.8'
-services:
-  app:
-    image: lessay-app:stage
-    deploy:
-      replicas: 2
-    environment:
-      NODE_ENV: staging
-      DATABASE_URL: ${STAGE_DB_URL}
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  redis:
-    image: redis:alpine
-    ports:
-      - "6379:6379"
-```
-
-### 2.2 Deployment
-```bash
-docker stack deploy -c docker-compose.stage.yml lessay-stage
-```
-
-## 3. Production Environment
-### 3.1 Configuration
-```yaml
-# docker-compose.prod.yml
-version: '3.8'
-services:
-  app:
-    image: lessay-app:prod
-    deploy:
-      replicas: 4
-      resources:
-        limits:
-          cpus: '2'
-          memory: 2G
-    environment:
-      NODE_ENV: production
-      DATABASE_URL: ${PROD_DB_URL}
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
-
-  redis:
-    image: redis:alpine
-    ports:
-      - "6379:6379"
-    configs:
-      - source: redis.conf
-        target: /usr/local/etc/redis/redis.conf
-```
-
-### 3.2 Deployment
-```bash
-docker stack deploy -c docker-compose.prod.yml lessay-prod
-```
-
-## 4. CI/CD Pipeline
-### 4.1 GitHub Actions Workflow
-```yaml
-name: Deploy Lessay
-on:
-  push:
-    branches:
-      - main
-      - release/*
-
-jobs:
-  build-test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: npm ci
-      - run: npm run build
-      - run: npm test
-
-  deploy-stage:
-    needs: build-test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: docker-compose -f docker-compose.stage.yml up -d
-      - run: npm run migrate:stage
-
-  deploy-prod:
-    needs: deploy-stage
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: docker-compose -f docker-compose.prod.yml up -d
-      - run: npm run migrate:prod
-```
-
-## 5. Proxy Environment
-### 2.1 Configuration
-```yaml
-# docker-compose.proxy.yml
-version: '3.8'
-services:
-  reverse-proxy:
-    image: nginx
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-```
-
-### 2.2 Deployment
-```bash
-docker-compose -f docker-compose.proxy.yml up -d
-```
-
-## 6. Secrets Management
-### 6.1 Environment Variables
-### 3.1 Required Variables
-```env
-### 6.1 Supabase Secrets
-```bash
-supabase secrets set STRIPE_SECRET_KEY=sk_live_***
-supabase secrets set AI_API_KEY=ai_***
-```
-
-### 6.2 Environment Hierarchy
-```env
-# Order of precedence (highest to lowest)
-1. Supabase secrets (production)
-2. .env.production.local
-3. .env.staging.local
-4. .env.local
-5. .env
-```
-
-### 6.3 Rotation Policy
-- API keys: Every 90 days
-- Database credentials: Every 180 days
-- Certificates: Annually
 </file>
 
 <file path="documentation/templates/monetization_strategy.md">
@@ -2994,6 +2898,197 @@ graph TD
     E --> F[Autonomous Deployment]
     F --> A
 ```
+</file>
+
+<file path="documentation/templates/deployment_playbook_template.md">
+# DEPLOYMENT PLAYBOOK TEMPLATE
+<!-- Document Version: 1.1 -->
+<!-- Last Updated: 2025-06-11 -->
+
+## 1. Local Development (Mac)
+### 1.1 Docker Setup
+```yaml
+# docker-compose.mac.yml
+version: '3.8'
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_PASSWORD: lessay
+    ports:
+      - "5432:5432"
+  
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.mac
+    ports:
+      - "3000:3000"
+    environment:
+      MOCK_AUTH: "true"
+```
+
+### 1.2 Initial Setup
+```bash
+docker-compose -f docker-compose.mac.yml up -d
+```
+
+## 2. Staging Environment
+### 2.1 Configuration
+```yaml
+# docker-compose.stage.yml
+version: '3.8'
+services:
+  app:
+    image: lessay-app:stage
+    deploy:
+      replicas: 2
+    environment:
+      NODE_ENV: staging
+      DATABASE_URL: ${STAGE_DB_URL}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+```
+
+### 2.2 Deployment
+```bash
+docker stack deploy -c docker-compose.stage.yml lessay-stage
+```
+
+## 3. Production Environment
+### 3.1 Configuration
+```yaml
+# docker-compose.prod.yml
+version: '3.8'
+services:
+  app:
+    image: lessay-app:prod
+    deploy:
+      replicas: 4
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${PROD_DB_URL}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    configs:
+      - source: redis.conf
+        target: /usr/local/etc/redis/redis.conf
+```
+
+### 3.2 Deployment
+```bash
+docker stack deploy -c docker-compose.prod.yml lessay-prod
+```
+
+## 4. CI/CD Pipeline
+### 4.1 GitHub Actions Workflow
+```yaml
+name: Deploy Lessay
+on:
+  push:
+    branches:
+      - main
+      - release/*
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+
+  deploy-stage:
+    needs: build-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker-compose -f docker-compose.stage.yml up -d
+      - run: npm run migrate:stage
+
+  deploy-prod:
+    needs: deploy-stage
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker-compose -f docker-compose.prod.yml up -d
+      - run: npm run migrate:prod
+```
+
+## 5. Proxy Environment
+### 2.1 Configuration
+```yaml
+# docker-compose.proxy.yml
+version: '3.8'
+services:
+  reverse-proxy:
+    image: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+```
+
+### 2.2 Deployment
+```bash
+docker-compose -f docker-compose.proxy.yml up -d
+```
+
+## 6. Secrets Management
+### 6.1 Environment Variables
+### 6.1.1 Required Variables
+```env
+### Supabase Secrets
+```bash
+supabase secrets set STRIPE_SECRET_KEY=sk_live_***
+supabase secrets set AI_API_KEY=ai_***
+```
+
+### Google Cloud Credentials
+For local development:
+- Place `gcp-credentials.json` in project root
+- Add to `.gitignore` to prevent accidental commits
+
+For production environments:
+```bash
+# Store entire JSON content as a single environment variable
+supabase secrets set GCP_CREDENTIALS_JSON='{"type": "service_account", ...}'
+```
+
+### 6.2 Environment Hierarchy
+```env
+# Order of precedence (highest to lowest)
+1. Supabase secrets (production)
+2. .env.production.local
+3. .env.staging.local
+4. .env.local
+5. .env
+```
+
+### 6.3 Rotation Policy
+- API keys: Every 90 days
+- Database credentials: Every 180 days
+- Certificates: Annually
+- Google Cloud Service Account Keys: Every 365 days
 </file>
 
 <file path="documentation/templates/frs_template.md">
