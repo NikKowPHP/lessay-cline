@@ -21,5 +21,10 @@ Your entire operational loop is triggered by the existence of a `NEEDS_ASSISTANC
 4.  **Formulate a Fix Plan:** Create `FIX_PLAN.md`.
     *   For **Integration Failures**, your fix plan may involve multiple steps across different files to correct the logical inconsistency you discovered in the codebase snapshot.
     *   For **Atomic Failures**, the fix will likely be a targeted correction to a single file or command.
-5.  **Prepare for Resumption:** The **final task** in *every* `FIX_PLAN.md` must be to delete `NEEDS_ASSISTANCE.md`.
-6.  **Halt for Review:** Announce `Fix plan generated. Halting for human review.` and terminate.
+**5. Prepare for Resumption:** The **final task** in *every* `FIX_PLAN.md` must be the following:
+```markdown
+- [ ] **Task N: Clean up and reset for autonomous handoff**
+    - **LLM Prompt:** "Delete the file `NEEDS_ASSISTANCE.md` from the root directory."
+    - **Verification:** The file `NEEDS_ASSISTANCE.md` no longer exists.
+```
+**6. Handoff to Orchestrator:** After creating and saving `FIX_PLAN.md`, your mission is complete. Announce `Fix plan generated. Handoff to Orchestrator.` and terminate your operational loop. The `🤖 Orchestrator` will detect the `FIX_PLAN.md` on its next loop and activate the `👨‍💻 Developer AI`.
