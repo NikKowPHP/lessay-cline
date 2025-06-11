@@ -1,0 +1,1269 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+documentation/
+  templates/
+    api_spec_template.md
+    brd_template.md
+    change_management_template.md
+    compliance_framework_template.md
+    continuous_improvement_template.md
+    data_governance_template.md
+    deployment_playbook_template.md
+    frs_template.md
+    maintenance_guide_template.md
+    monetization_strategy.md
+    performance_baseline_template.md
+    project_charter_template.md
+    risk_assessment_template.md
+    technical_design_template.md
+    test_plan_template.md
+    user_documentation_template.md
+  app_description.md
+  documentation_completion_plan.md
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="documentation/templates/compliance_framework_template.md">
+# COMPLIANCE FRAMEWORK TEMPLATE
+<!-- Document Version: 1.1 -->
+<!-- Last Updated: 2025-06-10 -->
+
+[Existing sections...]
+
+## 3. Payment Compliance
+### 3.1 PCI DSS Requirements
+- **SAQ A** compliance level
+- No card data storage
+- Quarterly vulnerability scans
+
+### 3.2 GDPR Financial Data
+- Legal basis: Contractual necessity
+- Right to erasure limitations
+- Breach notification timeline: 72 hours
+
+### 3.3 Audit Controls
+```mermaid
+graph TD
+    A[Payment Event] --> B[Log Entry]
+    B --> C[Encrypted Storage]
+    C --> D[Quarterly Review]
+```
+
+## 4. Certification Status
+- PCI DSS: Annual assessment
+- GDPR: Continuous compliance
+- SOC 2: Planned for 2026
+</file>
+
+<file path="documentation/templates/data_governance_template.md">
+# DATA GOVERNANCE FRAMEWORK TEMPLATE
+<!-- Document Version: 1.1 -->
+<!-- Last Updated: 2025-06-10 -->
+
+[Existing sections...]
+
+## 4. Payment Data Handling
+### 4.1 Data Types
+| Classification | Examples | Handling Requirements |
+|----------------|----------|-----------------------|
+| Sensitive | Stripe customer IDs | Encrypted storage |
+| Restricted | Payment tokens | Never stored locally |
+
+### 4.2 Security Controls
+- **Encryption**: AES-256 for payment metadata
+- **Access**: Role-based, limited to billing team
+- **Audit**: All access logged and monitored
+
+### 4.3 Tokenization Flow
+```mermaid
+sequenceDiagram
+    Client->>Stripe: Tokenize card
+    Stripe-->>Client: Payment token
+    Client->>Backend: Use token for payment
+    Backend->>Stripe: Charge via token
+```
+
+## 5. Data Retention
+### 5.1 Payment Metadata
+- Retention period: 7 years (tax compliance)
+- Deletion method: Cryptographic shredding
+</file>
+
+<file path="documentation/templates/deployment_playbook_template.md">
+# DEPLOYMENT PLAYBOOK TEMPLATE
+<!-- Document Version: 1.1 -->
+<!-- Last Updated: 2025-06-10 -->
+
+## 1. Local Development (Mac)
+### 1.1 Docker Setup
+```yaml
+# docker-compose.mac.yml
+version: '3.8'
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_PASSWORD: lessay
+    ports:
+      - "5432:5432"
+  
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.mac
+    ports:
+      - "3000:3000"
+    environment:
+      MOCK_AUTH: "true"
+```
+
+### 1.2 Initial Setup
+```bash
+docker-compose -f docker-compose.mac.yml up -d
+```
+
+## 2. Proxy Environment
+### 2.1 Configuration
+```yaml
+# docker-compose.proxy.yml
+version: '3.8'
+services:
+  reverse-proxy:
+    image: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+```
+
+### 2.2 Deployment
+```bash
+docker-compose -f docker-compose.proxy.yml up -d
+```
+
+## 3. Environment Variables
+### 3.1 Required Variables
+```env
+STRIPE_SECRET_KEY=sk_test_***
+DATABASE_URL=postgres://user:pass@db:5432/lessay
+MOCK_AUTH=false # Production value
+</file>
+
+<file path="documentation/templates/monetization_strategy.md">
+# MONETIZATION STRATEGY
+<!-- Document Version: 1.0 -->
+<!-- Last Updated: 2025-06-10 -->
+
+## 1. Pricing Model
+### 1.1 Subscription Tiers
+| Tier | Price | Features |
+|------|-------|----------|
+| Free | $0 | Basic lessons, Limited voice practice |
+| Premium | $9.99/month | All lessons, Full voice features, Progress tracking |
+| Pro | $19.99/month | Premium features + Certification, Priority support |
+
+### 1.2 In-App Purchases
+- Specialized lesson packs: $4.99-$14.99
+- Certification badges: $9.99
+- Voice analysis credits: $0.99/credit
+
+## 2. Stripe Integration
+### 2.1 Architecture
+```mermaid
+sequenceDiagram
+    Frontend->>Next.js API: Initiate payment
+    Next.js API->>Stripe: Create payment intent
+    Stripe-->>Next.js API: Client secret
+    Next.js API-->>Frontend: Payment details
+    Frontend->>Stripe: Complete payment (client-side)
+    Stripe->>Webhook: Payment success/failure
+    Webhook->>Database: Update subscription status
+```
+
+### 2.2 Key Components
+- **Stripe Account**: Connected mode for platform payments
+- **Webhook Handler**: /api/stripe/webhook
+- **Subscription Manager**: CRON job for recurring billing
+
+## 3. Revenue Reporting
+### 3.1 Metrics Tracked
+- MRR (Monthly Recurring Revenue)
+- Churn rate
+- LTV (Customer Lifetime Value)
+- ARPU (Average Revenue Per User)
+
+### 3.2 Analytics Integration
+- Stripe Dashboard
+- Internal reporting system
+- Tax compliance reporting
+
+## 4. Security & Compliance
+- PCI DSS Level 1 compliant
+- Tokenized payment processing
+- GDPR-compliant data handling
+</file>
+
+<file path="documentation/templates/performance_baseline_template.md">
+# PERFORMANCE BASELINE TEMPLATE
+<!-- Document Version: 1.0 -->
+<!-- Last Updated: DATE -->
+
+## 1. Testing Methodology
+### 1.1 Load Testing
+- Tools: <List of tools>
+- Scenarios: <Description of test cases>
+
+### 1.2 Stress Testing
+- Breaking points: <Identify system limits>
+- Recovery procedures: <Describe recovery steps>
+
+## 2. Performance Metrics
+### 2.1 Key Indicators
+| Metric | Target | Actual |
+|--------|--------|--------|
+| Response Time | <ms> |        |
+| Throughput | <req/s> |      |
+
+### 2.2 Benchmark Results
+<!-- Include graphs/tables of results -->
+
+## 3. Scalability
+### 3.1 Horizontal Scaling
+- Nodes: <Number>
+- Performance gain: <Percentage>
+
+### 3.2 Vertical Scaling
+- Resource increases: <CPU/Memory>
+- Impact: <Performance improvement>
+</file>
+
+<file path="documentation/templates/user_documentation_template.md">
+# USER DOCUMENTATION TEMPLATE
+<!-- Document Version: 1.1 -->
+<!-- Last Updated: 2025-06-10 -->
+
+[Existing sections...]
+
+## 4. Subscription Management
+### 4.1 Choosing a Plan
+```mermaid
+flowchart LR
+    A[Free Tier] -->|Upgrade| B[Premium]
+    A -->|Upgrade| C[Pro]
+    B -->|Downgrade| A
+    B -->|Upgrade| C
+    C -->|Downgrade| B
+```
+
+### 4.2 Payment Process
+1. Navigate to Settings > Subscription
+2. Select desired plan
+3. Enter payment details
+4. Confirm purchase
+
+### 4.3 Managing Your Subscription
+- **Update Payment Method**: Settings > Billing
+- **Change Plan**: Instant effect with prorated charges
+- **Cancel**: Ends at billing period end
+
+### 4.4 Troubleshooting
+| Issue | Solution |
+|-------|----------|
+| Payment failed | Update card details |
+| Wrong charge | Contact support |
+| Canceled by mistake | Reactivate within 7 days |
+</file>
+
+<file path="documentation/app_description.md">
+## **Lessay: Software Documentation Overview**
+
+### **1. Introduction: Our Philosophy**
+
+Lessay is an AI-powered language learning platform designed to create a deeply personal and efficient path to fluency. Unlike one-size-fits-all learning apps, Lessay's core engine is built to **listen, understand, and adapt** to each unique learner. Our philosophy is to **measure everything**, transforming every interaction into a data point that refines the learning path. We move beyond generic exercises by integrating AI-driven diagnostics with proven cognitive science principles, like **Spaced Repetition**, to provide a hyper-personalized experience that makes every minute of practice count.
+
+This document provides a high-level overview of the learner's journey and the intelligent systems that power this adaptive ecosystem, all aligned with best practices in both language acquisition and scalable software development.
+
+---
+
+### **2. The Learner's Journey**
+
+This is the typical path a user takes from their first interaction to becoming an active learner in our continuous improvement cycle.
+
+#### **Step 1: Getting to Know You**
+When a new user joins, Lessay begins by gathering foundational data:
+*   What is your native language?
+*   What language do you want to learn **first**? (You can switch or add other languages at any time from your profile).
+*   What is your primary goal (e.g., travel, business, conversation)?
+*   What is your self-assessed comfort level (Beginner, Intermediate, Advanced)?
+
+This initial information calibrates the app's voice, translations, and the starting difficulty for the user's first experience.
+
+#### **Step 2: The Initial Diagnostic**
+Before creating lessons, Lessay conducts a short, voice-based diagnostic. This low-pressure placement exercise uses a series of adaptive questions to give our AI a quick but accurate baseline of the user's current vocabulary, grammar, and pronunciation.
+
+#### **Step 3: Your First Personalized Lessons**
+Immediately after the diagnostic, the results are analyzed. Lessay doesn't just provide a score; it identifies the most critical areas for improvement. The app instantly generates a set of personalized lessons tailored to this baseline.
+
+#### **Step 4: The Learning Loop (Practice & Improve)**
+This is the core of the app experience, presented in a simple, chat-like interface.
+*   **Listen:** The user hears prompts and correct pronunciations from the app's voice.
+*   **Speak:** The user practices by speaking their answers. The app listens **in real-time**, using live speech-to-text to provide immediate feedback on the content of their response.
+*   **Get Feedback:** The user receives instant corrections and guidance, reinforcing learning in the moment.
+
+#### **Step 5: Growing With You (The Adaptive Cycle)**
+This is where Lessay truly stands apart. After each lesson, the system analyzes the user's entire performance. It moves beyond right or wrong answers to perform a deep analysis of the **raw audio recording** of the session. Based on this, it not only identifies new areas for improvement but also **updates its understanding of what the user is close to forgetting**, scheduling concepts for review at the perfect moment. The app automatically generates the **next** set of lessons, creating a continuous, adaptive learning loop where the curriculum evolves with the user.
+
+#### **Step 6: Your Progress Dashboard**
+Lessay believes in transparent learning. Users have access to a detailed statistics and measurements dashboard that visualizes their progress over time. This includes:
+*   **Skill Mastery Charts:** Tracking progress across competencies like grammar, vocabulary themes, and pronunciation.
+*   **Fluency Metrics:** Visualizing improvements in speaking pace, reduction in hesitation, and use of filler words.
+*   **Recall Strength (SRS View):** A dynamic view of their known vocabulary and grammar rules, showing which concepts are "cemented," "maturing," or "due for review" based on the Spaced Repetition algorithm.
+*   **Error Analysis:** Highlighting recurring mistakes so the user is consciously aware of what the AI is helping them fix.
+*   **Activity Log:** A history of completed lessons and performance scores.
+
+---
+
+### **3. How Lessay Works: The Technology**
+
+Lessay's adaptive experience is powered by a few key technological components working in synergy.
+
+*   **The Brain (Artificial Intelligence):**
+    At the heart of Lessay is an advanced AI (e.g., Google Gemini). This "Brain" has two primary jobs:
+    1.  **Expert Lesson Designer:** It acts as a master tutor, creating new, relevant lesson plans and exercises from scratch based on a user's detailed performance profile.
+    2.  **Expert Language & Vocal Analyst:** It reviews a user's session recordings to perform a deep diagnostic, identifying subtle pronunciation errors, grammatical patterns, and vocal delivery issues that are invisible to most apps.
+
+*   **The Ears (Speech Recognition & Capture):**
+    When a user speaks, our system performs two tasks simultaneously:
+    1.  **Real-Time Transcription:** It uses a high-speed API (Google Speech-to-Text) to instantly convert speech to text for immediate answer validation within the lesson.
+    2.  **Diagnostic Recording:** It captures a high-fidelity audio blob of the user's speech. This raw audio is sent to our AI Brain after the session for the deeper diagnostic analysis (pronunciation, hesitation, etc.).
+
+*   **The Voice (Text-to-Speech):**
+    To provide clear examples and prompts, the app's "Voice" (powered by Google TTS and AWS Polly) converts all lesson text into natural-sounding audio, crucial for modeling correct pronunciation and intonation.
+
+*   **The Memory (Comprehensive User Profile & Database):**
+    Lessay securely stores a rich, evolving profile of each user's journey. This is a multi-faceted dataset including:
+    *   Performance scores and a history of all AI-generated lessons.
+    *   A detailed list of identified weaknesses and mastered concepts.
+    *   Vocal & Fluency Metrics over time.
+    *   **A Spaced Repetition System (SRS) Engine:** This is the core of long-term retention. For **every single vocabulary word and grammar concept** the user learns, the Memory tracks:
+        *   **Recall Strength Score:** A dynamic score indicating how well the user knows the item.
+        *   **Next Review Date:** The optimal date for the user to be tested on this item again.
+    This comprehensive memory is the fuel for the AI Brain, ensuring every new lesson is both personalized and strategically timed for maximum retention.
+
+---
+
+### **4. The Adaptive Learning Method: Our "Secret Sauce"**
+
+Lessay’s hyper-personalization is based on a four-step, data-driven cycle that intelligently blends new material with targeted review.
+
+#### **Step 1: Capture & Measure**
+During a lesson, the app records the complete audio of the user's responses. This high-fidelity recording provides a complete, contextualized dataset of the user's speaking performance, capturing not just *what* they said, but *how* they said it.
+
+#### **Step 2: Analyze & Diagnose**
+Once the lesson is complete, the AI Analyst (The Brain) scrutinizes the entire audio recording and session data. It looks for a wide array of specific, nuanced details:
+*   **Phonetic Accuracy:** *Are you pronouncing "ü" correctly in German? Is your "r" sound in Spanish a tap or a trill?*
+*   **Vocal Delivery & Fluency:** *What is your speaking pace? Do you hesitate frequently? Are there patterns to your hesitations (e.g., before certain verb conjugations)? Are you using filler words ("um," "uh") excessively?*
+*   **Grammatical Patterns:** *Did you consistently use the correct verb endings or sentence structure, even if the individual words were correct?*
+*   **Vocabulary Recall:** *Are you using newly learned words correctly and confidently, or do you stumble over them?*
+
+Crucially, during this analysis, the AI also **updates the SRS scores in The Memory**. If a user recalled a vocabulary word quickly and pronounced it well, its "Recall Strength" increases, and its "Next Review Date" is pushed further into the future. If they hesitated or made a grammatical error related to a known concept, the strength score for that item decreases, and it is scheduled for an earlier review.
+
+#### **Step 3: Prioritize & Plan**
+The system then synthesizes this new diagnosis with the user's historical data to decide what the next lesson should contain. It prioritizes tasks in a specific, pedagogically-sound order:
+
+1.  **Spaced Repetition Reviews (Top Priority):** It first queries the SRS Engine for any vocabulary or grammar concepts that are **due for review**. Preventing knowledge decay is paramount.
+2.  **Critical Weaknesses:** It then identifies the most significant pronunciation, grammar, or fluency issues from the most recent session analysis. These need immediate attention.
+3.  **Struggling Concepts:** It targets topics the user has consistently made mistakes on in recent lessons, providing further reinforcement.
+4.  **New Material:** Finally, it introduces new vocabulary and grammar that align with the user's stated goals, expanding their knowledge base.
+
+#### **Step 4: Create & Adapt**
+With this clear, prioritized plan, the AI Lesson Designer gets to work. It generates a brand new, custom-built lesson that seamlessly integrates these different elements.
+
+For example, if the analysis showed a user struggles with the "ch" sound in German and makes mistakes with dative case articles, **and the SRS indicates they are due to review the vocabulary for 'train station' and 'ticket'**, the next lesson will be a conversational exercise about buying a train ticket. This single, natural-sounding scenario forces the user to:
+*   Practice the difficult "ch" sound (e.g., in "ich möchte").
+*   Correctly use dative articles (e.g., "an de**m** Schalter").
+*   Actively recall the review vocabulary ('Bahnhof', 'Ticket').
+
+This integrated **Capture -> Analyze -> Plan (with SRS) -> Create** cycle ensures the user is always working on a balanced mix of retaining old knowledge, fixing current weaknesses, and learning new material in the most efficient way possible.
+</file>
+
+<file path="documentation/documentation_completion_plan.md">
+# Documentation Completion Plan
+
+## 1. Documentation Audit Summary
+- **Total templates**: 16
+- **Complete templates**: 7 
+  (api_spec, compliance_framework, data_governance, deployment_playbook, monetization_strategy, technical_design, test_plan)
+- **Incomplete templates**: 9 
+  (BRD, change management, continuous improvement, FRS, maintenance guide, performance baseline, project charter, risk assessment, user docs)
+- **Missing sections**: 58 across all templates
+
+## 2. Content Creation Strategy
+```mermaid
+graph TD
+    A[Subject Matter Experts] -->|Provide input| B(Technical Writers)
+    B --> C[Documentation Templates]
+    C --> D[Review Cycle]
+    D --> E[Final Approval]
+    E --> F[Published Docs]
+```
+
+### Content Sourcing:
+- **Technical specifications**: Engineering team
+- **Business requirements**: Product owners
+- **Compliance details**: Legal team
+- **User workflows**: UX researchers
+
+## 3. Prioritization Framework
+```mermaid
+gantt
+    title Documentation Completion Timeline
+    dateFormat  YYYY-MM-DD
+    section Critical
+    BRD             :active,  doc1, 2025-06-11, 3d
+    FRS             :         doc2, after doc1, 2d
+    section High
+    Change Management:         doc3, after doc2, 2d
+    Risk Assessment :         doc4, after doc3, 2d
+    section Medium
+    Project Charter :         doc5, after doc4, 2d
+    Maintenance Guide:        doc6, after doc5, 2d
+```
+
+## 4. Implementation Plan
+
+### Phase 1: Information Gathering (1 day)
+- Conduct stakeholder interviews
+- Collect existing specifications
+- Map requirements to template sections
+
+### Phase 2: Content Development (5 days)
+- Assign templates to technical writers
+- Use standardized writing guidelines
+- Implement version control for documents
+
+### Phase 3: Review & Approval (2 days)
+- Technical review by engineering leads
+- Compliance review by legal team
+- Final sign-off by product owners
+
+## 5. Quality Assurance
+- Automated checks for:
+  - Placeholder text detection
+  - Broken links
+  - Compliance markers
+- Manual checks for:
+  - Technical accuracy
+  - Consistency across documents
+  - Readability scores
+
+## 6. Completion Metrics
+- **Success criteria**:
+  - 0 placeholder comments
+  - 100% section completion
+  - All tables populated
+  - Approval from 3 stakeholder groups
+- **Tracking**: Weekly progress reports
+</file>
+
+<file path="documentation/templates/api_spec_template.md">
+# API SPECIFICATION TEMPLATE
+<!-- Document Version: 1.1 -->
+<!-- Last Updated: 2025-06-10 -->
+
+[Existing sections...]
+
+## 5. Payment Endpoints
+### 5.1 Subscription Management
+#### POST /api/payments/create-subscription
+##### Request
+```json
+{
+  "tier": "premium",
+  "paymentMethodId": "pm_123456"
+}
+```
+
+##### Response
+```json
+{
+  "status": "active",
+  "currentPeriodEnd": "2025-07-10"
+}
+```
+
+### 5.2 Webhook
+#### POST /api/stripe/webhook
+##### Event Types
+- payment_intent.succeeded
+- invoice.payment_failed
+- customer.subscription.updated
+
+### 5.3 Get Subscription
+#### GET /api/payments/subscription
+##### Response
+```json
+{
+  "tier": "pro",
+  "status": "active",
+  "nextPaymentDate": "2025-07-10"
+}
+```
+
+## 6. Error Handling Updates
+### 6.1 Payment Errors
+| Code | Error Type | Description |
+|------|------------|-------------|
+| 402  | payment_required | Payment failed |
+| 409  | subscription_conflict | Plan change in progress |
+</file>
+
+<file path="documentation/templates/brd_template.md">
+# BUSINESS REQUIREMENTS DOCUMENT
+<!-- Document Version: 1.0 -->
+<!-- Last Updated: DATE -->
+
+## 1. Project Overview
+### 1.1 Purpose
+This document defines the business requirements for the Lessay language learning platform, serving as the single source of truth for all functional and non-functional requirements.
+
+### 1.2 Scope
+**Included**:
+- Core language learning features (lessons, exercises, progress tracking)
+- User authentication and profile management
+- Subscription and payment processing
+- Basic reporting and analytics
+
+**Excluded**:
+- Third-party content partnerships
+- Offline functionality
+- Enterprise features
+
+### 1.3 Objectives
+1. Achieve 10,000 active users within 6 months of launch
+2. Maintain 90% user satisfaction rate (measured weekly)
+3. Process payments with 99.9% reliability
+4. Support 5 languages by end of Q3
+
+## 2. Business Context
+### 2.1 Problem Statement
+Traditional language learning methods often fail to provide:
+- Personalized learning paths
+- Real-time feedback
+- Engaging, interactive content
+- Affordable pricing models
+
+### 2.2 Business Opportunities
+1. Global language learning market growing at 18.7% CAGR
+2. Increasing demand for interactive, app-based learning
+3. Opportunity to disrupt traditional language schools
+4. Potential for premium subscription revenue
+
+## 3. Stakeholder Analysis
+### 3.1 Key Stakeholders
+| Role | Name | Responsibility |
+|------|------|----------------|
+| Product Owner | Jane Doe | Final requirements approval |
+| Tech Lead | John Smith | Technical feasibility |
+| UX Lead | Sarah Lee | User experience |
+| Legal Counsel | Mike Chen | Compliance |
+
+### 3.2 User Profiles
+1. **Casual Learner**: Wants 5-10 min daily lessons
+2. **Serious Student**: Needs structured curriculum
+3. **Traveler**: Focuses on conversational skills
+4. **Professional**: Requires business vocabulary
+
+## 4. Functional Requirements
+### 4.1 Feature Breakdown
+1. **Adaptive Lessons**:
+   - AI-generated content based on user level
+   - Real-time pronunciation feedback
+   - Progressively difficult exercises
+
+2. **Subscription Management**:
+   - Multiple tier options
+   - Payment method management
+   - Usage analytics
+
+### 4.2 User Workflows
+```mermaid
+graph TD
+    A[Start Lesson] --> B{Assessment}
+    B -->|New User| C[Placement Test]
+    B -->|Returning| D[Continue Last Lesson]
+    C --> E[Generate Plan]
+    D --> F[Track Progress]
+    E --> F
+    F --> G[Complete Lesson]
+    G --> H[Receive Feedback]
+```
+
+## 5. Non-Functional Requirements
+### 5.1 Performance
+- API response time < 500ms (p95)
+- Support 100 concurrent lessons
+- Handle 1000 new users/day
+
+### 5.2 Security
+- PCI DSS compliance for payments
+- GDPR compliance for EU users
+- Regular penetration testing
+
+### 5.3 Scalability
+- Horizontal scaling to 10 nodes
+- Auto-scaling based on CPU usage
+- Multi-region deployment capability
+
+## 6. Success Metrics
+### 6.1 KPIs
+- Monthly Active Users (MAU)
+- Lesson completion rate
+- Payment success rate
+- Customer support tickets
+
+### 6.2 Acceptance Criteria
+1. 95% of lessons load within 2 seconds
+2. Payment processing success rate ≥ 99%
+3. User registration takes < 1 minute
+4. App receives 4+ star rating average
+</file>
+
+<file path="documentation/templates/change_management_template.md">
+# CHANGE MANAGEMENT TEMPLATE
+<!-- Document Version: 1.0 -->
+<!-- Last Updated: DATE -->
+
+## 1. Change Request Form
+### 1.1 Change Details
+| Field | Description | Example |
+|-------|-------------|---------|
+| Change ID | CR-{YYYYMMDD}-{SEQ} | CR-20250610-001 |
+| Requestor | Initiating team/member | Backend Team |
+| Date | Change request date | 2025-06-10 |
+| Description | Detailed change description | "Add new payment method type for regional providers" |
+| Reason | Business/technical justification | "Support alternative payment methods in Southeast Asia market" |
+
+### 1.2 Impact Analysis
+- **Affected Components**:
+  - Payment processing service
+  - User profile database
+  - Billing UI
+- **Risk Assessment**: Medium (requires database migration)
+- **Downtime Expected**: No (feature flag implementation)
+
+## 2. Approval Workflow
+### 2.1 Review Process
+| Step | Role | Action | SLA | Date |
+|------|------|--------|-----|------|
+| 1    | Tech Lead | Technical review | 2d | 2025-06-12 |
+| 2    | Security Engineer | Security audit | 1d | 2025-06-13 |
+| 3    | Product Owner | Final approval | 1d | 2025-06-14 |
+
+### 2.2 Implementation Plan
+- **Target Release**: v2.3.0 (2025-06-21)
+- **Rollback Strategy**:
+  - Feature flag disable
+  - Database migration rollback script
+  - API version fallback
+
+## 3. Change Log
+| Change ID | Description | Status | Implemented Version | Owner |
+|-----------|-------------|--------|---------------------|-------|
+| CR-20250515-002 | Add voice recording feature | Completed | v2.2.0 | Frontend Team |
+| CR-20250520-003 | Update Stripe API version | In Progress | v2.3.0 | Backend Team |
+| CR-20250601-004 | New language content (Spanish) | Planned | v2.4.0 | Content Team |
+</file>
+
+<file path="documentation/templates/continuous_improvement_template.md">
+# CONTINUOUS IMPROVEMENT PLAN TEMPLATE
+<!-- Document Version: 1.0 -->
+<!-- Last Updated: DATE -->
+
+## 1. Feedback Management
+### 1.1 Collection Channels
+- In-app feedback widget
+- Weekly user surveys
+- Support ticket analysis
+- App store reviews
+- Social media monitoring
+- NPS (Net Promoter Score)
+
+### 1.2 Prioritization Framework
+| Impact | Effort | Priority | Examples |
+|--------|--------|----------|----------|
+| High   | Low    | P1       | UI bug fixes, Critical performance issues |
+| High   | High   | P2       | Major feature additions |
+| Medium | Low    | P3       | Small UX improvements |
+| Low    | Low    | P4       | Cosmetic changes |
+
+## 2. Iteration Planning
+### 2.1 Improvement Backlog
+| ID | Description | Status | Target Release | Owner |
+|----|-------------|--------|----------------|-------|
+| CI-001 | Implement dark mode | Planned | v2.4 | Frontend Team |
+| CI-002 | Add pronunciation analytics | In Progress | v2.3 | AI Team |
+| CI-003 | Improve lesson loading speed | Backlog | v2.5 | Perf Team |
+
+### 2.2 Retrospective Process
+1. **Data Review** (30 mins):
+   - Metrics comparison (before/after)
+   - Key incidents analysis
+2. **Discussion** (60 mins):
+   - What went well?
+   - What could be improved?
+   - Action items
+3. **Follow-up**:
+   - Document decisions
+   - Assign action items
+   - Schedule check-ins
+
+## 3. Technical Debt
+### 3.1 Debt Inventory
+| Area | Description | Severity | Remediation Plan |
+|------|-------------|----------|------------------|
+| API | Legacy authentication | High | Migrate to OAuth 2.0 |
+| DB | Missing indexes | Medium | Add performance-critical indexes |
+| UI | jQuery dependencies | Low | Rewrite in React |
+
+### 3.2 Paydown Schedule
+- **Q2 2025**: Address high-severity items
+- **Q3 2025**: Complete medium-severity items
+- **Q4 2025**: Review and prioritize remaining debt
+- **Ongoing**: Allocate 20% sprint capacity to debt
+
+## 4. Metrics & Reporting
+### 4.1 Improvement Metrics
+- Weekly velocity (story points)
+- Bug escape rate (prod vs staging)
+- Cycle time (commit to deploy)
+- User satisfaction (CSAT)
+- Feature adoption rate
+
+### 4.2 Progress Dashboard
+```mermaid
+graph LR
+    A[Raw Metrics] --> B{Analysis}
+    B --> C[Improvement Backlog]
+    B --> D[Technical Debt]
+    C --> E[Release Planning]
+    D --> F[Paydown Schedule]
+```
+</file>
+
+<file path="documentation/templates/frs_template.md">
+# FUNCTIONAL REQUIREMENTS SPECIFICATION
+<!-- Document Version: 1.0 -->
+<!-- Last Updated: DATE -->
+
+## 1. Introduction
+### 1.1 Purpose
+This document specifies the functional requirements for the Lessay language learning platform, providing detailed specifications for development teams.
+
+### 1.2 Scope
+Covers core functionality including:
+- User authentication and authorization
+- Lesson delivery and progress tracking
+- Subscription management
+- Payment processing
+- Basic reporting
+
+Excludes:
+- Content creation tools
+- Marketing features
+- Third-party integrations beyond payment processing
+
+### 1.3 Definitions
+- **LTI**: Learning Tools Interoperability
+- **SRS**: Speech Recognition System
+- **A/B Testing**: Feature experimentation
+- **PCI DSS**: Payment Card Industry Data Security Standard
+
+## 2. Overall Description
+### 2.1 Product Perspective
+Integrates with:
+- Mobile devices for on-the-go learning
+- Payment processors (Stripe)
+- Email services for notifications
+- Analytics platforms for usage tracking
+
+### 2.2 User Characteristics
+1. **Casual Learners**:
+   - Need quick, engaging lessons
+   - Prefer gamified elements
+   - Limited time commitment
+
+2. **Serious Students**:
+   - Require structured curriculum
+   - Want progress certifications
+   - Need detailed feedback
+
+3. **Educators**:
+   - Require classroom tools
+   - Need progress monitoring
+   - Want assignment creation
+
+## 3. System Features
+### 3.1 Lesson Delivery
+#### 3.1.1 Description
+Core system for presenting language learning content with adaptive difficulty and real-time feedback.
+
+#### 3.1.2 Functional Requirements
+- FR-001: System shall generate personalized lesson plans based on user level
+- FR-002: Shall provide pronunciation scoring using SRS
+- FR-003: Must track completion status for all exercises
+- FR-004: Shall adapt difficulty based on performance
+
+### 3.2 User Management
+#### 3.2.1 Description
+System for handling user accounts, profiles, and authentication.
+
+#### 3.2.2 Functional Requirements
+- FR-005: Shall support email/password authentication
+- FR-006: Must implement role-based access control
+- FR-007: Shall allow profile customization
+- FR-008: Must track learning preferences
+
+## 4. External Interface Requirements
+### 4.1 User Interfaces
+- Responsive design for mobile/desktop
+- Accessibility compliant (WCAG 2.1 AA)
+- Consistent branding across screens
+- Intuitive navigation structure
+
+### 4.2 Hardware Interfaces
+- Microphone for voice exercises
+- Camera for AR translation features
+- Touchscreen support for mobile
+- Keyboard shortcuts for desktop
+
+### 4.3 Software Interfaces
+- Stripe API for payments
+- Google/Facebook OAuth
+- SendGrid for email
+- Mixpanel for analytics
+
+## 5. Other Requirements
+### 5.1 Performance
+- API response time < 500ms (p95)
+- Support 100 concurrent lessons
+- Handle 5000 requests/minute
+- Database queries < 100ms
+
+### 5.2 Safety
+- Content moderation for user-generated content
+- Age-appropriate material filtering
+- Secure storage of personal data
+- Compliance with COPPA for under-13 users
+</file>
+
+<file path="documentation/templates/maintenance_guide_template.md">
+# MAINTENANCE GUIDE
+<!-- Document Version: 1.0 -->
+<!-- Last Updated: DATE -->
+
+## 1. Monitoring Configuration
+### 1.1 Key Metrics
+- API response times (p50, p95, p99)
+- Error rates by service
+- Database connection pool usage
+- Payment transaction success rate
+- Active user sessions
+- Lesson completion rate
+
+### 1.2 Alert Thresholds
+- CPU Usage: >80% for 5m (warning), >90% for 5m (critical)
+- Memory Usage: >85% (warning), >95% (critical)
+- Disk Space: >75% used
+- API Error Rate: >5% for 10m
+- Database Latency: >500ms p95
+
+## 2. Troubleshooting Procedures
+### 2.1 Common Issues
+| Symptom | Resolution | Escalation Path |
+|---------|------------|-----------------|
+| High API latency | Check database queries<br>Scale API instances | Senior Engineer |
+| Payment failures | Verify Stripe API status<br>Check error logs | Payment Team |
+| User login issues | Review auth service logs<br>Check IDP connectivity | Auth Team |
+
+### 2.2 Diagnostic Tools
+```bash
+# Check service logs
+journalctl -u lessay-api --since "5 minutes ago"
+
+# Database performance
+pg_stat_activity -x -c "SELECT * FROM pg_stat_activity"
+
+# API health check
+curl -v https://api.lessay/health
+
+# Network diagnostics
+mtr -rwc 10 api.stripe.com
+```
+
+## 3. Update Procedures
+### 3.1 Patch Management
+1. Review patch notes for breaking changes
+2. Apply to staging environment first
+3. Monitor for 24 hours
+4. Deploy to production with canary rollout
+5. Verify metrics post-deployment
+
+### 3.2 Version Upgrades
+1. **Preparation**:
+   - Notify stakeholders of downtime window
+   - Create database backup snapshot
+   - Document rollback procedure
+
+2. **Deployment**:
+   - Drain traffic from old version
+   - Deploy new version to 10% of nodes
+   - Run migration scripts
+   - Verify critical functionality
+
+3. **Verification**:
+   - Monitor metrics for 1 hour
+   - Run smoke tests
+   - Gradually roll out to 100%
+
+## 4. Backup & Recovery
+### 4.1 Backup Schedule
+- **Database**: Hourly snapshots (retained 7 days) + Daily full backups (retained 30 days)
+- **User Files**: Daily incremental (retained 14 days)
+- **Configuration**: Versioned in Git + Weekly exports
+- **Payment Data**: Real-time replication to DR site
+
+### 4.2 Recovery Process
+1. Identify last known good backup
+2. Restore database from snapshot
+3. Verify data consistency
+4. Gradually enable traffic
+5. Monitor system health
+6. Conduct post-mortem analysis
+</file>
+
+<file path="documentation/templates/project_charter_template.md">
+# PROJECT CHARTER TEMPLATE
+<!-- Document Version: 1.0 -->
+<!-- Last Updated: DATE -->
+
+## 1. Project Overview
+### 1.1 Vision Statement
+To create an AI-powered language learning platform that delivers personalized, adaptive lessons with real-time feedback, making language acquisition accessible and effective for everyone.
+
+### 1.2 Objectives
+- Launch MVP with 3 languages by Q3 2025
+- Achieve 10,000 active users within 6 months
+- Maintain 90% user satisfaction rate
+- Process payments with 99.9% reliability
+
+### 1.3 Success Criteria
+- 80% of users complete at least 5 lessons/month
+- Average lesson rating ≥ 4.5/5 stars
+- Payment success rate ≥ 99%
+- <500ms API response time (p95)
+
+## 2. Scope
+### 2.1 In Scope
+- Core lesson delivery engine
+- User authentication system
+- Subscription management
+- Basic progress tracking
+- Payment processing integration
+
+### 2.2 Out of Scope
+- Offline functionality
+- Social features
+- Classroom management tools
+- Third-party content marketplace
+
+## 3. Stakeholders
+### 3.1 Key Stakeholders
+| Role | Name | Responsibility |
+|------|------|----------------|
+| Product Owner | Jane Doe | Final requirements approval |
+| Tech Lead | John Smith | Technical oversight |
+| UX Lead | Sarah Lee | User experience |
+| Marketing Lead | Alex Wong | Go-to-market strategy |
+
+### 3.2 Steering Committee
+Composed of:
+- CTO (chair)
+- VP Product
+- Head of Engineering
+- Finance Director
+Meets bi-weekly to review progress and approve major changes
+
+## 4. Timeline
+### 4.1 Key Milestones
+| Milestone | Date | Owner |
+|-----------|------|-------|
+| Requirements Finalized | 2025-06-30 | Jane Doe |
+| MVP Development Complete | 2025-09-15 | John Smith |
+| Beta Launch | 2025-10-01 | Sarah Lee |
+| Full Release | 2025-11-15 | Alex Wong |
+
+### 4.2 High-Level Schedule
+```mermaid
+gantt
+    title Project Timeline
+    dateFormat  YYYY-MM-DD
+    section Planning
+    Requirements      :active,  req, 2025-06-01, 30d
+    Technical Design  :         tech, after req, 15d
+    section Development
+    Core Engine       :         engine, after tech, 45d
+    Payment Integration :      payment, after engine, 15d
+    section Testing
+    QA Phase          :         qa, after payment, 30d
+    Launch Preparation:         launch, after qa, 15d
+```
+</file>
+
+<file path="documentation/templates/risk_assessment_template.md">
+# RISK ASSESSMENT TEMPLATE
+<!-- Document Version: 1.0 -->
+<!-- Last Updated: DATE -->
+
+## 1. Risk Identification
+### 1.1 Threat Sources
+1. **External Threats**:
+   - Hackers targeting payment data
+   - Competitors scraping content
+   - Malicious bots overloading APIs
+
+2. **Internal Threats**:
+   - Accidental data leaks
+   - Unauthorized access by employees
+   - Configuration errors
+
+### 1.2 Vulnerabilities
+1. **Technical**:
+   - Unencrypted user data in transit
+   - Lack of rate limiting on APIs
+   - Single point of failure in payment processing
+
+2. **Process**:
+   - Manual deployment procedures
+   - Lack of disaster recovery testing
+   - Incomplete audit trails
+
+## 2. Risk Analysis
+### 2.1 Risk Matrix
+| Likelihood/Impact | Low | Medium | High |
+|-------------------|-----|--------|------|
+| **High**          |     |  Data scraping | Payment breach |
+| **Medium**        | API overload | Service outage |    |
+| **Low**           | Minor UI bugs |     |      |
+
+### 2.2 Risk Scoring
+1. **Payment Data Breach**
+   Likelihood: Medium
+   Impact: High
+   Score: 12 (Medium x High)
+   
+2. **Service Outage**
+   Likelihood: Medium
+   Impact: High
+   Score: 12
+   
+3. **Content Scraping**
+   Likelihood: High
+   Impact: Medium
+   Score: 9
+
+## 3. Risk Mitigation
+### 3.1 Mitigation Strategies
+| Risk | Strategy | Owner | Timeline |
+|------|----------|-------|----------|
+| Payment Breach | Implement PCI DSS compliance | Security Team | Q3 2025 |
+| Service Outage | Add auto-scaling and failover | DevOps | Q2 2025 |
+| Content Scraping | Rate limiting + CAPTCHA | Backend Team | Q2 2025 |
+
+### 3.2 Residual Risk
+Accepted risks:
+- Minor UI bugs (low impact)
+- Temporary API throttling during peaks
+- Scheduled maintenance downtime
+
+## 4. Review Process
+### 4.1 Monitoring
+- Real-time payment fraud detection
+- Weekly vulnerability scans
+- Monthly penetration tests
+- Quarterly compliance audits
+
+### 4.2 Review Schedule
+- **Monthly**: Operational risk review
+- **Quarterly**: Full risk assessment
+- **Annually**: Compliance certification
+- **Ad-hoc**: After major incidents
+</file>
+
+<file path="documentation/templates/technical_design_template.md">
+# TECHNICAL DESIGN DOCUMENT
+<!-- Document Version: 1.2 -->
+<!-- Last Updated: 2025-06-10 -->
+
+## 1. Architecture Overview
+### 1.1 System Context
+```mermaid
+graph TD
+    A[Next.js Frontend] -->|API Routes| B[Next.js Backend]
+    B --> C[Prisma ORM]
+    B --> D[Supabase Auth]
+    B --> E[Supabase Storage]
+    B --> F[AIService]
+    C --> G[Supabase PostgreSQL]
+    F --> H[4B LLM Agent]
+    F --> I[Task Executor]
+```
+
+### 1.2 Key Features
+- **Language Learning Core**:
+  - Adaptive lesson generation
+  - Progress tracking
+  - Voice interaction handling
+- **AI Integration**:
+  - Autonomous development agent
+  - Content personalization
+  - Error correction
+
+## 2. Component Design
+### 2.1 Service Layer
+- **AuthService**:
+  - JWT verification
+  - Session management
+  - Mock auth implementation (`MOCK_AUTH=true`)
+  
+- **DataService**:
+  ```mermaid
+  flowchart LR
+      A[API Route] --> B[DataService]
+      B --> C[Prisma Client]
+      C --> D[(PostgreSQL)]
+      B --> E[Cache Layer]
+  ```
+  - Manages:
+    - User profiles
+    - Learning content
+    - Progress data
+
+- **AIService**:
+  - As previously detailed
+
+## 3. Data Flow
+### 3.1 Key Flows
+```mermaid
+sequenceDiagram
+    User->>Frontend: Start Lesson
+    Frontend->>API: POST /api/lessons/start
+    API->>AIService: Generate lesson
+    AIService->>DataService: Get user progress
+    DataService-->>AIService: Progress data
+    AIService-->>API: Lesson content
+    API-->>Frontend: Lesson data
+```
+
+## 4. Interface Specifications
+### 4.1 AI Endpoints
+| Method | Path | Description |
+|--------|------|-------------|
+| POST   | /api/ai/generate-lesson | Create personalized lesson |
+| POST   | /api/ai/analyze-response | Evaluate user input |
+
+## 5. Database Design
+### 5.1 Extended Schema
+```prisma
+model Exercise {
+  id          String @id @default(uuid())
+  type        String // 'vocabulary', 'grammar', etc.
+  content     Json
+  difficulty  Int
+  language    String
+  tags        String[]
+}
+```
+
+## 6. Non-Functional Considerations
+### 6.1 AI Performance
+- Model inference optimization
+- Async task processing
+- Rate limiting
+
+### 6.2 Language Processing
+- Multilingual support
+- Voice data handling
+- Real-time feedback
+</file>
+
+<file path="documentation/templates/test_plan_template.md">
+# TEST PLAN TEMPLATE
+<!-- Document Version: 1.1 -->
+<!-- Last Updated: 2025-06-10 -->
+
+[Existing sections...]
+
+## 5. Payment Flow Tests
+### 5.1 Subscription Scenarios
+| Test Case | Steps | Expected Result |
+|-----------|-------|-----------------|
+| New Premium Subscription | 1. Select Premium plan<br>2. Enter valid card<br>3. Submit | - Status: active<br>- Features unlocked |
+| Payment Failure | 1. Use declined card<br>2. Attempt purchase | - Error message shown<br>- No access change |
+| Plan Upgrade | 1. From Free to Pro<br>2. Confirm prorated charge | - Immediate upgrade<br>- Correct charge |
+
+### 5.2 Webhook Tests
+- Payment success → DB updated
+- Payment failed → Retry logic
+- Subscription canceled → Access revoked
+
+## 6. Security Tests
+### 6.1 Payment Data
+- Card details never stored
+- Tokenization verified
+- PCI compliance checks
+</file>
+
+</files>
