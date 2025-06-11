@@ -34,7 +34,39 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
-  const body = await request.json()
-  console.log('Received profile update:', body)
-  return NextResponse.json({ success: true })
+  const session = await getUserSession();
+  
+  if (!session) {
+    return NextResponse.json(
+      { error: 'Unauthorized' },
+      { status: 401 }
+    );
+  }
+
+  const body = await request.json();
+  
+  try {
+    const updatedUser = await prisma.user.update({
+      where: { id: session.user.id },
+      data: {
+        targetLang: body.targetLang,
+        nativeLang: body.nativeLang
+      },
+      select: {
+        id: true,
+        email: true,
+        targetLang: true,
+        nativeLang: true,
+        createdAt: true
+      }
+    });
+
+    return NextResponse.json(updatedUser);
+  } catch (error) {
+    console.error('Profile update failed:', error);
+    return NextResponse.json(
+      { error: 'Profile update failed' },
+      { status: 500 }
+    );
+  }
 }
