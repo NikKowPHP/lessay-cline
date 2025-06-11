@@ -40,12 +40,45 @@ The content is organized as follows:
 </file_summary>
 
 <directory_structure>
+.github/
+  workflows/
+    ci.yml
 .roo/
   rules-architect/
     rules.md
   rules-documentation/
     rules.md
+app/
+  api/
+    lessons/
+      [id]/
+        submit-answer/
+          route.ts
+      start/
+        route.ts
+    payments/
+      create-subscription/
+        route.ts
+    stats/
+      fluency/
+        route.ts
+      srs-overview/
+        route.ts
+    stripe/
+      webhook/
+        route.ts
+    users/
+      profile/
+        route.ts
+  globals.css
+  layout.tsx
+  page.tsx
+components/
+  LessonView.tsx
+  PricingPage.tsx
 documentation/
+  project_managment/
+    init_todo.md
   templates/
     api_spec_template.md
     brd_template.md
@@ -64,53 +97,883 @@ documentation/
     test_plan_template.md
     user_documentation_template.md
   app_description.md
+  architect_master_todo.md
   documentation_completion_plan.md
+  human_todo.md
+  logic_phase_1_todo.md
+  logic_phase_2_todo.md
+  logic_phase_3_todo.md
+  logic_phase_4_todo.md
+  logic_phase_5_todo.md
   todo.md
+lib/
+  ai-service.ts
+  prisma.ts
+prisma/
+  schema.prisma
+public/
+  file.svg
+  globe.svg
+  next.svg
+  vercel.svg
+  window.svg
+.gitignore
+ARCHITECT_PLANNING_COMPLETE.md
 BLUEPRINT_COMPLETE.md
+eslint.config.mjs
+globals.css
+layout.tsx
+next.config.ts
+package.json
+page.tsx
+postcss.config.mjs
+README.md
+tsconfig.json
 </directory_structure>
 
 <files>
 This section contains the contents of the repository's files.
 
-<file path="BLUEPRINT_COMPLETE.md">
-# Lessay Documentation Blueprint Complete
+<file path=".github/workflows/ci.yml">
+name: CI
 
-**Completion Date:** 2025-06-11  
-**Architect AI:** Roo (Documentation Mode)
+on:
+  push:
+    branches: [main]
 
-## Documentation Suite Overview
-All SDLC documentation phases have been completed:
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm run lint
+</file>
 
-1. **Phase 0:** Foundation & Alignment
-2. **Phase 1:** Project Definition & Requirements
-3. **Phase 2:** Architecture & Technical Design
-4. **Phase 3:** Implementation, Operations & Maintenance
-5. **Phase 4:** Quality Assurance & Performance
-6. **Phase 5:** Governance, Risk, and Compliance
-7. **Phase 6:** User-Facing Documentation
+<file path="app/api/lessons/[id]/submit-answer/route.ts">
+import { NextResponse } from 'next/server'
 
-## Key Documents Created
-- Business Requirements Document (BRD)
-- Functional Requirements Specification (FRS)
-- Technical Design Document
-- API Specification
-- Deployment Playbook
-- Maintenance Guide
-- Test Plan
-- Performance Baseline
-- Risk Assessment
-- Change Management Plan
-- Continuous Improvement Plan
-- User Documentation
+export async function POST(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  const body = await request.json()
+  console.log(`Received answer for lesson ${params.id}:`, body)
+  return NextResponse.json({ correct: true })
+}
+</file>
 
-## Next Steps
-1. Review all documentation with development team
-2. Begin implementation using the provided blueprints
-3. Use the change management process for any modifications
+<file path="app/api/lessons/start/route.ts">
+import { NextResponse } from 'next/server'
 
-**Signed,**  
-🧠 Documentation AI  
-Project Lessay
+export async function POST() {
+  return NextResponse.json({ lessonId: 'lesson_123' })
+}
+</file>
+
+<file path="app/api/payments/create-subscription/route.ts">
+import { NextResponse } from 'next/server';
+
+export async function POST(request: Request) {
+  const { tier } = await request.json();
+  console.log('Creating subscription for tier:', tier);
+  return NextResponse.json({ status: 'active' });
+}
+</file>
+
+<file path="app/api/stats/fluency/route.ts">
+import { NextResponse } from 'next/server';
+
+export async function GET() {
+  return NextResponse.json({ speakingPace: 125 });
+}
+</file>
+
+<file path="app/api/stats/srs-overview/route.ts">
+import { NextResponse } from 'next/server';
+
+export async function GET() {
+  return NextResponse.json({ totalItems: 150 });
+}
+</file>
+
+<file path="app/api/stripe/webhook/route.ts">
+import { NextResponse } from 'next/server';
+
+export async function POST() {
+  console.log('Stripe webhook received');
+  return NextResponse.json({ received: true }, { status: 200 });
+}
+</file>
+
+<file path="app/api/users/profile/route.ts">
+import { NextResponse } from 'next/server'
+
+export async function GET() {
+  return NextResponse.json({ id: 'user_123' })
+}
+
+export async function PUT(request: Request) {
+  const body = await request.json()
+  console.log('Received profile update:', body)
+  return NextResponse.json({ success: true })
+}
+</file>
+
+<file path="components/LessonView.tsx">
+'use client'
+
+import { useState } from 'react'
+
+type Lesson = {
+  lessonId: string
+}
+
+export default function LessonView() {
+  const [lesson, setLesson] = useState<Lesson | null>(null)
+
+  const startLesson = async () => {
+    try {
+      const response = await fetch('/api/lessons/start', {
+        method: 'POST'
+      })
+      const data = await response.json()
+      setLesson(data)
+    } catch (error) {
+      console.error('Failed to start lesson:', error)
+    }
+  }
+
+  return (
+    <div className="lesson-container">
+      {!lesson && (
+        <button onClick={startLesson}>
+          Start New Lesson
+        </button>
+      )}
+      
+      {lesson && (
+        <div className="lesson-content">
+          <h2>Lesson {lesson.lessonId}</h2>
+          <p>Your lesson content would appear here</p>
+        </div>
+      )}
+    </div>
+  )
+}
+</file>
+
+<file path="components/PricingPage.tsx">
+'use client';
+
+export default function PricingPage() {
+  return (
+    <div>
+      <h1>Choose Your Plan</h1>
+      <section>
+        <h2>Premium Plan</h2>
+        <button>Subscribe</button>
+      </section>
+    </div>
+  );
+}
+</file>
+
+<file path="documentation/project_managment/init_todo.md">
+Of course. You are correct. The instructions must be a script for the autonomous agent to follow, not the implementation itself.
+
+Here are the separate, simplified to-do files for each phase. Each task is designed to be an atomic, generative instruction for a small 4B LLM agent, with clear actions and verifications.
+
+---
+### **`phase_1_todo.md`**
+
+## Phase 1: Project Setup & Core Infrastructure
+
+**Goal:** Establish the project foundation, database, and authentication.
+**Project Location:** All commands and file paths are relative to the project's root folder.
+
+- [x] **Task 1.1: Initialize Next.js Project**
+    - **File Path:** Project root (`./`)
+    - **Action:** Execute a command to create a new Next.js project in the current directory.
+    - **LLM Prompt:** "Execute the following shell command *exactly* as written, without any modifications, to initialize the project structure."
+    - **Command:** `npx create-next-app@latest . --ts --eslint --tailwind --no-src-dir --app --import-alias "@/*"`
+    - **Verification:** The file `package.json` exists in the root folder.
+
+- [x] hask 1.2: Install Production Dependencies**
+    - **File Path:** Project root (`./`)
+    - **Action:** Execute a command to install required production libraries.
+    - **LLM Prompt:** "Execute the following shell command to install the project's production dependencies."
+    - **Command:** `npm install @prisma/client @supabase/supabase-js @stripe/stripe-js @stripe/react-stripe-js`
+    - **Verification:** The `dependencies` section of `package.json` contains `@prisma/client` and `@supabase/supabase-js`.
+
+- [x] **Task 1.3: Install Development Dependencies**
+    - **File Path:** Project root (`./`)
+    - **Action:** Execute a command to install Prisma as a development dependency.
+    - **LLM Prompt:** "Execute the following shell command to install the project's development dependencies."
+    - **Command:** `npm install -D prisma`
+    - **Verification:** The `devDependencies` section of `package.json` contains `prisma`.
+
+- [x] **Task 1.4: Initialize Prisma**
+    - **File Path:** Project root (`./`)
+    - **Action:** Execute the command to set up the Prisma directory and schema file.
+    - **LLM Prompt:** "Execute the following shell command to initialize Prisma."
+    - **Command:** `npx prisma init`
+    - **Verification:** The file `/prisma/schema.prisma` exists.
+
+- [ ] **Task 1.5: Define Database Schema**
+    - **File Path:** `/prisma/schema.prisma`
+    - **Action:** Overwrite the existing file with the complete, correct database schema for the Lessay application.
+    - **LLM Prompt:** "Replace the entire content of the file at `/prisma/schema.prisma` with the provided code block. Do not add or change anything."
+    - **Reference Code:** `[Copy the full Prisma schema from documentation/templates/technical_design_template.md Section 5.1]`
+    - **Verification:** The file `/prisma/schema.prisma` contains the string `model SRSEntry`.
+
+- [ ] **Task 1.6: Run Initial Database Migration**
+    - **File Path:** Project root (`./`)
+    - **Action:** Execute the command to generate the SQL migration from the schema and apply it to the database.
+    - **LLM Prompt:** "Execute the following shell command to create and apply the initial database migration."
+    - **Command:** `npx prisma migrate dev --name init`
+    - **Verification:** A new directory exists inside `/prisma/migrations/`.
+
+- [ ] **Task 1.7: Create Environment Variable Example File**
+    - **File Path:** `/.env.example`
+    - **Action:** Create a new file to serve as a template for environment variables.
+    - **LLM Prompt:** "Create a new file at `/.env.example` and populate it with the provided content."
+    - **Reference Code:** `[Copy the content of the .env.example file from the previous response]`
+    - **Verification:** The file `/.env.example` exists and contains the string `NEXT_PUBLIC_SUPABASE_URL`.
+
+---
+### **`phase_2_todo.md`**
+
+## Phase 2: Backend Core Services & User Management
+
+**Goal:** Build the backend APIs for user profiles.
+
+- [ ] **Task 2.1: Create Prisma Client Helper**
+    - **File Path:** `/lib/prisma.ts`
+    - **Action:** Create a reusable helper module to ensure only one instance of Prisma Client is used.
+    - **LLM Prompt:** "Create a new file at `/lib/prisma.ts`. Generate TypeScript code that initializes a single, global instance of `PrismaClient` to prevent multiple connections in a development environment."
+    - **Verification:** The file `/lib/prisma.ts` exists and contains the string `new PrismaClient()`.
+
+- [ ] **Task 2.2: Create User Profile API Route**
+    - **File Path:** `/app/api/users/profile/route.ts`
+    - **Action:** Generate a Next.js App Router API route to handle fetching and updating user profiles.
+    - **LLM Prompt:** "Generate a Next.js API route file at `/app/api/users/profile/route.ts`. It must export two async functions: `GET` and `PUT`. The `GET` function should return a static JSON object like `{\"id\":\"user_123\"}`. The `PUT` function should parse the JSON body of the request, log it to the console, and return a success JSON object. Import `NextResponse` from `next/server`."
+    - **Verification:** The file `/app/api/users/profile/route.ts` exists and contains the strings `export async function GET` and `export async function PUT`.
+
+---
+### **`phase_3_todo.md`**
+
+## Phase 3: Core Learning Loop
+
+**Goal:** Implement the basic interactive lesson UI and APIs.
+
+- [ ] **Task 3.1: Create Lesson API Routes**
+    - **File Path:** `/app/api/lessons/start/route.ts`
+    - **Action:** Generate the API endpoint for starting a new lesson.
+    - **LLM Prompt:** "Generate a Next.js API route file at `/app/api/lessons/start/route.ts`. It must export a `POST` async function that returns a static JSON object representing a new lesson, like `{\"lessonId\":\"lesson_123\"}`. Import `NextResponse`."
+    - **Verification:** The file `/app/api/lessons/start/route.ts` exists.
+
+- [ ] **Task 3.2: Create Answer Submission API Route**
+    - **File Path:** `/app/api/lessons/[id]/submit-answer/route.ts`
+    - **Action:** Generate a dynamic API endpoint for submitting answers to a lesson.
+    - **LLM Prompt:** "Generate a Next.js dynamic API route at `/app/api/lessons/[id]/submit-answer/route.ts`. It must export a `POST` async function that accepts `params` to read the lesson `id`. It should log the `id` and the request body to the console, then return a static JSON object representing feedback, like `{\"correct\":true}`. Import `NextResponse`."
+    - **Verification:** The file `/app/api/lessons/[id]/submit-answer/route.ts` exists.
+
+- [ ] **Task 3.3: Create Basic Lesson UI Component**
+    - **File Path:** `/components/LessonView.tsx`
+    - **Action:** Generate a basic, client-side React component to display a lesson.
+    - **LLM Prompt:** "Generate a React client component at `/components/LessonView.tsx`. It must be a client component (`'use client'`). Use the `useState` hook to manage `lesson` and `feedback` states. Include a button that, when clicked, fetches from `/api/lessons/start` and sets the `lesson` state. Conditionally render the lesson prompt if the `lesson` state is not null."
+    - **Verification:** The file `/components/LessonView.tsx` exists and contains the strings `'use client'` and `useState`.
+
+---
+### **`phase_4_todo.md`**
+
+## Phase 4: Adaptive AI Engine & Analytics
+
+**Goal:** Create stubs for the AI service and build the dashboard APIs.
+
+- [ ] **Task 4.1: Create AI Service Stub**
+    - **File Path:** `/lib/ai-service.ts`
+    - **Action:** Create a placeholder module for AI logic.
+    - **LLM Prompt:** "Create a TypeScript file at `/lib/ai-service.ts`. It must export two async functions: `generateLessonForUser` and `analyzeAudioForDiagnostics`. These functions should *not* contain real AI logic. They should only log a message to the console indicating they were called and return a static, dummy JSON object."
+    - **Verification:** The file `/lib/ai-service.ts` exists and contains the string `export async function generateLessonForUser`.
+
+- [ ] **Task 4.2: Create Dashboard Stats API Routes**
+    - **File Path:** `/app/api/stats/fluency/route.ts`
+    - **Action:** Generate the API endpoint for fluency metrics.
+    - **LLM Prompt:** "Generate a Next.js API route file at `/app/api/stats/fluency/route.ts`. It must export a `GET` async function that returns a static JSON object representing fluency metrics, like `{\"speakingPace\":125}`. Import `NextResponse`."
+    - **Verification:** The file `/app/api/stats/fluency/route.ts` exists.
+
+- [ ] **Task 4.3: Create Dashboard SRS API Route**
+    - **File Path:** `/app/api/stats/srs-overview/route.ts`
+    - **Action:** Generate the API endpoint for SRS metrics.
+    - **LLM Prompt:** "Generate a Next.js API route file at `/app/api/stats/srs-overview/route.ts`. It must export a `GET` async function that returns a static JSON object representing an SRS overview, like `{\"totalItems\":150}`. Import `NextResponse`."
+    - **Verification:** The file `/app/api/stats/srs-overview/route.ts` exists.
+
+---
+### **`phase_5_todo.md`**
+
+## Phase 5: Monetization
+
+**Goal:** Implement placeholder APIs and UI for the Stripe payment system.
+
+- [ ] **Task 5.1: Create Stripe Subscription API Route**
+    - **File Path:** `/app/api/payments/create-subscription/route.ts`
+    - **Action:** Generate the API endpoint for creating a new subscription.
+    - **LLM Prompt:** "Generate a Next.js API route at `/app/api/payments/create-subscription/route.ts`. It must export a `POST` async function that parses the request body, logs the desired `tier`, and returns a static JSON success response, like `{\"status\":\"active\"}`. Import `NextResponse`."
+    - **Verification:** The file `/app/api/payments/create-subscription/route.ts` exists.
+
+- [ ] **Task 5.2: Create Stripe Webhook API Route**
+    - **File Path:** `/app/api/stripe/webhook/route.ts`
+    - **Action:** Generate the API endpoint to receive webhooks from Stripe.
+    - **LLM Prompt:** "Generate a Next.js API route at `/app/api/stripe/webhook/route.ts`. It must export a `POST` async function. The function should log that a webhook was received and return a JSON object `{\"received\":true}` with a 200 status code. Import `NextResponse`."
+    - **Verification:** The file `/app/api/stripe/webhook/route.ts` exists.
+
+- [ ] **Task 5.3: Create Basic Pricing UI Component**
+    - **File Path:** `/components/PricingPage.tsx`
+    - **Action:** Generate a basic UI component for the pricing page.
+    - **LLM Prompt:** "Generate a React client component at `/components/PricingPage.tsx`. It must be a client component (`'use client'`). It should render a heading like `Choose Your Plan` and a section for a 'Premium Plan' that includes a 'Subscribe' button."
+    - **Verification:** The file `/components/PricingPage.tsx` exists and contains the string `Choose Your Plan`.
+
+---
+### **`phase_6_todo.md`**
+
+## Phase 6: Testing, CI/CD, and Deployment Preparation
+
+**Goal:** Ensure the app is testable and deployable.
+
+- [ ] **Task 6.1: Add `test` and `lint` Scripts to `package.json`**
+    - **File Path:** `/package.json`
+    - **Action:** Modify the `scripts` section of the `package.json` file.
+    - **LLM Prompt:** "Modify the `/package.json` file. In the `scripts` object, ensure there is a `lint` script with the value `next lint` and a `test` script with the value `echo 'No tests yet' && exit 0`."
+    - **Verification:** The `scripts` section in `package.json` contains the `lint` and `test` keys with the correct values.
+
+- [ ] **Task 6.2: Create CI/CD Workflow File**
+    - **File Path:** `/.github/workflows/ci.yml`
+    - **Action:** Create a GitHub Actions workflow file for Continuous Integration.
+    - **LLM Prompt:** "Create a new file at `/.github/workflows/ci.yml`. Populate it with YAML content for a GitHub Action that triggers on `push` to the `main` branch. The workflow should have one job, `build-and-test`, that runs on `ubuntu-latest`. The job must include steps to checkout code, setup Node.js v20, run `npm ci`, and run `npm run lint`."
+    - **Verification:** The file `/.github/workflows/ci.yml` exists and contains the string `npm run lint`.
+</file>
+
+<file path="documentation/architect_master_todo.md">
+Excellent. This is the correct next step. We will now generate the plan for the **real work**.
+
+The strategy is as follows:
+1.  **Human Task:** Create a `human_todo.md` for gathering all necessary credentials. The AI will not see or handle these.
+2.  **Architect's Task:** The Architect AI will generate a new set of phased to-do lists (`logic_phase_1_todo.md`, etc.). These will instruct the Developer AI to replace the stubbed-out code from the "scaffolding" phase with real, functional logic.
+3.  **Developer's Environment:** The Developer AI will work in a local dev environment using the `docker-compose.mac.yml` and a local `.env.local` file with placeholder credentials, but the code will be written to use them as if they were real.
+
+Here is the to-do list for your **Architect LLM** to create the implementation tasks for the small Developer LLM.
+
+---
+
+### **To-Do List for Lessay Architect Agent: Generate Implementation Plan**
+
+**Objective:** To generate a complete set of phased to-do lists that will guide the Developer AI agent in transforming the "scaffolded" application into a fully functional, logic-complete application ready for local testing.
+
+**Prioritization Note:** You will generate one `human_todo.md` file and multiple `logic_phase_X_todo.md` files. This plan must be executed sequentially.
+
+---
+
+### **Phase A: Human Onboarding Plan Generation**
+
+*Goal: Create the instructions for the human operator.*
+
+1.  **[x] Generate `human_todo.md`:**
+    *   **File Path:** `/documentation/human_todo.md`
+    *   **Action:** Create a clear, secure checklist for the human operator to gather all necessary API keys and credentials. Emphasize that these secrets should **NEVER** be committed to the repository.
+    *   **LLM Prompt:** "Create a new file at `/documentation/human_todo.md`. The file should instruct a human user on how to gather all the necessary API keys for the Lessay project and where to place them for local development. It must include sections for Supabase, Stripe, and a generic AI Service (like Google AI). It must explicitly warn the user **NOT** to commit the `.env.local` file."
+
+---
+
+### **Phase B: Implementation Plan Generation (The "Real Work")**
+
+*Goal: Generate the sequential to-do lists that will instruct the Developer AI to implement the application's logic.*
+
+1.  **[x] Generate `logic_phase_1_todo.md` (Core Backend & User Auth):**
+    *   **File Path:** `/documentation/logic_phase_1_todo.md`
+    *   **Action:** Create tasks to replace authentication stubs with real Supabase Auth logic.
+    *   **LLM Prompt:** "Generate a to-do list file named `/documentation/logic_phase_1_todo.md`. The tasks should instruct the Developer AI to:
+        1.  Create a Supabase server-side client helper at `/lib/supabase-server.ts`.
+        2.  Modify the `/app/api/users/profile/route.ts` `GET` function to: get the current user session from the server-side Supabase client, and if a user exists, fetch their profile from the Prisma database using the user's ID. Handle the case where there is no user (return 401 Unauthorized).
+        3.  Modify the `/app/api/users/profile/route.ts` `PUT` function to do the same authentication check and then update the user's data in Prisma based on the request body.
+        4.  Create a sign-up and sign-in UI component at `/components/Auth.tsx` with email and password fields, and buttons that use the client-side Supabase client to perform `signUp` and `signInWithPassword`."
+
+2.  **[x] Generate `logic_phase_2_todo.md` (Learning Loop Logic):**
+    *   **File Path:** `/documentation/logic_phase_2_todo.md`
+    *   **Action:** Create tasks to implement the core logic of lesson delivery and answer submission.
+    *   **LLM Prompt:** "Generate a to-do list file named `/documentation/logic_phase_2_todo.md`. The tasks should instruct the Developer AI to:
+        1.  Modify the `/app/api/lessons/start/route.ts` `POST` function to: authenticate the user, call the (still stubbed) `AIService.generateLessonForUser` function, and save the generated lesson and exercises to the database using Prisma.
+        2.  Modify the `/app/api/lessons/[id]/submit-answer/route.ts` `POST` function to: authenticate the user, find the relevant exercise in the database, compare the user's `textResponse` to the correct answer (simple string comparison for now), create a `UserProgress` entry in the database, and return real feedback.
+        3.  Modify the `/components/LessonView.tsx` to handle a text input field and a submit button, which calls the submit-answer API with the user's text."
+
+3.  **[x] Generate `logic_phase_3_todo.md` (AI Service Integration):**
+    *   **File Path:** `/documentation/logic_phase_3_todo.md`
+    *   **Action:** Create tasks to replace the AI service stubs with real API calls.
+    *   **LLM Prompt:** "Generate a to-do list file named `/documentation/logic_phase_3_todo.md`. The tasks should instruct the Developer AI to:
+        1.  Install the Google AI SDK (`@google/generative-ai`).
+        2.  Modify the `/lib/ai-service.ts` file to import and initialize the Google AI client using the `AI_API_KEY` environment variable.
+        3.  Replace the stubbed `generateLessonForUser` function with a real implementation that constructs a detailed prompt (based on the `documentation/templates/technical_design_template.md` examples) and sends it to the Gemini model. It should then parse the model's JSON response.
+        4.  Replace the stubbed `analyzeAudioForDiagnostics` function with a placeholder that logs 'Real audio analysis will be implemented here' but connects to the real `VoiceAnalysis` model in Prisma to save dummy metrics."
+
+4.  **[x] Generate `logic_phase_4_todo.md` (Dashboard & Payments Integration):**
+    *   **File Path:** `/documentation/logic_phase_4_todo.md`
+    *   **Action:** Create tasks to connect the dashboard and payment systems to real backend logic.
+    *   **LLM Prompt:** "Generate a to-do list file named `/documentation/logic_phase_4_todo.md`. The tasks should instruct the Developer AI to:
+        1.  Modify the dashboard API routes (`/app/api/stats/fluency/route.ts` and `/app/api/stats/srs-overview/route.ts`) to authenticate the user and perform real Prisma aggregation queries on the `UserProgress` and `SRSEntry` tables to calculate and return actual statistics.
+        2.  Modify the `/components/DashboardView.tsx` to fetch data from these two endpoints and display it.
+        3.  Modify the `/app/api/payments/create-subscription/route.ts` to import the official `stripe` library, initialize it with the secret key, and use it to create a real Stripe `subscription` object.
+        4.  Modify the `/app/api/stripe/webhook/route.ts` to use `stripe.webhooks.constructEvent` to securely verify the incoming webhook signature before processing the event."
+
+5.  **[x] Generate `logic_phase_5_todo.md` (Testing & Finalization):**
+    *   **File Path:** `/documentation/logic_phase_5_todo.md`
+    *   **Action:** Create tasks for writing tests and cleaning up the codebase.
+    *   **LLM Prompt:** "Generate a to-do list file named `/documentation/logic_phase_5_todo.md`. The tasks should instruct the Developer AI to:
+        1.  Install `jest` and `ts-jest` as development dependencies.
+        2.  Create a unit test file for a simple function, like `/lib/utils.test.ts`, and write a basic test to ensure the testing framework is configured correctly.
+        3.  Modify the `package.json` `test` script to run `jest`.
+        4.  Review all created files and add JSDoc comments to all exported functions explaining their purpose, parameters, and return values."
+</file>
+
+<file path="documentation/human_todo.md">
+# Human Operator Checklist for Lessay Project Credentials
+
+**IMPORTANT SECURITY NOTICE:**  
+⚠️ **NEVER** commit any `.env.local` file or any file containing API keys to the repository.  
+⚠️ Keep all credentials secure and never share them publicly.
+
+---
+
+## Required Credentials
+
+### 1. Supabase
+- [ ] Create a Supabase project at https://supabase.com
+- [ ] Obtain your:
+  - `SUPABASE_URL`
+  - `SUPABASE_ANON_KEY`
+  - `SUPABASE_SERVICE_ROLE_KEY` (for server-side operations)
+
+### 2. Stripe
+- [ ] Create a Stripe account at https://stripe.com
+- [ ] Obtain your:
+  - `STRIPE_SECRET_KEY`
+  - `STRIPE_WEBHOOK_SECRET`
+  - `STRIPE_PUBLISHABLE_KEY` (for client-side)
+
+### 3. AI Service (Google AI)
+- [ ] Create a Google AI account at https://ai.google.dev
+- [ ] Obtain your:
+  - `AI_API_KEY`
+
+---
+
+## Setup Instructions
+
+1. Create a `.env.local` file in the project root
+2. Add the credentials in this format:
+```bash
+# Supabase
+SUPABASE_URL=your_url_here
+SUPABASE_ANON_KEY=your_key_here
+SUPABASE_SERVICE_ROLE_KEY=your_key_here
+
+# Stripe
+STRIPE_SECRET_KEY=your_key_here
+STRIPE_WEBHOOK_SECRET=your_secret_here
+STRIPE_PUBLISHABLE_KEY=your_key_here
+
+# Google AI
+AI_API_KEY=your_key_here
+```
+
+3. **DO NOT** add `.env.local` to git - it's already in `.gitignore`
+
+---
+
+## Verification
+- [ ] Confirm all credentials are working by running the development server:
+```bash
+npm run dev
+</file>
+
+<file path="documentation/logic_phase_1_todo.md">
+# Lessay Implementation Phase 1: Core Backend & User Auth
+
+## Tasks for Developer AI
+
+### 1. Create Supabase Server-Side Client Helper
+**File:** `/lib/supabase-server.ts`  
+**Action:** Create a server-side Supabase client for authenticated operations  
+**Steps:**
+- Import `createClient` and `createServerComponentClient` from `@supabase/ssr`
+- Export a `supabaseServerClient` function that:
+  - Accepts `cookies()` from `next/headers`
+  - Returns a Supabase client configured with `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`
+- Export a `getUserSession` helper that:
+  - Uses the server client to call `auth.getUser()`
+  - Returns the user object or null
+
+**Verification:** File exists and exports both functions with proper TypeScript types
+
+---
+
+### 2. Implement Profile GET Route
+**File:** `/app/api/users/profile/route.ts`  
+**Action:** Add real user session handling  
+**Steps:**
+- Import `getUserSession` from `@/lib/supabase-server`
+- Modify the GET function to:
+  1. Call `getUserSession()`
+  2. If no user, return `401 Unauthorized`
+  3. Query Prisma for `User` with `user.id`
+  4. Return profile data (excluding sensitive fields)
+
+**Verification:** Route returns 401 when unauthenticated and profile data when logged in
+
+---
+
+### 3. Implement Profile PUT Route
+**File:** `/app/api/users/profile/route.ts`  
+**Action:** Add profile update functionality  
+**Steps:**
+- Keep existing auth check from GET route
+- Add Prisma `user.update` call with:
+  - `where: { id: user.id }`
+  - `data` from request body (validate/sanitize first)
+- Return updated profile data
+
+**Verification:** PUT requests successfully update user data in database
+
+---
+
+### 4. Create Auth UI Component
+**File:** `/components/Auth.tsx`  
+**Action:** Build sign-up/sign-in interface  
+**Steps:
+- Create client-side Supabase client with `createClientComponentClient`
+- Add:
+  - Email input field
+  - Password input field
+  - Sign Up button (calls `supabase.auth.signUp`)
+  - Sign In button (calls `supabase.auth.signInWithPassword`)
+  - Error message display
+- Style with Tailwind CSS
+
+**Verification:** Component renders properly and allows user registration/login
+</file>
+
+<file path="documentation/logic_phase_2_todo.md">
+# Lessay Implementation Phase 2: Learning Loop Logic
+
+## Tasks for Developer AI
+
+### 1. Implement Lesson Start Route
+**File:** `/app/api/lessons/start/route.ts`  
+**Action:** Add real lesson generation logic  
+**Steps:**
+- Import `getUserSession` from `@/lib/supabase-server`
+- Modify POST function to:
+  1. Authenticate user (return 401 if not logged in)
+  2. Call `AIService.generateLessonForUser` with user's ID
+  3. Create Prisma records for:
+     - `Lesson` (with generated content)
+     - `Exercise` (linked to lesson)
+  4. Return lesson ID and first exercise
+
+**Verification:** Route creates database entries and returns structured lesson data
+
+---
+
+### 2. Implement Answer Submission Route
+**File:** `/app/api/lessons/[id]/submit-answer/route.ts`  
+**Action:** Add answer processing logic  
+**Steps:**
+- Import `getUserSession` for auth
+- Modify POST function to:
+  1. Authenticate user
+  2. Find exercise by ID
+  3. Compare `textResponse` to `correctAnswer`
+  4. Create `UserProgress` record with:
+     - `isCorrect` flag
+     - `submittedAnswer`
+     - `exerciseId`
+     - `userId`
+  5. Return feedback object with:
+     - `isCorrect`
+     - `correctAnswer`
+     - `explanation`
+
+**Verification:** Submissions create progress records and return proper feedback
+
+---
+
+### 3. Update Lesson View Component
+**File:** `/components/LessonView.tsx`  
+**Action:** Add interactive exercise UI  
+**Steps:**
+- Add:
+  - Text input field for answers
+  - Submit button that:
+    - Calls submit-answer API
+    - Disables during submission
+  - Feedback display area showing:
+    - Correct/incorrect indicator
+    - Explanation (if available)
+- Handle loading states
+- Style with Tailwind CSS
+
+**Verification:** Component allows answer submission and displays feedback
+</file>
+
+<file path="documentation/logic_phase_3_todo.md">
+# Lessay Implementation Phase 3: AI Service Integration
+
+## Tasks for Developer AI
+
+### 1. Install Google AI SDK
+**Command:**  
+```bash
+npm install @google/generative-ai
+```
+**Verification:** Package appears in `package.json` dependencies
+
+---
+
+### 2. Initialize AI Client
+**File:** `/lib/ai-service.ts`  
+**Action:** Configure real Google AI client  
+**Steps:**
+- Import `GoogleGenerativeAI` from SDK
+- Create client instance using `AI_API_KEY` from env
+- Export initialized client
+- Remove any existing stub implementations
+
+**Verification:** File exports properly configured client instance
+
+---
+
+### 3. Implement Lesson Generation
+**File:** `/lib/ai-service.ts`  
+**Action:** Replace stubbed `generateLessonForUser`  
+**Steps:**
+1. Construct detailed prompt per `technical_design_template.md`
+2. Call Gemini model with:
+   - `temperature: 0.7`
+   - `maxOutputTokens: 2048`
+3. Parse JSON response into:
+   - `lessonContent`
+   - `exercises[]` with:
+     - `question`
+     - `correctAnswer`
+     - `explanation`
+4. Return structured lesson data
+
+**Verification:** Function returns valid lesson structure from API call
+
+---
+
+### 4. Add Audio Analysis Placeholder
+**File:** `/lib/ai-service.ts`  
+**Action:** Connect audio analysis to Prisma  
+**Steps:**
+- Keep function signature but:
+  1. Log "Real audio analysis will be implemented here"
+  2. Create `VoiceAnalysis` record in Prisma with dummy metrics:
+     - `fluencyScore: 0.8`
+     - `pronunciationScore: 0.75`
+     - `accuracyScore: 0.85`
+  3. Return dummy metrics object
+
+**Verification:** Function creates database records and returns expected structure
+</file>
+
+<file path="documentation/logic_phase_4_todo.md">
+# Lessay Implementation Phase 4: Dashboard & Payments Integration
+
+## Tasks for Developer AI
+
+### 1. Implement Fluency Stats Route
+**File:** `/app/api/stats/fluency/route.ts`  
+**Action:** Add real fluency statistics  
+**Steps:**
+- Authenticate user
+- Use Prisma to aggregate `UserProgress`:
+  - `avg` of `accuracyScore`
+  - `count` of exercises by `isCorrect`
+  - Group by `createdAt` (daily)
+- Return structured stats object
+
+**Verification:** Route returns proper stats shape with real data
+
+---
+
+### 2. Implement SRS Overview Route
+**File:** `/app/api/stats/srs-overview/route.ts`  
+**Action:** Add spaced repetition stats  
+**Steps:**
+- Authenticate user
+- Use Prisma to aggregate `SRSEntry`:
+  - `count` by `status`
+  - `min`, `max`, `avg` of `nextReview`
+  - Group by `exerciseType`
+- Return structured overview
+
+**Verification:** Route returns proper SRS metrics
+
+---
+
+### 3. Update Dashboard View
+**File:** `/components/DashboardView.tsx`  
+**Action:** Display real stats  
+**Steps:
+- Fetch data from both stats endpoints
+- Display:
+  - Accuracy trend chart
+  - SRS status pie chart
+  - Recent activity list
+- Style with Tailwind CSS
+
+**Verification:** Component renders all data visualizations
+
+---
+
+### 4. Implement Stripe Subscription
+**File:** `/app/api/payments/create-subscription/route.ts`  
+**Action:** Add real payment processing  
+**Steps:**
+- Install `stripe` package
+- Initialize Stripe with `STRIPE_SECRET_KEY`
+- Create subscription with:
+  - `customer` from request
+  - `items` from request
+  - `payment_behavior: 'default_incomplete'`
+- Return subscription ID
+
+**Verification:** Route creates Stripe subscriptions
+
+---
+
+### 5. Secure Stripe Webhook
+**File:** `/app/api/stripe/webhook/route.ts`  
+**Action:** Add signature verification  
+**Steps:
+- Get webhook secret from env
+- Use `stripe.webhooks.constructEvent`
+- Verify signature before processing
+- Handle relevant event types
+
+**Verification:** Webhook rejects invalid signatures
+</file>
+
+<file path="documentation/logic_phase_5_todo.md">
+# Lessay Implementation Phase 5: Testing & Finalization
+
+## Tasks for Developer AI
+
+### 1. Install Testing Dependencies
+**Command:**  
+```bash
+npm install jest ts-jest @types/jest --save-dev
+```
+**Verification:** Packages appear in `package.json` devDependencies
+
+---
+
+### 2. Configure Jest for TypeScript
+**File:** `jest.config.ts`  
+**Action:** Create test configuration  
+**Steps:**
+- Export default config with:
+  - `preset: 'ts-jest'`
+  - `testEnvironment: 'node'`
+  - `roots: ['<rootDir>']`
+  - `testMatch: ['**/*.test.ts']`
+
+**Verification:** Configuration file exists with proper settings
+
+---
+
+### 3. Create Sample Test
+**File:** `/lib/utils.test.ts`  
+**Action:** Add basic test case  
+**Steps:
+- Import function to test (e.g., from `/lib/utils.ts`)
+- Write test that:
+  - Checks a simple function
+  - Uses `describe` and `it` blocks
+  - Has assertions with `expect`
+
+**Verification:** `npm test` runs successfully
+
+---
+
+### 4. Update Test Script
+**File:** `package.json`  
+**Action:** Add test command  
+**Steps:
+- Add script: `"test": "jest"`
+- Ensure it's in the `scripts` section
+
+**Verification:** `npm test` executes Jest
+
+---
+
+### 5. Add JSDoc Comments
+**Action:** Document all exported functions  
+**Scope:** All created/modified files  
+**Requirements:**
+- `/**` comment blocks
+- Description of purpose
+- `@param` for each parameter
+- `@returns` for return value
+- `@example` usage if applicable
+
+**Verification:** All exports have complete documentation
+</file>
+
+<file path="lib/ai-service.ts">
+export async function generateLessonForUser() {
+  console.log('AI Service: Generating lesson for user');
+  return { lessonId: 'demo_lesson', content: 'This is a demo lesson' };
+}
+
+export async function analyzeAudioForDiagnostics() {
+  console.log('AI Service: Analyzing audio');
+  return { fluencyScore: 85, pronunciationAccuracy: 90 };
+}
+</file>
+
+<file path="lib/prisma.ts">
+import { PrismaClient } from '@prisma/client'
+
+declare global {
+  // eslint-disable-next-line no-var
+  var prisma: PrismaClient | undefined
+}
+
+const prisma = global.prisma || new PrismaClient()
+
+if (process.env.NODE_ENV === 'development') global.prisma = prisma
+
+export default prisma
+</file>
+
+<file path="ARCHITECT_PLANNING_COMPLETE.md">
+# Architect Planning Complete
+
+All phased implementation plans have been generated and are ready for execution.
+
+Next steps:
+1. Human operator completes credentials setup per `documentation/human_todo.md`
+2. Developer AI executes tasks in sequential order from:
+   - `logic_phase_1_todo.md`
+   - `logic_phase_2_todo.md` 
+   - `logic_phase_3_todo.md`
+   - `logic_phase_4_todo.md`
+   - `logic_phase_5_todo.md`
 </file>
 
 <file path=".roo/rules-documentation/rules.md">
@@ -216,6 +1079,178 @@ When documents conflict, you must resolve the inconsistency by adhering to this 
 -   Deleting `NEEDS_ASSISTANCE.md` is a required step in a fix plan, not an independent action.
 </file>
 
+<file path="app/globals.css">
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+</file>
+
+<file path="app/layout.tsx">
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "Create Next App",
+  description: "Generated by create next app",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        {children}
+      </body>
+    </html>
+  );
+}
+</file>
+
+<file path="app/page.tsx">
+import Image from "next/image";
+
+export default function Home() {
+  return (
+    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+        <Image
+          className="dark:invert"
+          src="/next.svg"
+          alt="Next.js logo"
+          width={180}
+          height={38}
+          priority
+        />
+        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
+          <li className="mb-2 tracking-[-.01em]">
+            Get started by editing{" "}
+            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
+              app/page.tsx
+            </code>
+            .
+          </li>
+          <li className="tracking-[-.01em]">
+            Save and see your changes instantly.
+          </li>
+        </ol>
+
+        <div className="flex gap-4 items-center flex-col sm:flex-row">
+          <a
+            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
+            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Image
+              className="dark:invert"
+              src="/vercel.svg"
+              alt="Vercel logomark"
+              width={20}
+              height={20}
+            />
+            Deploy now
+          </a>
+          <a
+            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
+            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Read our docs
+          </a>
+        </div>
+      </main>
+      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
+        <a
+          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
+          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Image
+            aria-hidden
+            src="/file.svg"
+            alt="File icon"
+            width={16}
+            height={16}
+          />
+          Learn
+        </a>
+        <a
+          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
+          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Image
+            aria-hidden
+            src="/window.svg"
+            alt="Window icon"
+            width={16}
+            height={16}
+          />
+          Examples
+        </a>
+        <a
+          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
+          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Image
+            aria-hidden
+            src="/globe.svg"
+            alt="Globe icon"
+            width={16}
+            height={16}
+          />
+          Go to nextjs.org →
+        </a>
+      </footer>
+    </div>
+  );
+}
+</file>
+
 <file path="documentation/templates/compliance_framework_template.md">
 # COMPLIANCE FRAMEWORK TEMPLATE
 <!-- Document Version: 1.1 -->
@@ -280,6 +1315,458 @@ sequenceDiagram
 ### 5.1 Payment Metadata
 - Retention period: 7 years (tax compliance)
 - Deletion method: Cryptographic shredding
+</file>
+
+<file path="documentation/app_description.md">
+## **Lessay: Software Documentation Overview**
+
+### **1. Introduction: Our Philosophy**
+
+Lessay is an AI-powered language learning platform designed to create a deeply personal and efficient path to fluency. Unlike one-size-fits-all learning apps, Lessay's core engine is built to **listen, understand, and adapt** to each unique learner. Our philosophy is to **measure everything**, transforming every interaction into a data point that refines the learning path. We move beyond generic exercises by integrating AI-driven diagnostics with proven cognitive science principles, like **Spaced Repetition**, to provide a hyper-personalized experience that makes every minute of practice count.
+
+This document provides a high-level overview of the learner's journey and the intelligent systems that power this adaptive ecosystem, all aligned with best practices in both language acquisition and scalable software development.
+
+---
+
+### **2. The Learner's Journey**
+
+This is the typical path a user takes from their first interaction to becoming an active learner in our continuous improvement cycle.
+
+#### **Step 1: Getting to Know You**
+When a new user joins, Lessay begins by gathering foundational data:
+*   What is your native language?
+*   What language do you want to learn **first**? (You can switch or add other languages at any time from your profile).
+*   What is your primary goal (e.g., travel, business, conversation)?
+*   What is your self-assessed comfort level (Beginner, Intermediate, Advanced)?
+
+This initial information calibrates the app's voice, translations, and the starting difficulty for the user's first experience.
+
+#### **Step 2: The Initial Diagnostic**
+Before creating lessons, Lessay conducts a short, voice-based diagnostic. This low-pressure placement exercise uses a series of adaptive questions to give our AI a quick but accurate baseline of the user's current vocabulary, grammar, and pronunciation.
+
+#### **Step 3: Your First Personalized Lessons**
+Immediately after the diagnostic, the results are analyzed. Lessay doesn't just provide a score; it identifies the most critical areas for improvement. The app instantly generates a set of personalized lessons tailored to this baseline.
+
+#### **Step 4: The Learning Loop (Practice & Improve)**
+This is the core of the app experience, presented in a simple, chat-like interface.
+*   **Listen:** The user hears prompts and correct pronunciations from the app's voice.
+*   **Speak:** The user practices by speaking their answers. The app listens **in real-time**, using live speech-to-text to provide immediate feedback on the content of their response.
+*   **Get Feedback:** The user receives instant corrections and guidance, reinforcing learning in the moment.
+
+#### **Step 5: Growing With You (The Adaptive Cycle)**
+This is where Lessay truly stands apart. After each lesson, the system analyzes the user's entire performance. It moves beyond right or wrong answers to perform a deep analysis of the **raw audio recording** of the session. Based on this, it not only identifies new areas for improvement but also **updates its understanding of what the user is close to forgetting**, scheduling concepts for review at the perfect moment. The app automatically generates the **next** set of lessons, creating a continuous, adaptive learning loop where the curriculum evolves with the user.
+
+#### **Step 6: Your Progress Dashboard**
+Lessay believes in transparent learning. Users have access to a detailed statistics and measurements dashboard that visualizes their progress over time. This includes:
+*   **Skill Mastery Charts:** Tracking progress across competencies like grammar, vocabulary themes, and pronunciation.
+*   **Fluency Metrics:** Visualizing improvements in speaking pace, reduction in hesitation, and use of filler words.
+*   **Recall Strength (SRS View):** A dynamic view of their known vocabulary and grammar rules, showing which concepts are "cemented," "maturing," or "due for review" based on the Spaced Repetition algorithm.
+*   **Error Analysis:** Highlighting recurring mistakes so the user is consciously aware of what the AI is helping them fix.
+*   **Activity Log:** A history of completed lessons and performance scores.
+
+---
+
+### **3. How Lessay Works: The Technology**
+
+Lessay's adaptive experience is powered by a few key technological components working in synergy.
+
+*   **The Brain (Artificial Intelligence):**
+    At the heart of Lessay is an advanced AI (e.g., Google Gemini). This "Brain" has two primary jobs:
+    1.  **Expert Lesson Designer:** It acts as a master tutor, creating new, relevant lesson plans and exercises from scratch based on a user's detailed performance profile.
+    2.  **Expert Language & Vocal Analyst:** It reviews a user's session recordings to perform a deep diagnostic, identifying subtle pronunciation errors, grammatical patterns, and vocal delivery issues that are invisible to most apps.
+
+*   **The Ears (Speech Recognition & Capture):**
+    When a user speaks, our system performs two tasks simultaneously:
+    1.  **Real-Time Transcription:** It uses a high-speed API (Google Speech-to-Text) to instantly convert speech to text for immediate answer validation within the lesson.
+    2.  **Diagnostic Recording:** It captures a high-fidelity audio blob of the user's speech. This raw audio is sent to our AI Brain after the session for the deeper diagnostic analysis (pronunciation, hesitation, etc.).
+
+*   **The Voice (Text-to-Speech):**
+    To provide clear examples and prompts, the app's "Voice" (powered by Google TTS and AWS Polly) converts all lesson text into natural-sounding audio, crucial for modeling correct pronunciation and intonation.
+
+*   **The Memory (Comprehensive User Profile & Database):**
+    Lessay securely stores a rich, evolving profile of each user's journey. This is a multi-faceted dataset including:
+    *   Performance scores and a history of all AI-generated lessons.
+    *   A detailed list of identified weaknesses and mastered concepts.
+    *   Vocal & Fluency Metrics over time.
+    *   **A Spaced Repetition System (SRS) Engine:** This is the core of long-term retention. For **every single vocabulary word and grammar concept** the user learns, the Memory tracks:
+        *   **Recall Strength Score:** A dynamic score indicating how well the user knows the item.
+        *   **Next Review Date:** The optimal date for the user to be tested on this item again.
+    This comprehensive memory is the fuel for the AI Brain, ensuring every new lesson is both personalized and strategically timed for maximum retention.
+
+---
+
+### **4. The Adaptive Learning Method: Our "Secret Sauce"**
+
+Lessay’s hyper-personalization is based on a four-step, data-driven cycle that intelligently blends new material with targeted review.
+
+#### **Step 1: Capture & Measure**
+During a lesson, the app records the complete audio of the user's responses. This high-fidelity recording provides a complete, contextualized dataset of the user's speaking performance, capturing not just *what* they said, but *how* they said it.
+
+#### **Step 2: Analyze & Diagnose**
+Once the lesson is complete, the AI Analyst (The Brain) scrutinizes the entire audio recording and session data. It looks for a wide array of specific, nuanced details:
+*   **Phonetic Accuracy:** *Are you pronouncing "ü" correctly in German? Is your "r" sound in Spanish a tap or a trill?*
+*   **Vocal Delivery & Fluency:** *What is your speaking pace? Do you hesitate frequently? Are there patterns to your hesitations (e.g., before certain verb conjugations)? Are you using filler words ("um," "uh") excessively?*
+*   **Grammatical Patterns:** *Did you consistently use the correct verb endings or sentence structure, even if the individual words were correct?*
+*   **Vocabulary Recall:** *Are you using newly learned words correctly and confidently, or do you stumble over them?*
+
+Crucially, during this analysis, the AI also **updates the SRS scores in The Memory**. If a user recalled a vocabulary word quickly and pronounced it well, its "Recall Strength" increases, and its "Next Review Date" is pushed further into the future. If they hesitated or made a grammatical error related to a known concept, the strength score for that item decreases, and it is scheduled for an earlier review.
+
+#### **Step 3: Prioritize & Plan**
+The system then synthesizes this new diagnosis with the user's historical data to decide what the next lesson should contain. It prioritizes tasks in a specific, pedagogically-sound order:
+
+1.  **Spaced Repetition Reviews (Top Priority):** It first queries the SRS Engine for any vocabulary or grammar concepts that are **due for review**. Preventing knowledge decay is paramount.
+2.  **Critical Weaknesses:** It then identifies the most significant pronunciation, grammar, or fluency issues from the most recent session analysis. These need immediate attention.
+3.  **Struggling Concepts:** It targets topics the user has consistently made mistakes on in recent lessons, providing further reinforcement.
+4.  **New Material:** Finally, it introduces new vocabulary and grammar that align with the user's stated goals, expanding their knowledge base.
+
+#### **Step 4: Create & Adapt**
+With this clear, prioritized plan, the AI Lesson Designer gets to work. It generates a brand new, custom-built lesson that seamlessly integrates these different elements.
+
+For example, if the analysis showed a user struggles with the "ch" sound in German and makes mistakes with dative case articles, **and the SRS indicates they are due to review the vocabulary for 'train station' and 'ticket'**, the next lesson will be a conversational exercise about buying a train ticket. This single, natural-sounding scenario forces the user to:
+*   Practice the difficult "ch" sound (e.g., in "ich möchte").
+*   Correctly use dative articles (e.g., "an de**m** Schalter").
+*   Actively recall the review vocabulary ('Bahnhof', 'Ticket').
+
+This integrated **Capture -> Analyze -> Plan (with SRS) -> Create** cycle ensures the user is always working on a balanced mix of retaining old knowledge, fixing current weaknesses, and learning new material in the most efficient way possible.
+</file>
+
+<file path="public/file.svg">
+<svg fill="none" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M14.5 13.5V5.41a1 1 0 0 0-.3-.7L9.8.29A1 1 0 0 0 9.08 0H1.5v13.5A2.5 2.5 0 0 0 4 16h8a2.5 2.5 0 0 0 2.5-2.5m-1.5 0v-7H8v-5H3v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1M9.5 5V2.12L12.38 5zM5.13 5h-.62v1.25h2.12V5zm-.62 3h7.12v1.25H4.5zm.62 3h-.62v1.25h7.12V11z" clip-rule="evenodd" fill="#666" fill-rule="evenodd"/></svg>
+</file>
+
+<file path="public/globe.svg">
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><g clip-path="url(#a)"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.27 14.1a6.5 6.5 0 0 0 3.67-3.45q-1.24.21-2.7.34-.31 1.83-.97 3.1M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.48-1.52a7 7 0 0 1-.96 0H7.5a4 4 0 0 1-.84-1.32q-.38-.89-.63-2.08a40 40 0 0 0 3.92 0q-.25 1.2-.63 2.08a4 4 0 0 1-.84 1.31zm2.94-4.76q1.66-.15 2.95-.43a7 7 0 0 0 0-2.58q-1.3-.27-2.95-.43a18 18 0 0 1 0 3.44m-1.27-3.54a17 17 0 0 1 0 3.64 39 39 0 0 1-4.3 0 17 17 0 0 1 0-3.64 39 39 0 0 1 4.3 0m1.1-1.17q1.45.13 2.69.34a6.5 6.5 0 0 0-3.67-3.44q.65 1.26.98 3.1M8.48 1.5l.01.02q.41.37.84 1.31.38.89.63 2.08a40 40 0 0 0-3.92 0q.25-1.2.63-2.08a4 4 0 0 1 .85-1.32 7 7 0 0 1 .96 0m-2.75.4a6.5 6.5 0 0 0-3.67 3.44 29 29 0 0 1 2.7-.34q.31-1.83.97-3.1M4.58 6.28q-1.66.16-2.95.43a7 7 0 0 0 0 2.58q1.3.27 2.95.43a18 18 0 0 1 0-3.44m.17 4.71q-1.45-.12-2.69-.34a6.5 6.5 0 0 0 3.67 3.44q-.65-1.27-.98-3.1" fill="#666"/></g><defs><clipPath id="a"><path fill="#fff" d="M0 0h16v16H0z"/></clipPath></defs></svg>
+</file>
+
+<file path="public/next.svg">
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 394 80"><path fill="#000" d="M262 0h68.5v12.7h-27.2v66.6h-13.6V12.7H262V0ZM149 0v12.7H94v20.4h44.3v12.6H94v21h55v12.6H80.5V0h68.7zm34.3 0h-17.8l63.8 79.4h17.9l-32-39.7 32-39.6h-17.9l-23 28.6-23-28.6zm18.3 56.7-9-11-27.1 33.7h17.8l18.3-22.7z"/><path fill="#000" d="M81 79.3 17 0H0v79.3h13.6V17l50.2 62.3H81Zm252.6-.4c-1 0-1.8-.4-2.5-1s-1.1-1.6-1.1-2.6.3-1.8 1-2.5 1.6-1 2.6-1 1.8.3 2.5 1a3.4 3.4 0 0 1 .6 4.3 3.7 3.7 0 0 1-3 1.8zm23.2-33.5h6v23.3c0 2.1-.4 4-1.3 5.5a9.1 9.1 0 0 1-3.8 3.5c-1.6.8-3.5 1.3-5.7 1.3-2 0-3.7-.4-5.3-1s-2.8-1.8-3.7-3.2c-.9-1.3-1.4-3-1.4-5h6c.1.8.3 1.6.7 2.2s1 1.2 1.6 1.5c.7.4 1.5.5 2.4.5 1 0 1.8-.2 2.4-.6a4 4 0 0 0 1.6-1.8c.3-.8.5-1.8.5-3V45.5zm30.9 9.1a4.4 4.4 0 0 0-2-3.3 7.5 7.5 0 0 0-4.3-1.1c-1.3 0-2.4.2-3.3.5-.9.4-1.6 1-2 1.6a3.5 3.5 0 0 0-.3 4c.3.5.7.9 1.3 1.2l1.8 1 2 .5 3.2.8c1.3.3 2.5.7 3.7 1.2a13 13 0 0 1 3.2 1.8 8.1 8.1 0 0 1 3 6.5c0 2-.5 3.7-1.5 5.1a10 10 0 0 1-4.4 3.5c-1.8.8-4.1 1.2-6.8 1.2-2.6 0-4.9-.4-6.8-1.2-2-.8-3.4-2-4.5-3.5a10 10 0 0 1-1.7-5.6h6a5 5 0 0 0 3.5 4.6c1 .4 2.2.6 3.4.6 1.3 0 2.5-.2 3.5-.6 1-.4 1.8-1 2.4-1.7a4 4 0 0 0 .8-2.4c0-.9-.2-1.6-.7-2.2a11 11 0 0 0-2.1-1.4l-3.2-1-3.8-1c-2.8-.7-5-1.7-6.6-3.2a7.2 7.2 0 0 1-2.4-5.7 8 8 0 0 1 1.7-5 10 10 0 0 1 4.3-3.5c2-.8 4-1.2 6.4-1.2 2.3 0 4.4.4 6.2 1.2 1.8.8 3.2 2 4.3 3.4 1 1.4 1.5 3 1.5 5h-5.8z"/></svg>
+</file>
+
+<file path="public/vercel.svg">
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1155 1000"><path d="m577.3 0 577.4 1000H0z" fill="#fff"/></svg>
+</file>
+
+<file path="public/window.svg">
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.5 2.5h13v10a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1zM0 1h16v11.5a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 0 12.5zm3.75 4.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5M7 4.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0m1.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5" fill="#666"/></svg>
+</file>
+
+<file path="BLUEPRINT_COMPLETE.md">
+# Lessay Documentation Blueprint Complete
+
+**Completion Date:** 2025-06-11  
+**Architect AI:** Roo (Documentation Mode)
+
+## Documentation Suite Overview
+All SDLC documentation phases have been completed:
+
+1. **Phase 0:** Foundation & Alignment
+2. **Phase 1:** Project Definition & Requirements
+3. **Phase 2:** Architecture & Technical Design
+4. **Phase 3:** Implementation, Operations & Maintenance
+5. **Phase 4:** Quality Assurance & Performance
+6. **Phase 5:** Governance, Risk, and Compliance
+7. **Phase 6:** User-Facing Documentation
+
+## Key Documents Created
+- Business Requirements Document (BRD)
+- Functional Requirements Specification (FRS)
+- Technical Design Document
+- API Specification
+- Deployment Playbook
+- Maintenance Guide
+- Test Plan
+- Performance Baseline
+- Risk Assessment
+- Change Management Plan
+- Continuous Improvement Plan
+- User Documentation
+
+## Next Steps
+1. Review all documentation with development team
+2. Begin implementation using the provided blueprints
+3. Use the change management process for any modifications
+
+**Signed,**  
+🧠 Documentation AI  
+Project Lessay
+</file>
+
+<file path="eslint.config.mjs">
+import { dirname } from "path";
+import { fileURLToPath } from "url";
+import { FlatCompat } from "@eslint/eslintrc";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const compat = new FlatCompat({
+  baseDirectory: __dirname,
+});
+
+const eslintConfig = [
+  ...compat.extends("next/core-web-vitals", "next/typescript"),
+];
+
+export default eslintConfig;
+</file>
+
+<file path="globals.css">
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+</file>
+
+<file path="layout.tsx">
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "Create Next App",
+  description: "Generated by create next app",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        {children}
+      </body>
+    </html>
+  );
+}
+</file>
+
+<file path="next.config.ts">
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  /* config options here */
+};
+
+export default nextConfig;
+</file>
+
+<file path="page.tsx">
+import Image from "next/image";
+
+export default function Home() {
+  return (
+    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+        <Image
+          className="dark:invert"
+          src="/next.svg"
+          alt="Next.js logo"
+          width={180}
+          height={38}
+          priority
+        />
+        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
+          <li className="mb-2 tracking-[-.01em]">
+            Get started by editing{" "}
+            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
+              app/page.tsx
+            </code>
+            .
+          </li>
+          <li className="tracking-[-.01em]">
+            Save and see your changes instantly.
+          </li>
+        </ol>
+
+        <div className="flex gap-4 items-center flex-col sm:flex-row">
+          <a
+            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
+            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Image
+              className="dark:invert"
+              src="/vercel.svg"
+              alt="Vercel logomark"
+              width={20}
+              height={20}
+            />
+            Deploy now
+          </a>
+          <a
+            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
+            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Read our docs
+          </a>
+        </div>
+      </main>
+      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
+        <a
+          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
+          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Image
+            aria-hidden
+            src="/file.svg"
+            alt="File icon"
+            width={16}
+            height={16}
+          />
+          Learn
+        </a>
+        <a
+          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
+          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Image
+            aria-hidden
+            src="/window.svg"
+            alt="Window icon"
+            width={16}
+            height={16}
+          />
+          Examples
+        </a>
+        <a
+          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
+          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Image
+            aria-hidden
+            src="/globe.svg"
+            alt="Globe icon"
+            width={16}
+            height={16}
+          />
+          Go to nextjs.org →
+        </a>
+      </footer>
+    </div>
+  );
+}
+</file>
+
+<file path="postcss.config.mjs">
+const config = {
+  plugins: ["@tailwindcss/postcss"],
+};
+
+export default config;
+</file>
+
+<file path="README.md">
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+
+## Getting Started
+
+First, run the development server:
+
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## Learn More
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+</file>
+
+<file path="tsconfig.json">
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
 </file>
 
 <file path="documentation/templates/deployment_playbook_template.md">
@@ -666,119 +2153,6 @@ flowchart LR
 | Payment issues | Update card or contact support |
 </file>
 
-<file path="documentation/app_description.md">
-## **Lessay: Software Documentation Overview**
-
-### **1. Introduction: Our Philosophy**
-
-Lessay is an AI-powered language learning platform designed to create a deeply personal and efficient path to fluency. Unlike one-size-fits-all learning apps, Lessay's core engine is built to **listen, understand, and adapt** to each unique learner. Our philosophy is to **measure everything**, transforming every interaction into a data point that refines the learning path. We move beyond generic exercises by integrating AI-driven diagnostics with proven cognitive science principles, like **Spaced Repetition**, to provide a hyper-personalized experience that makes every minute of practice count.
-
-This document provides a high-level overview of the learner's journey and the intelligent systems that power this adaptive ecosystem, all aligned with best practices in both language acquisition and scalable software development.
-
----
-
-### **2. The Learner's Journey**
-
-This is the typical path a user takes from their first interaction to becoming an active learner in our continuous improvement cycle.
-
-#### **Step 1: Getting to Know You**
-When a new user joins, Lessay begins by gathering foundational data:
-*   What is your native language?
-*   What language do you want to learn **first**? (You can switch or add other languages at any time from your profile).
-*   What is your primary goal (e.g., travel, business, conversation)?
-*   What is your self-assessed comfort level (Beginner, Intermediate, Advanced)?
-
-This initial information calibrates the app's voice, translations, and the starting difficulty for the user's first experience.
-
-#### **Step 2: The Initial Diagnostic**
-Before creating lessons, Lessay conducts a short, voice-based diagnostic. This low-pressure placement exercise uses a series of adaptive questions to give our AI a quick but accurate baseline of the user's current vocabulary, grammar, and pronunciation.
-
-#### **Step 3: Your First Personalized Lessons**
-Immediately after the diagnostic, the results are analyzed. Lessay doesn't just provide a score; it identifies the most critical areas for improvement. The app instantly generates a set of personalized lessons tailored to this baseline.
-
-#### **Step 4: The Learning Loop (Practice & Improve)**
-This is the core of the app experience, presented in a simple, chat-like interface.
-*   **Listen:** The user hears prompts and correct pronunciations from the app's voice.
-*   **Speak:** The user practices by speaking their answers. The app listens **in real-time**, using live speech-to-text to provide immediate feedback on the content of their response.
-*   **Get Feedback:** The user receives instant corrections and guidance, reinforcing learning in the moment.
-
-#### **Step 5: Growing With You (The Adaptive Cycle)**
-This is where Lessay truly stands apart. After each lesson, the system analyzes the user's entire performance. It moves beyond right or wrong answers to perform a deep analysis of the **raw audio recording** of the session. Based on this, it not only identifies new areas for improvement but also **updates its understanding of what the user is close to forgetting**, scheduling concepts for review at the perfect moment. The app automatically generates the **next** set of lessons, creating a continuous, adaptive learning loop where the curriculum evolves with the user.
-
-#### **Step 6: Your Progress Dashboard**
-Lessay believes in transparent learning. Users have access to a detailed statistics and measurements dashboard that visualizes their progress over time. This includes:
-*   **Skill Mastery Charts:** Tracking progress across competencies like grammar, vocabulary themes, and pronunciation.
-*   **Fluency Metrics:** Visualizing improvements in speaking pace, reduction in hesitation, and use of filler words.
-*   **Recall Strength (SRS View):** A dynamic view of their known vocabulary and grammar rules, showing which concepts are "cemented," "maturing," or "due for review" based on the Spaced Repetition algorithm.
-*   **Error Analysis:** Highlighting recurring mistakes so the user is consciously aware of what the AI is helping them fix.
-*   **Activity Log:** A history of completed lessons and performance scores.
-
----
-
-### **3. How Lessay Works: The Technology**
-
-Lessay's adaptive experience is powered by a few key technological components working in synergy.
-
-*   **The Brain (Artificial Intelligence):**
-    At the heart of Lessay is an advanced AI (e.g., Google Gemini). This "Brain" has two primary jobs:
-    1.  **Expert Lesson Designer:** It acts as a master tutor, creating new, relevant lesson plans and exercises from scratch based on a user's detailed performance profile.
-    2.  **Expert Language & Vocal Analyst:** It reviews a user's session recordings to perform a deep diagnostic, identifying subtle pronunciation errors, grammatical patterns, and vocal delivery issues that are invisible to most apps.
-
-*   **The Ears (Speech Recognition & Capture):**
-    When a user speaks, our system performs two tasks simultaneously:
-    1.  **Real-Time Transcription:** It uses a high-speed API (Google Speech-to-Text) to instantly convert speech to text for immediate answer validation within the lesson.
-    2.  **Diagnostic Recording:** It captures a high-fidelity audio blob of the user's speech. This raw audio is sent to our AI Brain after the session for the deeper diagnostic analysis (pronunciation, hesitation, etc.).
-
-*   **The Voice (Text-to-Speech):**
-    To provide clear examples and prompts, the app's "Voice" (powered by Google TTS and AWS Polly) converts all lesson text into natural-sounding audio, crucial for modeling correct pronunciation and intonation.
-
-*   **The Memory (Comprehensive User Profile & Database):**
-    Lessay securely stores a rich, evolving profile of each user's journey. This is a multi-faceted dataset including:
-    *   Performance scores and a history of all AI-generated lessons.
-    *   A detailed list of identified weaknesses and mastered concepts.
-    *   Vocal & Fluency Metrics over time.
-    *   **A Spaced Repetition System (SRS) Engine:** This is the core of long-term retention. For **every single vocabulary word and grammar concept** the user learns, the Memory tracks:
-        *   **Recall Strength Score:** A dynamic score indicating how well the user knows the item.
-        *   **Next Review Date:** The optimal date for the user to be tested on this item again.
-    This comprehensive memory is the fuel for the AI Brain, ensuring every new lesson is both personalized and strategically timed for maximum retention.
-
----
-
-### **4. The Adaptive Learning Method: Our "Secret Sauce"**
-
-Lessay’s hyper-personalization is based on a four-step, data-driven cycle that intelligently blends new material with targeted review.
-
-#### **Step 1: Capture & Measure**
-During a lesson, the app records the complete audio of the user's responses. This high-fidelity recording provides a complete, contextualized dataset of the user's speaking performance, capturing not just *what* they said, but *how* they said it.
-
-#### **Step 2: Analyze & Diagnose**
-Once the lesson is complete, the AI Analyst (The Brain) scrutinizes the entire audio recording and session data. It looks for a wide array of specific, nuanced details:
-*   **Phonetic Accuracy:** *Are you pronouncing "ü" correctly in German? Is your "r" sound in Spanish a tap or a trill?*
-*   **Vocal Delivery & Fluency:** *What is your speaking pace? Do you hesitate frequently? Are there patterns to your hesitations (e.g., before certain verb conjugations)? Are you using filler words ("um," "uh") excessively?*
-*   **Grammatical Patterns:** *Did you consistently use the correct verb endings or sentence structure, even if the individual words were correct?*
-*   **Vocabulary Recall:** *Are you using newly learned words correctly and confidently, or do you stumble over them?*
-
-Crucially, during this analysis, the AI also **updates the SRS scores in The Memory**. If a user recalled a vocabulary word quickly and pronounced it well, its "Recall Strength" increases, and its "Next Review Date" is pushed further into the future. If they hesitated or made a grammatical error related to a known concept, the strength score for that item decreases, and it is scheduled for an earlier review.
-
-#### **Step 3: Prioritize & Plan**
-The system then synthesizes this new diagnosis with the user's historical data to decide what the next lesson should contain. It prioritizes tasks in a specific, pedagogically-sound order:
-
-1.  **Spaced Repetition Reviews (Top Priority):** It first queries the SRS Engine for any vocabulary or grammar concepts that are **due for review**. Preventing knowledge decay is paramount.
-2.  **Critical Weaknesses:** It then identifies the most significant pronunciation, grammar, or fluency issues from the most recent session analysis. These need immediate attention.
-3.  **Struggling Concepts:** It targets topics the user has consistently made mistakes on in recent lessons, providing further reinforcement.
-4.  **New Material:** Finally, it introduces new vocabulary and grammar that align with the user's stated goals, expanding their knowledge base.
-
-#### **Step 4: Create & Adapt**
-With this clear, prioritized plan, the AI Lesson Designer gets to work. It generates a brand new, custom-built lesson that seamlessly integrates these different elements.
-
-For example, if the analysis showed a user struggles with the "ch" sound in German and makes mistakes with dative case articles, **and the SRS indicates they are due to review the vocabulary for 'train station' and 'ticket'**, the next lesson will be a conversational exercise about buying a train ticket. This single, natural-sounding scenario forces the user to:
-*   Practice the difficult "ch" sound (e.g., in "ich möchte").
-*   Correctly use dative articles (e.g., "an de**m** Schalter").
-*   Actively recall the review vocabulary ('Bahnhof', 'Ticket').
-
-This integrated **Capture -> Analyze -> Plan (with SRS) -> Create** cycle ensures the user is always working on a balanced mix of retaining old knowledge, fixing current weaknesses, and learning new material in the most efficient way possible.
-</file>
-
 <file path="documentation/documentation_completion_plan.md">
 # Documentation Completion Plan
 
@@ -1051,71 +2425,79 @@ This plan is structured to follow the logical flow of the Software Development L
         *   Update the `Troubleshooting` table with common issues related to voice recognition or lesson generation.
 </file>
 
-<file path=".roo/rules-architect/rules.md">
-# Custom Instructions for Project Nexus: 🏗️ Architect AI (Dual-Mode v3.0)
+<file path="prisma/schema.prisma">
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
 
-## 1. IDENTITY & PERSONA
+generator client {
+  provider = "prisma-client-js"
+}
 
-You are the **Architect AI for Project Nexus**, designated as **🏗️ Architect**. You have two operational modes: **PLANNING** and **INTERVENTION**. Your primary purpose is to create and maintain a perfect, executable blueprint for the project.
+model User {
+  id           String @id @default(uuid())
+  email        String @unique
+  password     String
+  targetLang   String
+  nativeLang   String
+  progress     UserProgress[]
+  srsEntries   SRSEntry[]
+  lessons      Lesson[]
+  voiceAnalyses VoiceAnalysis[]
+  createdAt    DateTime @default(now())
+}
 
-## 2. THE CORE MISSION
+model Lesson {
+  id          String @id @default(uuid())
+  userId      String
+  user        User @relation(fields: [userId], references: [id])
+  exercises   Exercise[]
+  completedAt DateTime?
+  analysis    VoiceAnalysis[]
+}
 
-Your mission is to ensure the project blueprint is complete and executable. You will either be creating new documents (`PLANNING` mode) or fixing flawed plans (`INTERVENTION` mode).
+model Exercise {
+  id          String @id @default(uuid())
+  type        String // 'vocabulary', 'grammar', etc.
+  content     Json
+  difficulty  Int
+  language    String
+  tags        String // comma-separated list of tags
+  lesson      Lesson @relation(fields: [lessonId], references: [id])
+  lessonId    String
+}
 
-## 3. THE AUTONOMOUS OPERATIONAL LOOP (DUAL-MODE)
+model UserProgress {
+  id          String @id @default(uuid())
+  userId      String
+  user        User @relation(fields: [userId], references: [id])
+  metric      String // 'vocabulary', 'grammar', etc.
+  score       Float
+  lastUpdated DateTime @default(now())
+}
 
-Upon initiation, your first action is to check for a distress signal.
+model SRSEntry {
+  id             String @id @default(uuid())
+  userId         String
+  user           User @relation(fields: [userId], references: [id])
+  item           String // word or grammar concept
+  recallStrength Float @default(1.0)
+  nextReview     DateTime @default(now())
+  language       String
+  @@index([userId, nextReview])
+}
 
-1.  **Check for Distress Signal:** Look for the existence of a `NEEDS_ASSISTANCE.md` file in the project root.
-2.  **Select Mode:**
-    *   If `NEEDS_ASSISTANCE.md` **exists**, enter **INTERVENTION MODE** (Rule 3.1).
-    *   If `NEEDS_ASSISTANCE.md` **does not exist**, enter **PLANNING MODE** (Rule 3.2).
-
-## 3.1. INTERVENTION MODE (Fixing a Broken Plan)
-
-1.  **Read Distress Signal:** Open and parse `NEEDS_ASSISTANCE.md`.
-2.  **Diagnose the Problem:** Analyze the report to determine the failure type:
-    *   **Type A: Atomic Task Failure.** The Developer AI could not complete a single, granular step. The cause is likely a typo in a command or an incorrect file path in the plan.
-    -   **Type B: Phase Completion Failure.** The Developer AI completed all steps, but the integrated result failed testing. The cause is likely a subtle bug, a missing dependency, or a logical error in how the pieces fit together.
-3.  **Formulate a Fix Plan:** Create a new file named `FIX_PLAN.md`. The content will differ based on the failure type.
-    *   **For Type A Failure:** Generate a simple, direct fix.
-        ```markdown
-        # INTERVENTION FIX PLAN (ATOMIC)
-
-        **Problem:** The `docker-compose` command in the plan was incorrect.
-
-        - [ ] **Task 1: Correct the Command**
-            - **(File):** `project_management/tasks/1.3_local_development_environment.md`
-            - **(LLM Action):** "Replace the incorrect command `docker compose ...` with the correct `docker-compose ...`."
-            - **(Verification):** "The file contains the corrected command."
-        ```
-    *   **For Type B Failure:** Generate a diagnostic plan to help the Developer AI find the root cause.
-        ```markdown
-        # INTERVENTION FIX PLAN (INTEGRATION)
-
-        **Problem:** Phase 2 E2E tests are failing. The error log suggests an issue with API authentication.
-
-        - [ ] **Task 1: Add Diagnostic Logging**
-            - **(File):** `/project-nexus/apps/web/src/middleware.ts` (or relevant auth file)
-            - **(LLM Action):** "Add `console.log()` statements to the authentication middleware to print the incoming request headers and the decoded user token."
-            - **(Verification):** "The `console.log` statements are present in the specified file."
-        
-        - [ ] **Task 2: Re-run Failing Test**
-            - **(LLM Action):** "Execute the command `npm run test:e2e` and capture the full output, including the new logs."
-            - **(Verification):** "The command completes, and the output is saved."
-        
-        - [ ] **Task 3: Report Findings**
-            - **(LLM Action):** "Create a new file `DIAGNOSTIC_REPORT.md` containing the full output from the previous step."
-            - **(Verification):** "The `DIAGNOSTIC_REPORT.md` file is created and contains the test logs."
-        ```
-4.  **Prepare for Retry:** As the final step in the `FIX_PLAN.md`, always include the task to delete the `NEEDS_ASSISTANCE.md` file.
-5.  **Halt for Review:** After creating `FIX_PLAN.md`, halt your execution for human review and approval.
-
-## 3.2. PLANNING MODE (Creating the Blueprint)
-
-This mode remains unchanged. It operates by reading the active `documentation/todo.md` file and processing tasks sequentially until the blueprint is complete.
-
-## 4, 5, 6, 7. (Remaining rules for Zero-Question Mandate, Hierarchy of Truth, Output, and Interaction Model remain the same as v2.0).
+model VoiceAnalysis {
+  id        String @id @default(uuid())
+  userId    String
+  user      User @relation(fields: [userId], references: [id])
+  lessonId  String
+  lesson    Lesson @relation(fields: [lessonId], references: [id])
+  metrics   Json // {pace: 120, accuracy: 0.85, ...}
+  audioUrl  String
+  createdAt DateTime @default(now())
+}
 </file>
 
 <file path="documentation/templates/api_spec_template.md">
@@ -2346,6 +3728,167 @@ model VoiceAnalysis {
 - Card details never stored
 - Tokenization verified
 - PCI compliance checks
+</file>
+
+<file path=".gitignore">
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+/app/generated/prisma
+</file>
+
+<file path="package.json">
+{
+  "name": "app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "echo 'No tests yet' && exit 0"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.9.0",
+    "@stripe/react-stripe-js": "^3.7.0",
+    "@stripe/stripe-js": "^7.3.1",
+    "@supabase/supabase-js": "^2.50.0",
+    "next": "15.3.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.3.3",
+    "prisma": "^6.9.0",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
+</file>
+
+<file path=".roo/rules-architect/rules.md">
+d
+### **Custom Instructions for Project Lessay: 🧠 Architect AI (Multi-Phase Planning v2.0)**
+
+## 1. IDENTITY & PERSONA
+
+You are the **Architect AI for Project Lessay**, designated as **🧠 Architect**. You are the master strategist and planner for the entire software development lifecycle. You operate in two distinct modes: **PLANNING** (for generating development roadmaps) and **INTERVENTION** (for fixing development failures). Your purpose is to provide a flawless, executable plan for the Developer AI.
+
+## 2. THE CORE MISSION
+
+Your mission is to guide the Developer AI through the entire build process by generating a series of phased to-do lists. You will create the initial blueprint, then create the detailed implementation plans, and finally, fix any issues that arise during development.
+
+## 3. THE AUTONOMOUS OPERATIONAL LOOP (MULTI-PHASE)
+
+Upon initiation, you must first determine your operational mode.
+
+1.  **Check for Distress Signal:** Look for the existence of a `NEEDS_ASSISTANCE.md` file in the project's root directory.
+2.  **Select Mode:**
+    *   If `NEEDS_ASSISTANCE.md` **exists**, enter **INTERVENTION MODE** (Rule 3.1).
+    *   If `NEEDS_ASSISTANCE.md` **does not exist**, enter **PLANNING MODE** (Rule 3.2).
+
+### 3.1. INTERVENTION MODE (Fixing a Broken Plan)
+
+*(This section remains unchanged from your provided v3.0 example. It's a robust process for handling failures.)*
+
+1.  **Read Distress Signal:** Open and parse `NEEDS_ASSISTANCE.md`.
+2.  **Diagnose the Problem:** Analyze the report to determine the failure type (Atomic vs. Integration).
+3.  **Formulate a Fix Plan:** Create a new file named `FIX_PLAN.md`.
+    *   **For Atomic Failure:** Generate a simple, direct fix.
+    *   **For Integration Failure:** Generate a diagnostic plan to find the root cause.
+4.  **Prepare for Retry:** The final step in `FIX_PLAN.md` must be a task to delete `NEEDS_ASSISTANCE.md`.
+5.  **Halt for Review:** After creating `FIX_PLAN.md`, halt your execution for human review and approval.
+
+### 3.2. PLANNING MODE (Generating the Phased Blueprint)
+
+This mode guides the entire project from inception to completion by generating a sequence of to-do list files.
+
+1.  **Identify Current Master Task:** Open and read `documentation/architect_master_todo.md`. Identify the first task that is not marked as complete (`[ ]`). This file dictates which to-do list you will generate next.
+
+2.  **Execute Master Task (Generate a To-Do List):**
+    *   Read the description of the active master task. For example: "Generate `logic_phase_1_todo.md` (Core Backend & User Auth)".
+    *   Based on this description and your comprehensive knowledge of the Lessay documentation, generate the full content for the specified to-do list file (e.g., `documentation/logic_phase_1_todo.md`).
+    *   The generated to-do list must contain a series of simple, atomic, generative prompts for the **Developer AI**. Each task must be a clear instruction to create or modify a specific file with specific content.
+
+3.  **Update Master Plan:** After successfully generating the to-do list file, update `/documentation/architect_master_todo.md` by marking the corresponding task as complete (`[x]`).
+
+4.  **Loop or Conclude:**
+    *   If there are more incomplete tasks in `architect_master_todo.md`, repeat from Step 1.
+    *   If all tasks in `architect_master_todo.md` are complete, your planning work is finished. Create a final file named `ARCHITECT_PLANNING_COMPLETE.md` in the root directory and halt execution.
+
+## 4. THE ZERO-QUESTION MANDATE
+
+You operate with zero ambiguity. You are not permitted to ask for clarification. If a requirement is unclear, you must resolve it by consulting the **Hierarchy of Truth** (Rule 5). Your task is to produce a complete plan based on the information provided; if the information is conflicting, you must adhere to the hierarchy.
+
+## 5. HIERARCHY OF TRUTH
+
+When documents conflict, you must resolve the inconsistency by adhering to this strict order of precedence. The document higher on the list is the source of truth.
+
+1.  **`documentation/app_description.md` (The Vision):** The ultimate source of truth for the product's purpose and features.
+2.  **`documentation/templates/technical_design_template.md` (The Blueprint):** The primary technical reference for how components interact.
+3.  **`documentation/templates/api_spec_template.md` (The Contract):** The definition of API endpoints and data shapes.
+4.  **The Master Plan (`documentation/architect_master_todo.md`):** Your own high-level directive, which you must follow sequentially.
+
+## 6. OUTPUT & FORMATTING REQUIREMENTS
+
+-   All output must be in **Markdown (`.md`)**.
+-   When generating to-do lists for the Developer AI, each task must be:
+    -   **Atomic:** Representing a single, small piece of work.
+    -   **Generative:** Phrased as a clear instruction for an LLM (e.g., "Generate a file...", "Modify the file to include...").
+    -   **Specific:** Referencing exact file paths and function names.
+    -   **Verifiable:** Including a clear condition to confirm task completion (e.g., "Verification: The file exists and contains the string 'export async function GET'.").
+
+## 7. INTERACTION MODEL & HALT CONDITIONS
+
+-   You will halt execution upon creating `FIX_PLAN.md` (Intervention Mode).
+-   You will halt execution upon creating `ARCHITECT_PLANNING_COMPLETE.md` (Planning Mode).
+-   Your primary task in Planning Mode is to generate `.md` files containing to-do lists for another agent. You do not modify application code directly.
 </file>
 
 </files>

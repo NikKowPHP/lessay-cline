@@ -152,12 +152,23 @@ docker-compose -f docker-compose.proxy.yml up -d
 
 ## 6. Secrets Management
 ### 6.1 Environment Variables
-### 3.1 Required Variables
+### 6.1.1 Required Variables
 ```env
-### 6.1 Supabase Secrets
+### Supabase Secrets
 ```bash
 supabase secrets set STRIPE_SECRET_KEY=sk_live_***
 supabase secrets set AI_API_KEY=ai_***
+```
+
+### Google Cloud Credentials
+For local development:
+- Place `gcp-credentials.json` in project root
+- Add to `.gitignore` to prevent accidental commits
+
+For production environments:
+```bash
+# Store entire JSON content as a single environment variable
+supabase secrets set GCP_CREDENTIALS_JSON='{"type": "service_account", ...}'
 ```
 
 ### 6.2 Environment Hierarchy
@@ -174,3 +185,4 @@ supabase secrets set AI_API_KEY=ai_***
 - API keys: Every 90 days
 - Database credentials: Every 180 days
 - Certificates: Annually
+- Google Cloud Service Account Keys: Every 365 days

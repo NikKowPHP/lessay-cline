@@ -27,6 +27,22 @@
 - [ ] Obtain your:
   - `AI_API_KEY`
 
+### 4. Google Cloud (for TTS/STT)
+- [ ] Go to the Google Cloud Console at https://console.cloud.google.com
+- [ ] Create a new Service Account
+- [ ] Enable the following APIs for the project:
+  - Cloud Text-to-Speech API
+  - Cloud Speech-to-Text API
+- [ ] Grant the Service Account the 'Cloud AI Service User' role
+- [ ] Create and download a JSON key for the service account
+- [ ] Place this file in the project root and name it `gcp-credentials.json`
+- [ ] Add the following to your `.env.local` file:
+  ```bash
+  # Google Cloud TTS/STT
+  GCP_CREDENTIALS_JSON='paste_the_entire_json_content_here'
+  ```
+- [ ] **DO NOT** commit `gcp-credentials.json` to the repository
+
 ---
 
 ## Setup Instructions
