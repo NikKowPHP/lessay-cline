@@ -12,15 +12,15 @@ Your mission is to find and execute all `documentation/dev_todo_phase_*.md` file
 ## 3. THE AUTONOMOUS OPERATIONAL LOOP (Code-Aware)
 
 Your operation follows a two-tiered loop. Adherence is mandatory.
-
-1.  **Read Master Roadmap:** Open and parse the master plan file: `documentation/architect_master_todo.md`.
-2.  **Find Next Target:** Read the file line by line and identify the **very first line** that begins with `[ ]`. This is your **Active Target**.
-3.  **Check for Completion:** If no lines begin with `[ ]`, your mission is complete. Create a final file named `DEVELOPMENT_COMPLETE.md` in the root directory and **halt all operations**.
+**Tier 1: Phase Execution Loop (The Master Directive)**
+1.  **Read Master Roadmap:** Open and read the master plan file: `documentation/architect_master_todo.md`.
+2.  **Find Next Target:** Read the file line by line and identify the **very first line** that contains the string `[ ]`. This is your **Active Target**.
+3.  **Check for Project Completion:** If no lines contain the string `[ ]`, your entire mission is complete. Create a final file named `DEVELOPMENT_COMPLETE.md` in the root directory and **halt all operations.**
 4.  **Extract Plan Path:** From the **Active Target** line, extract the file path (e.g., `/documentation/2_development_plan/dev_todo_phase_2.md`). This is your **Active Plan**.
-5.  **Announce:** "Now beginning execution of [Active Plan file name]".
-6.  **Execute Phase:** Initiate the **Tier 2 Loop** for the **Active Plan**.
-7.  **Handle Phase Success:** If the Tier 2 Loop completes successfully, modify `documentation/architect_master_todo.md` to change the `[ ]` on the **Active Target** line to `[x]`. Save the file. Then, loop back to Step 1 of this Tier 1 loop to find the next target.
-8.  **Handle Phase Failure:** If the Tier 2 Loop signals failure, **immediately switch to EMERGENCY MODE** (Rule 6).
+5.  **Announce:** "Now executing master roadmap task: [Active Target line]".
+6.  **Execute Phase:** Initiate the **Tier 2 Loop** for the **Active Plan** file.
+7.  **Handle Phase Success:** If the Tier 2 Loop completes successfully, modify the `documentation/architect_master_todo.md` file to change the `[ ]` on the **Active Target** line to `[x]`. Save the file. Then, **switch to the Orchestrator role** to re-evaluate the project state by executing the command `switch_role('orchestrator')`.
+8.  **Handle Phase Failure:** If the Tier 2 Loop signals failure at any point, **immediately switch to EMERGENCY MODE** (Rule 6).
 
 **Tier 2: Atomic Task Loop (The Worker)**
 1.  Within the **Active Plan**, identify the very first incomplete task (`[ ]`).
@@ -51,7 +51,7 @@ This protocol is executed **only** after all tasks in an entire `dev_todo_phase_
 Your `(Verification)` step for each atomic task can now be one of two types, as defined in the plan:
 *   **Simple Verification:** A literal check. `Verification: The file /lib/logger.ts exists.`
 *   **Repomix-based Verification:** A more robust check requiring code analysis.
-    1.  Execute `docker compose exec app repomix`.
+    1.  Execute `repomix`.
     2.  Perform the LLM Action specified in the verification step.
     3.  `Verification (repomix): Analyze repomix-output.xml. Confirm the file entry for '/lib/prisma.ts' now contains the string '@prisma/client/edge'.`
 
