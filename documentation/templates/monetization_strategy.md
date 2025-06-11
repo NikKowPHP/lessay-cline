@@ -6,14 +6,14 @@
 ### 1.1 Subscription Tiers
 | Tier | Price | Features |
 |------|-------|----------|
-| Free | $0 | Basic lessons, Limited voice practice |
-| Premium | $9.99/month | All lessons, Full voice features, Progress tracking |
-| Pro | $19.99/month | Premium features + Certification, Priority support |
+| Free | $0 | Basic lessons, Limited voice practice, Basic SRS tracking |
+| Premium | $9.99/month | All lessons, Full voice features, Progress dashboard, Advanced SRS analytics |
+| Pro | $19.99/month | Premium features + Certification, Priority support, Unlimited voice analysis |
 
 ### 1.2 In-App Purchases
 - Specialized lesson packs: $4.99-$14.99
 - Certification badges: $9.99
-- Voice analysis credits: $0.99/credit
+- Detailed voice analysis reports: $0.99/report (complementary to standard analysis)
 
 ## 2. Stripe Integration
 ### 2.1 Architecture

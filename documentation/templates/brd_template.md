@@ -1,6 +1,6 @@
 # BUSINESS REQUIREMENTS DOCUMENT
 <!-- Document Version: 1.0 -->
-<!-- Last Updated: DATE -->
+<!-- Last Updated: 2025-06-11 -->
 
 ## 1. Project Overview
 ### 1.1 Purpose
@@ -55,44 +55,91 @@ Traditional language learning methods often fail to provide:
 
 ## 4. Functional Requirements
 ### 4.1 Feature Breakdown
-1. **Adaptive Lessons**:
-   - AI-generated content based on user level
-   - Real-time pronunciation feedback
-   - Progressively difficult exercises
+1. **Adaptive Learning Engine**:
+   - AI-generated lessons tailored to individual progress
+   - Real-time speech-to-text feedback during exercises
+   - Spaced Repetition System (SRS) for optimal retention
+   - Post-session voice analysis for pronunciation diagnostics
 
-2. **Subscription Management**:
-   - Multiple tier options
-   - Payment method management
-   - Usage analytics
+2. **Progress Dashboard**:
+   - Vocabulary mastery heatmap
+   - Fluency metrics (pace, hesitation, filler words)
+   - Error pattern analysis
+   - SRS recall strength visualization
+
+3. **Subscription Management**:
+   - Three-tier model (Free, Premium, Pro)
+   - Stripe integration for payments
+   - Usage-based premium feature unlocking
+
+4. **AI Analysis System**:
+   - Real-time answer validation
+   - Post-session diagnostic reports
+   - Automated lesson planning
+   - Continuous SRS score updates
 
 ### 4.2 User Workflows
+
+**Adaptive Learning Loop:**
+```mermaid
+sequenceDiagram
+    participant User
+    participant App
+    participant AI
+    participant DB
+
+    User->>App: Start Lesson
+    App->>AI: Request initial content
+    AI->>DB: Query user profile/SRS
+    DB-->>AI: Return user data
+    AI-->>App: Deliver lesson plan
+    App->>User: Present exercise
+    User->>App: Speak response
+    App->>AI: Real-time STT analysis
+    AI-->>App: Immediate feedback
+    App->>User: Show corrections
+    User->>App: Complete lesson
+    App->>AI: Send full session data
+    AI->>DB: Update SRS scores
+    AI-->>App: Next lesson plan
+    App->>User: Schedule next session
+```
+
+**Subscription Upgrade Flow:**
 ```mermaid
 graph TD
-    A[Start Lesson] --> B{Assessment}
-    B -->|New User| C[Placement Test]
-    B -->|Returning| D[Continue Last Lesson]
-    C --> E[Generate Plan]
-    D --> F[Track Progress]
-    E --> F
-    F --> G[Complete Lesson]
-    G --> H[Receive Feedback]
+    A[View Premium Features] --> B{Account Status}
+    B -->|Free| C[Select Plan]
+    B -->|Premium| D[Already Subscribed]
+    C --> E[Enter Payment Details]
+    E --> F[Process Payment]
+    F -->|Success| G[Unlock Features]
+    F -->|Failure| H[Show Error]
+    G --> I[Confirmation Email]
+    H --> C
 ```
 
 ## 5. Non-Functional Requirements
 ### 5.1 Performance
-- API response time < 500ms (p95)
-- Support 100 concurrent lessons
-- Handle 1000 new users/day
+- Real-time STT latency <300ms (p99)
+- Post-session analysis completion <5s
+- API response time <500ms (p95)
+- Support 500 concurrent voice sessions
+- Handle 5000 new users/day
 
 ### 5.2 Security
-- PCI DSS compliance for payments
-- GDPR compliance for EU users
-- Regular penetration testing
+- PCI DSS Level 1 compliance
+- GDPR/CCPA compliant voice data handling
+- AES-256 encryption for audio storage
+- Annual penetration testing
+- Voice data retention policy (30 days)
 
-### 5.3 Scalability
-- Horizontal scaling to 10 nodes
-- Auto-scaling based on CPU usage
-- Multi-region deployment capability
+### 5.3 AI & Voice Requirements
+- LLM response quality: 95% accuracy
+- STT accuracy: 90% for target languages
+- TTS naturalness: 4/5 MOS score
+- Diagnostic analysis consistency: 85% agreement with human raters
+- Content generation: Zero hallucination policy
 
 ## 6. Success Metrics
 ### 6.1 KPIs

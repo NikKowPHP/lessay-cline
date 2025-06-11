@@ -1,30 +1,30 @@
 # PROJECT CHARTER TEMPLATE
 <!-- Document Version: 1.0 -->
-<!-- Last Updated: DATE -->
+<!-- Last Updated: 2025-06-11 -->
 
 ## 1. Project Overview
 ### 1.1 Vision Statement
-To create an AI-powered language learning platform that delivers personalized, adaptive lessons with real-time feedback, making language acquisition accessible and effective for everyone.
+To create an AI-powered language learning platform that listens, understands, and adapts to each learner through continuous voice analysis and Spaced Repetition (SRS), transforming every interaction into measurable progress toward fluency.
 
 ### 1.2 Objectives
-- Launch MVP with 3 languages by Q3 2025
-- Achieve 10,000 active users within 6 months
-- Maintain 90% user satisfaction rate
-- Process payments with 99.9% reliability
+- Launch with English, Spanish and French by Q3 2025
+- Achieve 15% improvement in vocabulary recall (measured by SRS) within 30 days
+- Maintain <300ms latency for real-time voice analysis
+- Process 95% of payments through Stripe integration
 
 ### 1.3 Success Criteria
-- 80% of users complete at least 5 lessons/month
-- Average lesson rating ≥ 4.5/5 stars
-- Payment success rate ≥ 99%
-- <500ms API response time (p95)
+- 15% improvement in vocabulary recall over 30 days (SRS metric)
+- 10% reduction in pronunciation errors per month (voice analysis)
+- <300ms latency for real-time speech-to-text
+- 90% user retention at 30 days
 
 ## 2. Scope
 ### 2.1 In Scope
-- Core lesson delivery engine
-- User authentication system
-- Subscription management
-- Basic progress tracking
-- Payment processing integration
+- Adaptive lesson engine with SRS
+- Real-time voice analysis pipeline
+- Progress dashboard with fluency metrics
+- Stripe payment integration
+- AI-driven diagnostics system
 
 ### 2.2 Out of Scope
 - Offline functionality
@@ -53,23 +53,26 @@ Meets bi-weekly to review progress and approve major changes
 ### 4.1 Key Milestones
 | Milestone | Date | Owner |
 |-----------|------|-------|
-| Requirements Finalized | 2025-06-30 | Jane Doe |
-| MVP Development Complete | 2025-09-15 | John Smith |
-| Beta Launch | 2025-10-01 | Sarah Lee |
-| Full Release | 2025-11-15 | Alex Wong |
+| Requirements Finalized | 2025-06-25 | Jane Doe |
+| Core Engine Complete | 2025-08-15 | John Smith |
+| Voice Analysis Integrated | 2025-09-01 | John Smith |
+| Beta Launch | 2025-09-15 | Sarah Lee |
+| Full Release | 2025-10-01 | Alex Wong |
 
 ### 4.2 High-Level Schedule
 ```mermaid
 gantt
     title Project Timeline
     dateFormat  YYYY-MM-DD
-    section Planning
-    Requirements      :active,  req, 2025-06-01, 30d
-    Technical Design  :         tech, after req, 15d
-    section Development
-    Core Engine       :         engine, after tech, 45d
-    Payment Integration :      payment, after engine, 15d
-    section Testing
-    QA Phase          :         qa, after payment, 30d
-    Launch Preparation:         launch, after qa, 15d
+    section Phase 0
+    Foundation       :active,  phase0, 2025-06-11, 5d
+    section Phase 1
+    Requirements     :         phase1, after phase0, 10d
+    section Phase 2
+    Technical Design :         phase2, after phase1, 15d
+    section Phase 3
+    Core Development :         phase3, after phase2, 45d
+    Voice Integration:         voice, after phase3, 15d
+    section Phase 4
+    Testing & Launch :         phase4, after voice, 30d
 ```

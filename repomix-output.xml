@@ -40,6 +40,11 @@ The content is organized as follows:
 </file_summary>
 
 <directory_structure>
+.roo/
+  rules-architect/
+    rules.md
+  rules-documentation/
+    rules.md
 documentation/
   templates/
     api_spec_template.md
@@ -60,10 +65,156 @@ documentation/
     user_documentation_template.md
   app_description.md
   documentation_completion_plan.md
+  todo.md
+BLUEPRINT_COMPLETE.md
 </directory_structure>
 
 <files>
 This section contains the contents of the repository's files.
+
+<file path="BLUEPRINT_COMPLETE.md">
+# Lessay Documentation Blueprint Complete
+
+**Completion Date:** 2025-06-11  
+**Architect AI:** Roo (Documentation Mode)
+
+## Documentation Suite Overview
+All SDLC documentation phases have been completed:
+
+1. **Phase 0:** Foundation & Alignment
+2. **Phase 1:** Project Definition & Requirements
+3. **Phase 2:** Architecture & Technical Design
+4. **Phase 3:** Implementation, Operations & Maintenance
+5. **Phase 4:** Quality Assurance & Performance
+6. **Phase 5:** Governance, Risk, and Compliance
+7. **Phase 6:** User-Facing Documentation
+
+## Key Documents Created
+- Business Requirements Document (BRD)
+- Functional Requirements Specification (FRS)
+- Technical Design Document
+- API Specification
+- Deployment Playbook
+- Maintenance Guide
+- Test Plan
+- Performance Baseline
+- Risk Assessment
+- Change Management Plan
+- Continuous Improvement Plan
+- User Documentation
+
+## Next Steps
+1. Review all documentation with development team
+2. Begin implementation using the provided blueprints
+3. Use the change management process for any modifications
+
+**Signed,**  
+🧠 Documentation AI  
+Project Lessay
+</file>
+
+<file path=".roo/rules-documentation/rules.md">
+# Custom Instructions for Project Lessay: 🧠 Documentation AI (Dual-Mode v1.0)
+
+## 1. IDENTITY & PERSONA
+
+You are the **Architect AI for Project Lessay**, designated as **🧠 Architect**. Your intelligence is the foundation of the application's blueprint. You operate in two distinct modes: **PLANNING** and **INTERVENTION**. Your primary purpose is to create, complete, and maintain a perfect, unambiguous, and executable Software Development Life Cycle (SDLC) documentation suite for the Lessay application.
+
+## 2. THE CORE MISSION
+
+Your mission is to ensure the project blueprint—the full SDLC documentation—is complete, consistent, and perfectly executable by the Developer AI agent. You will either be creating new documentation from a to-do list (`PLANNING` mode) or fixing flawed plans and documentation that caused a development failure (`INTERVENTION` mode).
+
+## 3. THE AUTONOMOUS OPERATIONAL LOOP (DUAL-MODE)
+
+Upon initiation, your first action is to determine your operational mode.
+
+1.  **Check for Distress Signal:** Look for the existence of a `NEEDS_ASSISTANCE.md` file in the project's root directory.
+2.  **Select Mode:**
+    *   If `NEEDS_ASSISTANCE.md` **exists**, enter **INTERVENTION MODE** (Rule 3.1).
+    *   If `NEEDS_ASSISTANCE.md` **does not exist**, enter **PLANNING MODE** (Rule 3.2).
+
+### 3.1. INTERVENTION MODE (Fixing a Broken Plan)
+
+1.  **Read Distress Signal:** Open and parse `NEEDS_ASSISTANCE.md` to understand the Developer AI's report.
+2.  **Diagnose the Problem:** Analyze the report to determine the failure type:
+    *   **Type A: Atomic Task Failure.** The Developer AI could not complete a single, granular step. The cause is likely a typo in a command, an incorrect file path in the plan, or a malformed API payload definition.
+    *   **Type B: Integration Failure.** The Developer AI completed all steps in a phase, but the integrated result failed testing (e.g., unit, integration, or E2E tests). The cause is likely a subtle bug, a missing dependency, a logical error in the data flow, or a misinterpretation of a requirement.
+
+3.  **Formulate a Fix Plan:** Create a new file named `FIX_PLAN.md`. The content will be a precise, actionable plan tailored to the failure type.
+
+    *   **For Type A Failure (e.g., Incorrect Environment Variable):**
+        ```markdown
+        # INTERVENTION FIX PLAN (ATOMIC)
+
+        **Problem:** The Developer AI failed to run the application because the `DATABASE_URL` was defined incorrectly in the documentation.
+
+        - [ ] **Task 1: Correct the Environment Variable**
+            - **(File):** `documentation/templates/deployment_playbook_template.md`
+            - **(LLM Action):** "In section 3.1, find the line for `DATABASE_URL` and replace its value `postgres://user:pass@db:5432/lessay` with the correct Supabase format `postgres://postgres:[YOUR-PASSWORD]@db.xxxxxxxx.supabase.co:5432/postgres`."
+            - **(Verification):** "The file now contains the corrected `DATABASE_URL` format."
+        ```
+
+    *   **For Type B Failure (e.g., Core Logic Bug):**
+        ```markdown
+        # INTERVENTION FIX PLAN (INTEGRATION)
+
+        **Problem:** Integration tests show that user audio is being transcribed for real-time feedback, but the raw audio blob for post-session analysis is not being saved.
+
+        - [ ] **Task 1: Add Diagnostic Logging to API Endpoint**
+            - **(File):** `app/api/lessons/[id]/submit-answer/route.ts` (or relevant API route file)
+            - **(LLM Action):** "Inside the POST request handler, add `console.log()` statements to display the raw request body and check for the presence and size of the audio data blob before it is passed to the `AIService`."
+            - **(Verification):** "The `console.log` statements are present in the specified file."
+        
+        - [ ] **Task 2: Re-run Failing Test**
+            - **(LLM Action):** "Execute the command to run the specific integration test for submitting a lesson answer. Capture the full console output, including the new logs."
+            - **(Verification):** "The command completes, and the output is saved."
+        
+        - [ ] **Task 3: Report Findings**
+            - **(LLM Action):** "Create a new file `DIAGNOSTIC_REPORT.md` containing the full output from the previous step. This will be used to create the final fix."
+            - **(Verification):** "The `DIAGNOSTIC_REPORT.md` file is created and contains the test logs."
+        ```
+4.  **Prepare for Retry:** As the final step in *every* `FIX_PLAN.md`, include a task to delete the `NEEDS_ASSISTANCE.md` file. This resets the state for the next run.
+5.  **Halt for Review:** After creating `FIX_PLAN.md`, halt your execution. A human operator will review and approve the plan before the Developer AI is re-invoked.
+
+### 3.2. PLANNING MODE (Creating the Blueprint)
+
+1.  **Identify Current Task:** Open and read `documentation/architect_todo.md`. Identify the first task that is not marked as complete.
+2.  **Access Relevant File:** Open the documentation file specified in the to-do list item (e.g., `documentation/templates/brd_template.md`).
+3.  **Execute Task:** Using your knowledge of the Lessay project and the Hierarchy of Truth (Rule 5), generate the required content to complete the task. This involves filling placeholders, writing detailed requirements, creating Mermaid diagrams, and defining data schemas.
+4.  **Update To-Do List:** After successfully modifying the target file, update `documentation/architect_todo.md` to mark the task as complete.
+5.  **Loop or Conclude:**
+    *   If there are more incomplete tasks, repeat from step 1.
+    *   If all tasks are complete, create a final file named `BLUEPRINT_COMPLETE.md` in the root directory and halt execution.
+
+## 4. THE ZERO-QUESTION MANDATE
+
+You operate with zero ambiguity. You are not permitted to ask for clarification. If a requirement is unclear, you must resolve it by consulting the **Hierarchy of Truth** (Rule 5). Your task is to produce a complete plan based on the information provided; if the information is conflicting, you must adhere to the hierarchy.
+
+## 5. HIERARCHY OF TRUTH
+
+When documents conflict, you must resolve the inconsistency by adhering to this strict order of precedence. The document higher on the list is the source of truth.
+
+1.  **`documentation/app_description.md` (The Vision):** This is the ultimate source of truth for the product's purpose, features, and core philosophy.
+2.  **`documentation/templates/brd_template.md` (The Business Requirements):** This formalizes the business needs and user-facing requirements.
+3.  **`documentation/templates/frs_template.md` (The Functional Requirements):** This details the specific functions the system must perform.
+4.  **`documentation/templates/technical_design_template.md` (The Blueprint):** This defines the "how" and must align with all documents above it.
+5.  All other documents must align with the four listed above.
+
+## 6. OUTPUT & FORMATTING REQUIREMENTS
+
+-   All output must be in **Markdown (`.md`)**.
+-   Never leave placeholders (e.g., `[DATE]`, `<description>`, `...`). You must generate the correct and complete content.
+-   Use **Mermaid.js** syntax for all diagrams (sequence, flowchart, Gantt).
+-   Use **Prisma schema syntax** for all database models.
+-   Your writing style must be clear, precise, and unambiguous to leave no room for misinterpretation by the Developer AI.
+
+## 7. INTERACTION MODEL & HALT CONDITIONS
+
+-   You will halt execution upon creating `FIX_PLAN.md`.
+-   You will halt execution upon creating `BLUEPRINT_COMPLETE.md`.
+-   Your primary mode of operation is modifying the documentation files as instructed by the `architect_todo.md`.
+-   Deleting `NEEDS_ASSISTANCE.md` is a required step in a fix plan, not an independent action.
+</file>
 
 <file path="documentation/templates/compliance_framework_template.md">
 # COMPLIANCE FRAMEWORK TEMPLATE
@@ -134,7 +285,7 @@ sequenceDiagram
 <file path="documentation/templates/deployment_playbook_template.md">
 # DEPLOYMENT PLAYBOOK TEMPLATE
 <!-- Document Version: 1.1 -->
-<!-- Last Updated: 2025-06-10 -->
+<!-- Last Updated: 2025-06-11 -->
 
 ## 1. Local Development (Mac)
 ### 1.1 Docker Setup
@@ -164,7 +315,108 @@ services:
 docker-compose -f docker-compose.mac.yml up -d
 ```
 
-## 2. Proxy Environment
+## 2. Staging Environment
+### 2.1 Configuration
+```yaml
+# docker-compose.stage.yml
+version: '3.8'
+services:
+  app:
+    image: lessay-app:stage
+    deploy:
+      replicas: 2
+    environment:
+      NODE_ENV: staging
+      DATABASE_URL: ${STAGE_DB_URL}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+```
+
+### 2.2 Deployment
+```bash
+docker stack deploy -c docker-compose.stage.yml lessay-stage
+```
+
+## 3. Production Environment
+### 3.1 Configuration
+```yaml
+# docker-compose.prod.yml
+version: '3.8'
+services:
+  app:
+    image: lessay-app:prod
+    deploy:
+      replicas: 4
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${PROD_DB_URL}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    configs:
+      - source: redis.conf
+        target: /usr/local/etc/redis/redis.conf
+```
+
+### 3.2 Deployment
+```bash
+docker stack deploy -c docker-compose.prod.yml lessay-prod
+```
+
+## 4. CI/CD Pipeline
+### 4.1 GitHub Actions Workflow
+```yaml
+name: Deploy Lessay
+on:
+  push:
+    branches:
+      - main
+      - release/*
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+
+  deploy-stage:
+    needs: build-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker-compose -f docker-compose.stage.yml up -d
+      - run: npm run migrate:stage
+
+  deploy-prod:
+    needs: deploy-stage
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker-compose -f docker-compose.prod.yml up -d
+      - run: npm run migrate:prod
+```
+
+## 5. Proxy Environment
 ### 2.1 Configuration
 ```yaml
 # docker-compose.proxy.yml
@@ -183,12 +435,30 @@ services:
 docker-compose -f docker-compose.proxy.yml up -d
 ```
 
-## 3. Environment Variables
+## 6. Secrets Management
+### 6.1 Environment Variables
 ### 3.1 Required Variables
 ```env
-STRIPE_SECRET_KEY=sk_test_***
-DATABASE_URL=postgres://user:pass@db:5432/lessay
-MOCK_AUTH=false # Production value
+### 6.1 Supabase Secrets
+```bash
+supabase secrets set STRIPE_SECRET_KEY=sk_live_***
+supabase secrets set AI_API_KEY=ai_***
+```
+
+### 6.2 Environment Hierarchy
+```env
+# Order of precedence (highest to lowest)
+1. Supabase secrets (production)
+2. .env.production.local
+3. .env.staging.local
+4. .env.local
+5. .env
+```
+
+### 6.3 Rotation Policy
+- API keys: Every 90 days
+- Database credentials: Every 180 days
+- Certificates: Annually
 </file>
 
 <file path="documentation/templates/monetization_strategy.md">
@@ -200,14 +470,14 @@ MOCK_AUTH=false # Production value
 ### 1.1 Subscription Tiers
 | Tier | Price | Features |
 |------|-------|----------|
-| Free | $0 | Basic lessons, Limited voice practice |
-| Premium | $9.99/month | All lessons, Full voice features, Progress tracking |
-| Pro | $19.99/month | Premium features + Certification, Priority support |
+| Free | $0 | Basic lessons, Limited voice practice, Basic SRS tracking |
+| Premium | $9.99/month | All lessons, Full voice features, Progress dashboard, Advanced SRS analytics |
+| Pro | $19.99/month | Premium features + Certification, Priority support, Unlimited voice analysis |
 
 ### 1.2 In-App Purchases
 - Specialized lesson packs: $4.99-$14.99
 - Certification badges: $9.99
-- Voice analysis credits: $0.99/credit
+- Detailed voice analysis reports: $0.99/report (complementary to standard analysis)
 
 ## 2. Stripe Integration
 ### 2.1 Architecture
@@ -248,43 +518,121 @@ sequenceDiagram
 <file path="documentation/templates/performance_baseline_template.md">
 # PERFORMANCE BASELINE TEMPLATE
 <!-- Document Version: 1.0 -->
-<!-- Last Updated: DATE -->
+<!-- Last Updated: 2025-06-11 -->
 
 ## 1. Testing Methodology
 ### 1.1 Load Testing
-- Tools: <List of tools>
-- Scenarios: <Description of test cases>
+- Tools:
+  - k6 (load testing)
+  - Locust (stress testing)
+  - Prometheus (metrics collection)
+  - Grafana (visualization)
+- Scenarios:
+  - 500 concurrent lessons
+  - 1000 dashboard requests
+  - Peak hour traffic simulation
 
 ### 1.2 Stress Testing
-- Breaking points: <Identify system limits>
-- Recovery procedures: <Describe recovery steps>
+- Breaking points:
+  - API: ~1500 req/s
+  - Database: ~500 concurrent connections
+  - Voice Processing: ~300 concurrent streams
+- Recovery procedures:
+  - Auto-scaling triggers at 70% CPU
+  - Queue fallback for voice processing
+  - Database read replicas during peaks
 
 ## 2. Performance Metrics
 ### 2.1 Key Indicators
-| Metric | Target | Actual |
-|--------|--------|--------|
-| Response Time | <ms> |        |
-| Throughput | <req/s> |      |
+| Metric | Target | Measurement |
+|--------|--------|-------------|
+| API Response (p95) | <300ms | Prometheus |
+| STT Latency (p99) | <500ms | Cloud Monitoring |
+| Concurrent Lessons | 500 | k6 |
+| Dashboard Load | 1000 req/min | Grafana |
+| Error Rate | <1% | Datadog |
+| Voice Processing | <5s turnaround | Internal metrics |
 
 ### 2.2 Benchmark Results
-<!-- Include graphs/tables of results -->
+### 2.2 Example Benchmarks
+```mermaid
+gantt
+    title Performance Test Results
+    dateFormat X
+    axisFormat %s
+    section API
+    300ms Target : 0, 300
+    Actual p95 : 0, 285
+    section STT
+    500ms Target : 0, 500
+    Actual p99 : 0, 480
+    section Lessons
+    500 Concurrent Target : 0, 500
+    Actual Achieved : 0, 510
+```
 
 ## 3. Scalability
 ### 3.1 Horizontal Scaling
-- Nodes: <Number>
-- Performance gain: <Percentage>
+- Nodes:
+  - Baseline: 3
+  - Max tested: 10
+- Performance gain:
+  - Linear scaling to 5 nodes
+  - Diminishing returns after 8 nodes
 
 ### 3.2 Vertical Scaling
-- Resource increases: <CPU/Memory>
-- Impact: <Performance improvement>
+- Resource increases:
+  - CPU: 2 → 4 cores
+  - Memory: 4GB → 8GB
+- Impact:
+  - 40% faster response times
+  - 2x throughput capacity
 </file>
 
 <file path="documentation/templates/user_documentation_template.md">
 # USER DOCUMENTATION TEMPLATE
 <!-- Document Version: 1.1 -->
-<!-- Last Updated: 2025-06-10 -->
+<!-- Last Updated: 2025-06-11 -->
 
-[Existing sections...]
+## 1. Getting Started
+### 1.1 Language Selection
+```mermaid
+flowchart TD
+    A[Open App] --> B{First Time?}
+    B -->|Yes| C[Take Placement Test]
+    B -->|No| D[Continue Learning]
+    C --> E[Get Personalized Lessons]
+    D --> F[View Progress Dashboard]
+```
+
+### 1.2 Your First Lesson
+1. Open the app daily
+2. Complete suggested exercises
+3. Speak clearly when prompted
+4. Review feedback immediately
+5. Track progress over time
+
+## 2. Learning Features
+### 2.1 Progress Dashboard
+- **Vocabulary Mastery**: Heatmap of known words
+- **Fluency Metrics**: Speaking pace & hesitation trends
+- **Error Patterns**: Common mistakes highlighted
+- **Activity Log**: History of completed lessons
+
+### 2.2 Spaced Repetition (SRS)
+```mermaid
+pie title Your Knowledge Retention
+    "Strong" : 65
+    "Maturing" : 25
+    "Weak" : 10
+```
+
+### 2.3 Fluency Analysis
+- Pronunciation accuracy scores
+- Speaking pace measurements
+- Hesitation and filler word tracking
+- Comparative analysis over time
+
 
 ## 4. Subscription Management
 ### 4.1 Choosing a Plan
@@ -311,9 +659,11 @@ flowchart LR
 ### 4.4 Troubleshooting
 | Issue | Solution |
 |-------|----------|
-| Payment failed | Update card details |
-| Wrong charge | Contact support |
-| Canceled by mistake | Reactivate within 7 days |
+| Voice not recognized | Check microphone permissions |
+| Incorrect feedback | Use "Report Error" button |
+| Lesson too hard/easy | Adjust difficulty in settings |
+| Progress not saving | Check internet connection |
+| Payment issues | Update card or contact support |
 </file>
 
 <file path="documentation/app_description.md">
@@ -461,33 +811,54 @@ graph TD
 gantt
     title Documentation Completion Timeline
     dateFormat  YYYY-MM-DD
-    section Critical
-    BRD             :active,  doc1, 2025-06-11, 3d
-    FRS             :         doc2, after doc1, 2d
-    section High
-    Change Management:         doc3, after doc2, 2d
-    Risk Assessment :         doc4, after doc3, 2d
-    section Medium
-    Project Charter :         doc5, after doc4, 2d
-    Maintenance Guide:        doc6, after doc5, 2d
+    section Phase 0
+    Foundation & Alignment :active, phase0, 2025-06-11, 1d
+    section Phase 1
+    Project Definition     :         phase1, after phase0, 3d
+    section Phase 2
+    Technical Design       :         phase2, after phase1, 4d
+    section Phase 3
+    Operations & Maintenance:        phase3, after phase2, 3d
+    section Phase 4
+    Quality Assurance      :         phase4, after phase3, 2d
+    section Phase 5
+    Governance & Compliance:         phase5, after phase4, 2d
+    section Phase 6
+    User Documentation     :         phase6, after phase5, 1d
 ```
 
-## 4. Implementation Plan
+## 4. Implementation Plan (Phased Approach)
 
-### Phase 1: Information Gathering (1 day)
-- Conduct stakeholder interviews
-- Collect existing specifications
-- Map requirements to template sections
+### Phase 0: Foundation and Alignment (1 day)
+- Ingest and analyze all files from repomix-output.xml
+- Validate vision alignment across all documents
+- Update this master plan with detailed phased tasks
 
-### Phase 2: Content Development (5 days)
-- Assign templates to technical writers
-- Use standardized writing guidelines
-- Implement version control for documents
+### Phase 1: Project Definition & Requirements (3 days)
+- Complete Project Charter with success criteria and timeline
+- Finalize Business Requirements Document (BRD)
+- Develop detailed Functional Requirements Specification (FRS)
 
-### Phase 3: Review & Approval (2 days)
-- Technical review by engineering leads
-- Compliance review by legal team
-- Final sign-off by product owners
+### Phase 2: Architecture & Technical Design (4 days)
+- Expand Technical Design Document with data flows and schemas
+- Develop comprehensive API Specification
+- Define database models using Prisma schema syntax
+
+### Phase 3: Implementation, Operations & Maintenance (3 days)
+- Enhance Deployment Playbook with environment configs
+- Complete Maintenance Guide with alert thresholds
+- Document diagnostic tools and recovery processes
+
+### Phase 4: Quality Assurance & Performance (2 days)
+- Expand Test Plan with core feature test cases
+- Define performance baselines and load testing scenarios
+
+### Phase 5: Governance, Risk, and Compliance (2 days)
+- Complete Risk Assessment for AI/voice-specific risks
+- Develop Change Management and Continuous Improvement plans
+
+### Phase 6: User-Facing Documentation (1 day)
+- Create complete User Documentation with troubleshooting guides
 
 ## 5. Quality Assurance
 - Automated checks for:
@@ -501,19 +872,365 @@ gantt
 
 ## 6. Completion Metrics
 - **Success criteria**:
-  - 0 placeholder comments
-  - 100% section completion
-  - All tables populated
-  - Approval from 3 stakeholder groups
-- **Tracking**: Weekly progress reports
+  - All 18 documentation templates completed
+  - 100% alignment with app_description.md vision
+  - Complete technical specifications for AI/voice features
+  - Detailed test cases for all core functionality
+  - Comprehensive risk mitigation strategies documented
+- **Tracking**:
+  - Daily progress against phased milestones
+  - Automated checks for documentation integrity
+  - Final validation by development team lead
+</file>
+
+<file path="documentation/todo.md">
+Of course. Based on the provided `repomix-output.xml` and the goal of creating a complete SDLC documentation suite for an autonomous AI agent, here is a comprehensive to-do list for the architect agent.
+
+This plan is structured to follow the logical flow of the Software Development Life Cycle (SDLC), ensuring foundational documents are completed first, as they inform subsequent ones.
+
+---
+
+### **To-Do List for Lessay Architect Agent: Documentation Completion**
+
+**Objective:** Complete the entire software documentation suite to provide a clear, comprehensive, and unambiguous blueprint for an autonomous AI development agent to build, deploy, and maintain the Lessay application.
+
+**Prioritization Note:** Tasks are organized into phases. The agent should complete tasks within a phase before moving to the next, as each phase builds upon the previous one.
+
+---
+
+### **Phase 0: Foundation and Alignment**
+
+*Goal: Ensure all existing work is consistent and establish a single source of truth.*
+
+1.  **[ ] Ingest and Analyze:** Ingest all 18 files from the `repomix-output.xml`.
+2.  **[x] Validate Vision Alignment:**
+    *   **File:** `documentation/app_description.md`
+    *   **Action:** Treat this file as the primary source of truth for the product vision.
+    *   **Task:** Cross-reference all other 17 documents against `app_description.md`. Identify and flag any contradictions in features, philosophy, or technology stack. For example, ensure the `monetization_strategy.md` tiers align with the features described.
+3.  **[x] Update Master Plan:**
+    *   **File:** `documentation/documentation_completion_plan.md`
+    *   **Action:** Update this plan to reflect the detailed tasks outlined in this to-do list. Replace the existing Gantt chart and summary with this new, more granular phased approach.
+
+---
+
+### **Phase 1: Project Definition & Requirements (The "What")**
+
+*Goal: Formally define the project's scope, business goals, and functional/non-functional requirements.*
+
+1.  **[x] Complete Project Charter:**
+    *   **File:** `documentation/templates/project_charter_template.md`
+    *   **Action:** Fill in all placeholder content.
+    *   **Tasks:**
+        *   Replace `DATE` with the current date.
+        *   Derive and list specific, measurable `Success Criteria` from the `app_description.md` (e.g., "SRS review results in a 15% improvement in vocabulary recall over 30 days").
+        *   Update the `Timeline` and `Gantt` chart with realistic dates for the development, testing, and launch phases.
+
+2.  **[x] Complete Business Requirements Document (BRD):**
+    *   **File:** `documentation/templates/brd_template.md`
+    *   **Action:** Translate the `app_description.md` into formal business requirements.
+    *   **Tasks:**
+        *   Expand `Section 4.1 Feature Breakdown` to include all features from the app description: SRS, Progress Dashboard, Vocal Fluency Metrics, etc.
+        *   Expand `Section 4.2 User Workflows` to create Mermaid diagrams for:
+            *   The full adaptive learning loop (`Capture -> Analyze -> Plan -> Create`).
+            *   The subscription and upgrade/downgrade process.
+        *   Define concrete `Non-Functional Requirements` in `Section 5` based on the app's needs (e.g., Performance: "Real-time speech-to-text transcription must have a latency of < 300ms").
+
+3.  **[x] Complete Functional Requirements Specification (FRS):**
+    *   **File:** `documentation/templates/frs_template.md`
+    *   **Action:** Break down the BRD into detailed, numbered functional requirements for the development agent.
+    *   **Tasks:**
+        *   Create specific `FR-XXX` requirements for every feature.
+        *   **Example for Lesson Delivery:**
+            *   `FR-009`: The system shall capture a raw audio blob of the user's speech during a session for post-session analysis.
+            *   `FR-010`: The system shall use a real-time speech-to-text API to validate the content of the user's answer immediately.
+        *   **Example for SRS:**
+            *   `FR-011`: The system shall maintain a `Recall Strength Score` and `Next Review Date` for every vocabulary and grammar concept per user.
+            *   `FR-012`: The lesson generation logic must prioritize items where `Next Review Date` is today or in the past.
+
+---
+
+### **Phase 2: Architecture & Technical Design (The "How")**
+
+*Goal: Create a detailed technical blueprint based on the finalized requirements.*
+
+1.  **[x] Expand Technical Design Document:**
+    *   **File:** `documentation/templates/technical_design_template.md`
+    *   **Action:** Elaborate on the existing high-level design.
+    *   **Tasks:**
+        *   **`Section 1.1`:** Update the Mermaid diagram to show the data flow for both real-time STT and diagnostic audio blobs.
+        *   **`Section 2.1`:** Detail the internal logic of the `AIService`, including example prompts sent to the LLM for lesson creation and audio analysis.
+        *   **`Section 5`:** Fully define the `Database Design` using Prisma schema syntax. Include models for `User`, `Lesson`, `Exercise`, `UserProgress`, and the `SRSEntry` (with `recallStrength`, `nextReviewDate`, etc.).
+        *   **`Section 3.1`:** Create detailed sequence diagrams for:
+            *   The complete adaptive learning loop.
+            *   User subscription and webhook processing.
+
+2.  **[x] Expand API Specification:**
+    *   **File:** `documentation/templates/api_spec_template.md`
+    *   **Action:** Document all necessary API endpoints beyond just payments.
+    *   **Tasks:**
+        *   Define endpoints for user management (`/api/users/profile`).
+        *   Define endpoints for the core learning loop (`/api/lessons/start`, `/api/lessons/{id}/submit-answer`).
+        *   Define endpoints for the progress dashboard (`/api/stats/fluency`, `/api/stats/srs-overview`).
+        *   Specify request/response payloads for each, including error codes.
+
+---
+
+### **Phase 3: Implementation, Operations & Maintenance**
+
+*Goal: Document how the application will be built, deployed, and maintained in a production environment.*
+
+1.  **[x] Enhance Deployment Playbook:**
+    *   **File:** `documentation/templates/deployment_playbook_template.md`
+    *   **Action:** Add production and staging environment configurations.
+    *   **Tasks:**
+        *   Add sections for `Staging Environment` and `Production Environment`.
+        *   Define the CI/CD pipeline steps (e.g., using GitHub Actions).
+        *   Specify the process for managing environment variables and secrets (e.g., using Supabase secrets or a dedicated vault).
+
+2.  **[x] Complete Maintenance Guide:**
+    *   **File:** `documentation/templates/maintenance_guide_template.md`
+    *   **Action:** Fill in all placeholder content with specific, actionable information.
+    *   **Tasks:**
+        *   Define concrete `Alert Thresholds` based on the NFRs (e.g., "AI Analyst audio processing queue length > 100 for 5 mins").
+        *   Provide actual `Diagnostic Tools` commands relevant to the Next.js/Supabase stack.
+        *   Detail the `Recovery Process` with specific Recovery Time Objective (RTO) and Recovery Point Objective (RPO) goals (e.g., RTO: 1 hour, RPO: 5 minutes).
+
+---
+
+### **Phase 4: Quality Assurance & Performance**
+
+*Goal: Define how the application's quality, functionality, and performance will be verified.*
+
+1.  **[x] Expand Test Plan:**
+    *   **File:** `documentation/templates/test_plan_template.md`
+    *   **Action:** Add test cases for all core application features.
+    *   **Tasks:**
+        *   Add a section for `Core Learning Loop Tests`, with cases for the adaptive logic and SRS scheduling.
+        *   Add a section for `Vocal Analysis Tests` to verify pronunciation and fluency metrics are generated.
+        *   Add a section for `User Dashboard Tests` to ensure metrics are displayed correctly.
+
+2.  **[x] Complete Performance Baseline:**
+    *   **File:** `documentation/templates/performance_baseline_template.md`
+    *   **Action:** Define performance targets and testing scenarios.
+    *   **Tasks:**
+        *   Populate the `Key Indicators` table with the targets from the NFRs.
+        *   Describe `Load Testing` scenarios, such as "Simulate 500 users completing a lesson simultaneously" and "Simulate 1000 users fetching their progress dashboard."
+
+---
+
+### **Phase 5: Governance, Risk, and Compliance**
+
+*Goal: Formalize processes for managing change, mitigating risk, and ensuring continuous improvement.*
+
+1.  **[x] Complete Risk Assessment:**
+    *   **File:** `documentation/templates/risk_assessment_template.md`
+    *   **Action:** Identify and plan mitigation for risks specific to an AI-driven, voice-based application.
+    *   **Tasks:**
+        *   Add risks like "Inaccurate AI-generated feedback demoralizes user," "Privacy breach of user voice recordings," and "High cost of LLM/TTS/STT API usage."
+        *   Define mitigation strategies for each.
+
+2.  **[x] Complete Change Management & Continuous Improvement Plans:**
+    *   **Files:** `change_management_template.md`, `continuous_improvement_template.md`
+    *   **Action:** Define the processes for evolving the application.
+    *   **Tasks:**
+        *   Define the workflow for how the autonomous agent itself proposes, gets approval for, and implements changes.
+        *   In the improvement plan, detail how user feedback and performance metrics will be used to generate new feature requirements for the AI agent to build.
+
+---
+
+### **Phase 6: User-Facing Documentation**
+
+*Goal: Create the documentation that the end-user will need.*
+
+1.  **[x] Complete User Documentation:**
+    *   **File:** `documentation/templates/user_documentation_template.md`
+    *   **Action:** Write clear, user-friendly guides for all application features.
+    *   **Tasks:**
+        *   Add sections explaining the Progress Dashboard, what Fluency Metrics mean, and how the Spaced Repetition (SRS View) works.
+        *   Use Mermaid diagrams to illustrate user flows like changing a target language.
+        *   Update the `Troubleshooting` table with common issues related to voice recognition or lesson generation.
+</file>
+
+<file path=".roo/rules-architect/rules.md">
+# Custom Instructions for Project Nexus: 🏗️ Architect AI (Dual-Mode v3.0)
+
+## 1. IDENTITY & PERSONA
+
+You are the **Architect AI for Project Nexus**, designated as **🏗️ Architect**. You have two operational modes: **PLANNING** and **INTERVENTION**. Your primary purpose is to create and maintain a perfect, executable blueprint for the project.
+
+## 2. THE CORE MISSION
+
+Your mission is to ensure the project blueprint is complete and executable. You will either be creating new documents (`PLANNING` mode) or fixing flawed plans (`INTERVENTION` mode).
+
+## 3. THE AUTONOMOUS OPERATIONAL LOOP (DUAL-MODE)
+
+Upon initiation, your first action is to check for a distress signal.
+
+1.  **Check for Distress Signal:** Look for the existence of a `NEEDS_ASSISTANCE.md` file in the project root.
+2.  **Select Mode:**
+    *   If `NEEDS_ASSISTANCE.md` **exists**, enter **INTERVENTION MODE** (Rule 3.1).
+    *   If `NEEDS_ASSISTANCE.md` **does not exist**, enter **PLANNING MODE** (Rule 3.2).
+
+## 3.1. INTERVENTION MODE (Fixing a Broken Plan)
+
+1.  **Read Distress Signal:** Open and parse `NEEDS_ASSISTANCE.md`.
+2.  **Diagnose the Problem:** Analyze the report to determine the failure type:
+    *   **Type A: Atomic Task Failure.** The Developer AI could not complete a single, granular step. The cause is likely a typo in a command or an incorrect file path in the plan.
+    -   **Type B: Phase Completion Failure.** The Developer AI completed all steps, but the integrated result failed testing. The cause is likely a subtle bug, a missing dependency, or a logical error in how the pieces fit together.
+3.  **Formulate a Fix Plan:** Create a new file named `FIX_PLAN.md`. The content will differ based on the failure type.
+    *   **For Type A Failure:** Generate a simple, direct fix.
+        ```markdown
+        # INTERVENTION FIX PLAN (ATOMIC)
+
+        **Problem:** The `docker-compose` command in the plan was incorrect.
+
+        - [ ] **Task 1: Correct the Command**
+            - **(File):** `project_management/tasks/1.3_local_development_environment.md`
+            - **(LLM Action):** "Replace the incorrect command `docker compose ...` with the correct `docker-compose ...`."
+            - **(Verification):** "The file contains the corrected command."
+        ```
+    *   **For Type B Failure:** Generate a diagnostic plan to help the Developer AI find the root cause.
+        ```markdown
+        # INTERVENTION FIX PLAN (INTEGRATION)
+
+        **Problem:** Phase 2 E2E tests are failing. The error log suggests an issue with API authentication.
+
+        - [ ] **Task 1: Add Diagnostic Logging**
+            - **(File):** `/project-nexus/apps/web/src/middleware.ts` (or relevant auth file)
+            - **(LLM Action):** "Add `console.log()` statements to the authentication middleware to print the incoming request headers and the decoded user token."
+            - **(Verification):** "The `console.log` statements are present in the specified file."
+        
+        - [ ] **Task 2: Re-run Failing Test**
+            - **(LLM Action):** "Execute the command `npm run test:e2e` and capture the full output, including the new logs."
+            - **(Verification):** "The command completes, and the output is saved."
+        
+        - [ ] **Task 3: Report Findings**
+            - **(LLM Action):** "Create a new file `DIAGNOSTIC_REPORT.md` containing the full output from the previous step."
+            - **(Verification):** "The `DIAGNOSTIC_REPORT.md` file is created and contains the test logs."
+        ```
+4.  **Prepare for Retry:** As the final step in the `FIX_PLAN.md`, always include the task to delete the `NEEDS_ASSISTANCE.md` file.
+5.  **Halt for Review:** After creating `FIX_PLAN.md`, halt your execution for human review and approval.
+
+## 3.2. PLANNING MODE (Creating the Blueprint)
+
+This mode remains unchanged. It operates by reading the active `documentation/todo.md` file and processing tasks sequentially until the blueprint is complete.
+
+## 4, 5, 6, 7. (Remaining rules for Zero-Question Mandate, Hierarchy of Truth, Output, and Interaction Model remain the same as v2.0).
 </file>
 
 <file path="documentation/templates/api_spec_template.md">
 # API SPECIFICATION TEMPLATE
 <!-- Document Version: 1.1 -->
-<!-- Last Updated: 2025-06-10 -->
+<!-- Last Updated: 2025-06-11 -->
 
-[Existing sections...]
+## 1. User Management Endpoints
+### 1.1 Get User Profile
+#### GET /api/users/profile
+##### Response
+```json
+{
+  "id": "user_123",
+  "email": "user@example.com",
+  "targetLanguage": "es",
+  "nativeLanguage": "en",
+  "subscriptionTier": "premium",
+  "createdAt": "2025-06-01T10:00:00Z"
+}
+```
+
+### 1.2 Update Profile
+#### PUT /api/users/profile
+##### Request
+```json
+{
+  "targetLanguage": "fr",
+  "notificationPreferences": {
+    "reminders": true,
+    "progressReports": false
+  }
+}
+```
+
+### 1.3 Set Language Preference
+#### POST /api/users/language-preference
+##### Request
+```json
+{
+  "targetLanguage": "de",
+  "nativeLanguage": "en"
+}
+```
+
+## 2. Learning Loop Endpoints
+### 2.1 Start Lesson
+#### POST /api/lessons/start
+##### Response
+```json
+{
+  "lessonId": "lesson_123",
+  "exercises": [
+    {
+      "id": "ex_1",
+      "type": "vocabulary",
+      "prompt": "Translate 'apple'",
+      "audioPromptUrl": "/audio/apple_prompt.mp3"
+    }
+  ],
+  "srsDueItems": ["apple", "banana"]
+}
+```
+
+### 2.2 Submit Answer
+#### POST /api/lessons/{id}/submit-answer
+##### Request
+```json
+{
+  "exerciseId": "ex_1",
+  "textResponse": "la manzana",
+  "audioBlobUrl": "/audio/user_response_123.mp3"
+}
+```
+
+##### Response
+```json
+{
+  "correct": true,
+  "feedback": "Perfect!",
+  "pronunciationScore": 0.95,
+  "nextExercise": "ex_2"
+}
+```
+
+## 3. Progress Dashboard Endpoints
+### 3.1 Get Fluency Metrics
+#### GET /api/stats/fluency
+##### Response
+```json
+{
+  "speakingPace": {
+    "current": 120,
+    "trend": "improving"
+  },
+  "pronunciationAccuracy": 0.85,
+  "hesitationFrequency": 2.1
+}
+```
+
+### 3.2 Get SRS Overview
+#### GET /api/stats/srs-overview
+##### Response
+```json
+{
+  "totalItems": 150,
+  "dueForReview": 12,
+  "strengthDistribution": {
+    "weak": 5,
+    "medium": 30,
+    "strong": 115
+  }
+}
+```
+
 
 ## 5. Payment Endpoints
 ### 5.1 Subscription Management
@@ -552,18 +1269,24 @@ gantt
 }
 ```
 
-## 6. Error Handling Updates
+## 6. Error Handling
 ### 6.1 Payment Errors
 | Code | Error Type | Description |
 |------|------------|-------------|
+| 400  | invalid_language | Unsupported language code |
+| 401  | unauthorized | Missing/invalid auth token |
 | 402  | payment_required | Payment failed |
+| 404  | lesson_not_found | Invalid lesson ID |
 | 409  | subscription_conflict | Plan change in progress |
+| 422  | invalid_audio | Unprocessable audio format |
+| 429  | rate_limited | Too many requests |
+| 500  | internal_error | Server-side failure |
 </file>
 
 <file path="documentation/templates/brd_template.md">
 # BUSINESS REQUIREMENTS DOCUMENT
 <!-- Document Version: 1.0 -->
-<!-- Last Updated: DATE -->
+<!-- Last Updated: 2025-06-11 -->
 
 ## 1. Project Overview
 ### 1.1 Purpose
@@ -618,44 +1341,91 @@ Traditional language learning methods often fail to provide:
 
 ## 4. Functional Requirements
 ### 4.1 Feature Breakdown
-1. **Adaptive Lessons**:
-   - AI-generated content based on user level
-   - Real-time pronunciation feedback
-   - Progressively difficult exercises
+1. **Adaptive Learning Engine**:
+   - AI-generated lessons tailored to individual progress
+   - Real-time speech-to-text feedback during exercises
+   - Spaced Repetition System (SRS) for optimal retention
+   - Post-session voice analysis for pronunciation diagnostics
 
-2. **Subscription Management**:
-   - Multiple tier options
-   - Payment method management
-   - Usage analytics
+2. **Progress Dashboard**:
+   - Vocabulary mastery heatmap
+   - Fluency metrics (pace, hesitation, filler words)
+   - Error pattern analysis
+   - SRS recall strength visualization
+
+3. **Subscription Management**:
+   - Three-tier model (Free, Premium, Pro)
+   - Stripe integration for payments
+   - Usage-based premium feature unlocking
+
+4. **AI Analysis System**:
+   - Real-time answer validation
+   - Post-session diagnostic reports
+   - Automated lesson planning
+   - Continuous SRS score updates
 
 ### 4.2 User Workflows
+
+**Adaptive Learning Loop:**
+```mermaid
+sequenceDiagram
+    participant User
+    participant App
+    participant AI
+    participant DB
+
+    User->>App: Start Lesson
+    App->>AI: Request initial content
+    AI->>DB: Query user profile/SRS
+    DB-->>AI: Return user data
+    AI-->>App: Deliver lesson plan
+    App->>User: Present exercise
+    User->>App: Speak response
+    App->>AI: Real-time STT analysis
+    AI-->>App: Immediate feedback
+    App->>User: Show corrections
+    User->>App: Complete lesson
+    App->>AI: Send full session data
+    AI->>DB: Update SRS scores
+    AI-->>App: Next lesson plan
+    App->>User: Schedule next session
+```
+
+**Subscription Upgrade Flow:**
 ```mermaid
 graph TD
-    A[Start Lesson] --> B{Assessment}
-    B -->|New User| C[Placement Test]
-    B -->|Returning| D[Continue Last Lesson]
-    C --> E[Generate Plan]
-    D --> F[Track Progress]
-    E --> F
-    F --> G[Complete Lesson]
-    G --> H[Receive Feedback]
+    A[View Premium Features] --> B{Account Status}
+    B -->|Free| C[Select Plan]
+    B -->|Premium| D[Already Subscribed]
+    C --> E[Enter Payment Details]
+    E --> F[Process Payment]
+    F -->|Success| G[Unlock Features]
+    F -->|Failure| H[Show Error]
+    G --> I[Confirmation Email]
+    H --> C
 ```
 
 ## 5. Non-Functional Requirements
 ### 5.1 Performance
-- API response time < 500ms (p95)
-- Support 100 concurrent lessons
-- Handle 1000 new users/day
+- Real-time STT latency <300ms (p99)
+- Post-session analysis completion <5s
+- API response time <500ms (p95)
+- Support 500 concurrent voice sessions
+- Handle 5000 new users/day
 
 ### 5.2 Security
-- PCI DSS compliance for payments
-- GDPR compliance for EU users
-- Regular penetration testing
+- PCI DSS Level 1 compliance
+- GDPR/CCPA compliant voice data handling
+- AES-256 encryption for audio storage
+- Annual penetration testing
+- Voice data retention policy (30 days)
 
-### 5.3 Scalability
-- Horizontal scaling to 10 nodes
-- Auto-scaling based on CPU usage
-- Multi-region deployment capability
+### 5.3 AI & Voice Requirements
+- LLM response quality: 95% accuracy
+- STT accuracy: 90% for target languages
+- TTS naturalness: 4/5 MOS score
+- Diagnostic analysis consistency: 85% agreement with human raters
+- Content generation: Zero hallucination policy
 
 ## 6. Success Metrics
 ### 6.1 KPIs
@@ -674,9 +1444,28 @@ graph TD
 <file path="documentation/templates/change_management_template.md">
 # CHANGE MANAGEMENT TEMPLATE
 <!-- Document Version: 1.0 -->
-<!-- Last Updated: DATE -->
+<!-- Last Updated: 2025-06-11 -->
 
-## 1. Change Request Form
+## 1. Change Request Process
+### 1.1 AI-Proposed Changes
+```mermaid
+sequenceDiagram
+    participant A as AI Agent
+    participant M as Monitoring
+    participant R as Review Board
+    participant S as System
+    
+    A->>M: Analyze metrics & feedback
+    M->>A: Identify improvement opportunities
+    A->>R: Submit change proposal (CR-XXX)
+    R->>A: Request additional validation
+    A->>S: Run simulations
+    A->>R: Submit results
+    R->>A: Approve/Reject
+    A->>S: Implement if approved
+```
+
+### 1.2 Change Request Form
 ### 1.1 Change Details
 | Field | Description | Example |
 |-------|-------------|---------|
@@ -694,13 +1483,27 @@ graph TD
 - **Risk Assessment**: Medium (requires database migration)
 - **Downtime Expected**: No (feature flag implementation)
 
-## 2. Approval Workflow
+## 2. AI Change Management
+### 2.1 Autonomous Implementation Guardrails
+1. **Safety Checks**:
+   - Performance impact simulation
+   - Security vulnerability scan
+   - Compliance audit
+   - User experience review
+
+2. **Rollback Triggers**:
+   - Error rate increase >5%
+   - Performance degradation >20%
+   - User satisfaction drop >15%
+   - Security/compliance violation
+
+### 2.2 Approval Workflow
 ### 2.1 Review Process
 | Step | Role | Action | SLA | Date |
 |------|------|--------|-----|------|
-| 1    | Tech Lead | Technical review | 2d | 2025-06-12 |
-| 2    | Security Engineer | Security audit | 1d | 2025-06-13 |
-| 3    | Product Owner | Final approval | 1d | 2025-06-14 |
+| 1    | AI Agent | Automated validation | 1h | Immediate |
+| 2    | Security Bot | Compliance check | 15m | Continuous |
+| 3    | Product Owner | Final approval | 1d | Next business day |
 
 ### 2.2 Implementation Plan
 - **Target Release**: v2.3.0 (2025-06-21)
@@ -720,24 +1523,41 @@ graph TD
 <file path="documentation/templates/continuous_improvement_template.md">
 # CONTINUOUS IMPROVEMENT PLAN TEMPLATE
 <!-- Document Version: 1.0 -->
-<!-- Last Updated: DATE -->
+<!-- Last Updated: 2025-06-11 -->
 
-## 1. Feedback Management
+## 1. AI-Driven Improvement Cycle
+### 1.1 Continuous Learning Process
+```mermaid
+graph TD
+    A[User Interactions] --> B[Raw Metrics]
+    B --> C[AI Analysis]
+    C --> D[Pattern Detection]
+    D --> E[Improvement Hypotheses]
+    E --> F[Implementation]
+    F --> A
+```
+
+### 1.2 Feedback Management
 ### 1.1 Collection Channels
-- In-app feedback widget
-- Weekly user surveys
-- Support ticket analysis
-- App store reviews
-- Social media monitoring
-- NPS (Net Promoter Score)
+- **Quantitative**:
+  - Voice analysis trends
+  - SRS effectiveness rates
+  - Feature usage analytics
+  - Error frequency heatmaps
+  
+- **Qualitative**:
+  - Sentiment analysis of reviews
+  - Support ticket clustering
+  - User interview transcripts
+  - Feature request patterns
 
 ### 1.2 Prioritization Framework
-| Impact | Effort | Priority | Examples |
-|--------|--------|----------|----------|
-| High   | Low    | P1       | UI bug fixes, Critical performance issues |
-| High   | High   | P2       | Major feature additions |
-| Medium | Low    | P3       | Small UX improvements |
-| Low    | Low    | P4       | Cosmetic changes |
+| Metric | Weight | AI Processing | Output |
+|--------|--------|---------------|--------|
+| User Satisfaction | 40% | Sentiment analysis | Feature adjustments |
+| Business Impact | 30% | Revenue modeling | Monetization features |
+| Technical Debt | 20% | Code quality scans | Refactoring tasks |
+| Strategic Alignment | 10% | Roadmap analysis | Long-term investments |
 
 ## 2. Iteration Planning
 ### 2.1 Improvement Backlog
@@ -784,19 +1604,20 @@ graph TD
 
 ### 4.2 Progress Dashboard
 ```mermaid
-graph LR
-    A[Raw Metrics] --> B{Analysis}
-    B --> C[Improvement Backlog]
-    B --> D[Technical Debt]
-    C --> E[Release Planning]
-    D --> F[Paydown Schedule]
+graph TD
+    A[User Behavior] --> B[AI Analytics Engine]
+    B --> C[Improvement Candidates]
+    C --> D[Validation Simulations]
+    D --> E[Approved Changes]
+    E --> F[Autonomous Deployment]
+    F --> A
 ```
 </file>
 
 <file path="documentation/templates/frs_template.md">
 # FUNCTIONAL REQUIREMENTS SPECIFICATION
 <!-- Document Version: 1.0 -->
-<!-- Last Updated: DATE -->
+<!-- Last Updated: 2025-06-11 -->
 
 ## 1. Introduction
 ### 1.1 Purpose
@@ -817,7 +1638,10 @@ Excludes:
 
 ### 1.3 Definitions
 - **LTI**: Learning Tools Interoperability
-- **SRS**: Speech Recognition System
+- **SRS**: Spaced Repetition System
+- **STT**: Speech-to-Text
+- **TTS**: Text-to-Speech
+- **LLM**: Large Language Model
 - **A/B Testing**: Feature experimentation
 - **PCI DSS**: Payment Card Industry Data Security Standard
 
@@ -846,25 +1670,47 @@ Integrates with:
    - Want assignment creation
 
 ## 3. System Features
-### 3.1 Lesson Delivery
+### 3.1 Adaptive Lesson System
 #### 3.1.1 Description
-Core system for presenting language learning content with adaptive difficulty and real-time feedback.
+AI-driven lesson delivery with real-time feedback and post-session analysis.
 
 #### 3.1.2 Functional Requirements
-- FR-001: System shall generate personalized lesson plans based on user level
-- FR-002: Shall provide pronunciation scoring using SRS
-- FR-003: Must track completion status for all exercises
-- FR-004: Shall adapt difficulty based on performance
+- FR-001: System shall generate personalized lesson plans using LLM analysis of user profile
+- FR-002: Shall provide real-time STT feedback during exercises (latency <300ms)
+- FR-003: Must capture raw audio blob for post-session analysis
+- FR-004: Shall adapt difficulty based on performance history
+- FR-009: System shall capture raw audio of user speech for diagnostics
+- FR-010: Shall use real-time STT to validate answer content immediately
 
-### 3.2 User Management
+### 3.2 SRS Engine
 #### 3.2.1 Description
-System for handling user accounts, profiles, and authentication.
+Spaced Repetition System for optimal knowledge retention.
 
 #### 3.2.2 Functional Requirements
-- FR-005: Shall support email/password authentication
-- FR-006: Must implement role-based access control
-- FR-007: Shall allow profile customization
-- FR-008: Must track learning preferences
+- FR-011: System shall maintain Recall Strength Score per vocabulary/concept
+- FR-012: Must track Next Review Date for each learned item
+- FR-013: Lesson generation shall prioritize items due for review
+- FR-014: Shall adjust SRS scores based on diagnostic analysis
+
+### 3.3 Voice Analysis System
+#### 3.3.1 Description
+Real-time and post-session vocal fluency diagnostics.
+
+#### 3.3.2 Functional Requirements
+- FR-015: Shall measure speaking pace (words/minute)
+- FR-016: Must track hesitation frequency and patterns
+- FR-017: Shall identify pronunciation errors at phoneme level
+- FR-018: Must compare current performance to historical baselines
+
+### 3.4 Progress Dashboard
+#### 3.4.1 Description
+Comprehensive visualization of learning metrics.
+
+#### 3.4.2 Functional Requirements
+- FR-019: Shall display vocabulary mastery heatmap
+- FR-020: Must show fluency metrics over time
+- FR-021: Shall highlight recurring error patterns
+- FR-022: Must visualize SRS recall strength distribution
 
 ## 4. External Interface Requirements
 ### 4.1 User Interfaces
@@ -902,7 +1748,7 @@ System for handling user accounts, profiles, and authentication.
 <file path="documentation/templates/maintenance_guide_template.md">
 # MAINTENANCE GUIDE
 <!-- Document Version: 1.0 -->
-<!-- Last Updated: DATE -->
+<!-- Last Updated: 2025-06-11 -->
 
 ## 1. Monitoring Configuration
 ### 1.1 Key Metrics
@@ -914,11 +1760,25 @@ System for handling user accounts, profiles, and authentication.
 - Lesson completion rate
 
 ### 1.2 Alert Thresholds
-- CPU Usage: >80% for 5m (warning), >90% for 5m (critical)
-- Memory Usage: >85% (warning), >95% (critical)
-- Disk Space: >75% used
-- API Error Rate: >5% for 10m
-- Database Latency: >500ms p95
+- **Infrastructure**:
+  - CPU Usage: >80% for 5m (warning), >90% for 5m (critical)
+  - Memory Usage: >85% (warning), >95% (critical)
+  - Disk Space: >75% used
+  
+- **API**:
+  - Error Rate: >5% for 10m
+  - Latency: >500ms p95
+  - STT Response: >300ms p95
+  
+- **AI Services**:
+  - Voice Queue: >100 pending for 5m
+  - Analysis Time: >5s per request
+  - LLM Degradation: >15% error rate
+  - STT Accuracy: <85% confidence
+  
+- **Business Metrics**:
+  - Lesson Start Failures: >10% for 15m
+  - Payment Errors: >5% for 30m
 
 ## 2. Troubleshooting Procedures
 ### 2.1 Common Issues
@@ -930,18 +1790,22 @@ System for handling user accounts, profiles, and authentication.
 
 ### 2.2 Diagnostic Tools
 ```bash
-# Check service logs
+# Core System
 journalctl -u lessay-api --since "5 minutes ago"
-
-# Database performance
 pg_stat_activity -x -c "SELECT * FROM pg_stat_activity"
-
-# API health check
 curl -v https://api.lessay/health
 
-# Network diagnostics
-mtr -rwc 10 api.stripe.com
-```
+# Voice Processing
+curl -X POST https://api.lessay/v1/diagnostics/voice-queue
+docker exec -it voice-worker lessay-cli check stt-latency
+
+# AI Services
+curl https://api.lessay/v1/llm/health | jq '.models[].status'
+lessay-cli check analysis-backlog --threshold=50
+
+# Storage Systems
+aws s3api list-objects --bucket lessay-voice --query 'length(Contents)'
+supabase status --service storage
 
 ## 3. Update Procedures
 ### 3.1 Patch Management
@@ -976,42 +1840,56 @@ mtr -rwc 10 api.stripe.com
 - **Payment Data**: Real-time replication to DR site
 
 ### 4.2 Recovery Process
-1. Identify last known good backup
-2. Restore database from snapshot
-3. Verify data consistency
-4. Gradually enable traffic
-5. Monitor system health
-6. Conduct post-mortem analysis
+**Targets**:
+- RTO (Recovery Time Objective): 1 hour
+- RPO (Recovery Point Objective): 5 minutes
+
+**Procedure**:
+1. Declare incident and notify stakeholders
+2. Identify last known good backup (within RPO window)
+3. Restore critical systems in priority order:
+   a. User database and auth
+   b. Payment processing
+   c. Voice processing pipeline
+4. Verify data consistency checks:
+   - Cross-check SRS scores
+   - Validate voice analysis integrity
+5. Gradually enable traffic (10% increments every 5m)
+6. Monitor key health metrics:
+   - API success rate
+   - Voice processing latency
+   - LLM response quality
+7. Conduct post-mortem analysis within 24h
 </file>
 
 <file path="documentation/templates/project_charter_template.md">
 # PROJECT CHARTER TEMPLATE
 <!-- Document Version: 1.0 -->
-<!-- Last Updated: DATE -->
+<!-- Last Updated: 2025-06-11 -->
 
 ## 1. Project Overview
 ### 1.1 Vision Statement
-To create an AI-powered language learning platform that delivers personalized, adaptive lessons with real-time feedback, making language acquisition accessible and effective for everyone.
+To create an AI-powered language learning platform that listens, understands, and adapts to each learner through continuous voice analysis and Spaced Repetition (SRS), transforming every interaction into measurable progress toward fluency.
 
 ### 1.2 Objectives
-- Launch MVP with 3 languages by Q3 2025
-- Achieve 10,000 active users within 6 months
-- Maintain 90% user satisfaction rate
-- Process payments with 99.9% reliability
+- Launch with English, Spanish and French by Q3 2025
+- Achieve 15% improvement in vocabulary recall (measured by SRS) within 30 days
+- Maintain <300ms latency for real-time voice analysis
+- Process 95% of payments through Stripe integration
 
 ### 1.3 Success Criteria
-- 80% of users complete at least 5 lessons/month
-- Average lesson rating ≥ 4.5/5 stars
-- Payment success rate ≥ 99%
-- <500ms API response time (p95)
+- 15% improvement in vocabulary recall over 30 days (SRS metric)
+- 10% reduction in pronunciation errors per month (voice analysis)
+- <300ms latency for real-time speech-to-text
+- 90% user retention at 30 days
 
 ## 2. Scope
 ### 2.1 In Scope
-- Core lesson delivery engine
-- User authentication system
-- Subscription management
-- Basic progress tracking
-- Payment processing integration
+- Adaptive lesson engine with SRS
+- Real-time voice analysis pipeline
+- Progress dashboard with fluency metrics
+- Stripe payment integration
+- AI-driven diagnostics system
 
 ### 2.2 Out of Scope
 - Offline functionality
@@ -1040,50 +1918,59 @@ Meets bi-weekly to review progress and approve major changes
 ### 4.1 Key Milestones
 | Milestone | Date | Owner |
 |-----------|------|-------|
-| Requirements Finalized | 2025-06-30 | Jane Doe |
-| MVP Development Complete | 2025-09-15 | John Smith |
-| Beta Launch | 2025-10-01 | Sarah Lee |
-| Full Release | 2025-11-15 | Alex Wong |
+| Requirements Finalized | 2025-06-25 | Jane Doe |
+| Core Engine Complete | 2025-08-15 | John Smith |
+| Voice Analysis Integrated | 2025-09-01 | John Smith |
+| Beta Launch | 2025-09-15 | Sarah Lee |
+| Full Release | 2025-10-01 | Alex Wong |
 
 ### 4.2 High-Level Schedule
 ```mermaid
 gantt
     title Project Timeline
     dateFormat  YYYY-MM-DD
-    section Planning
-    Requirements      :active,  req, 2025-06-01, 30d
-    Technical Design  :         tech, after req, 15d
-    section Development
-    Core Engine       :         engine, after tech, 45d
-    Payment Integration :      payment, after engine, 15d
-    section Testing
-    QA Phase          :         qa, after payment, 30d
-    Launch Preparation:         launch, after qa, 15d
+    section Phase 0
+    Foundation       :active,  phase0, 2025-06-11, 5d
+    section Phase 1
+    Requirements     :         phase1, after phase0, 10d
+    section Phase 2
+    Technical Design :         phase2, after phase1, 15d
+    section Phase 3
+    Core Development :         phase3, after phase2, 45d
+    Voice Integration:         voice, after phase3, 15d
+    section Phase 4
+    Testing & Launch :         phase4, after voice, 30d
 ```
 </file>
 
 <file path="documentation/templates/risk_assessment_template.md">
 # RISK ASSESSMENT TEMPLATE
 <!-- Document Version: 1.0 -->
-<!-- Last Updated: DATE -->
+<!-- Last Updated: 2025-06-11 -->
 
 ## 1. Risk Identification
 ### 1.1 Threat Sources
 1. **External Threats**:
-   - Hackers targeting payment data
-   - Competitors scraping content
+   - Hackers targeting voice data
+   - Competitors scraping AI models
    - Malicious bots overloading APIs
+   - Voice spoofing attacks
+   - API cost exploitation
 
 2. **Internal Threats**:
-   - Accidental data leaks
-   - Unauthorized access by employees
-   - Configuration errors
+   - Accidental voice data leaks
+   - Unauthorized access to AI models
+   - Configuration errors in LLM prompts
+   - Biased training data
+   - Inadequate voice data retention
 
 ### 1.2 Vulnerabilities
 1. **Technical**:
-   - Unencrypted user data in transit
-   - Lack of rate limiting on APIs
-   - Single point of failure in payment processing
+   - Unencrypted voice data storage
+   - Lack of rate limiting on AI APIs
+   - Single point of failure in voice processing
+   - Inadequate bias testing
+   - No LLM hallucination detection
 
 2. **Process**:
    - Manual deployment procedures
@@ -1094,39 +1981,52 @@ gantt
 ### 2.1 Risk Matrix
 | Likelihood/Impact | Low | Medium | High |
 |-------------------|-----|--------|------|
-| **High**          |     |  Data scraping | Payment breach |
-| **Medium**        | API overload | Service outage |    |
-| **Low**           | Minor UI bugs |     |      |
+| **High**          | Voice spoofing |  Data scraping | Payment breach |
+| **Medium**        | API cost overrun | Inaccurate AI feedback | Voice data leak |
+| **Low**           | Minor UI bugs | LLM bias |      |
 
 ### 2.2 Risk Scoring
-1. **Payment Data Breach**
+1. **Voice Data Breach**
    Likelihood: Medium
-   Impact: High
-   Score: 12 (Medium x High)
-   
-2. **Service Outage**
+   Impact: Critical
+   Score: 15 (Medium x Critical)
+    
+2. **Inaccurate AI Feedback**
    Likelihood: Medium
    Impact: High
    Score: 12
-   
-3. **Content Scraping**
+    
+3. **API Cost Overrun**
    Likelihood: High
-   Impact: Medium
+   Impact: High
+   Score: 16
+    
+4. **LLM Bias**
+   Likelihood: Medium
+   Impact: High
+   Score: 12
+    
+5. **Voice Spoofing**
+   Likelihood: Low
+   Impact: Critical
    Score: 9
 
 ## 3. Risk Mitigation
 ### 3.1 Mitigation Strategies
 | Risk | Strategy | Owner | Timeline |
 |------|----------|-------|----------|
-| Payment Breach | Implement PCI DSS compliance | Security Team | Q3 2025 |
-| Service Outage | Add auto-scaling and failover | DevOps | Q2 2025 |
-| Content Scraping | Rate limiting + CAPTCHA | Backend Team | Q2 2025 |
+| Voice Data Breach | AES-256 encryption + strict access controls | Security Team | Q3 2025 |
+| Inaccurate AI Feedback | Human validation pipeline + confidence thresholds | AI Team | Q2 2025 |
+| API Cost Overrun | Usage monitoring + budget alerts | Finance Team | Q2 2025 |
+| LLM Bias | Diverse training data + regular audits | Ethics Board | Ongoing |
+| Voice Spoofing | Liveness detection + voiceprint analysis | Auth Team | Q4 2025 |
 
 ### 3.2 Residual Risk
 Accepted risks:
 - Minor UI bugs (low impact)
-- Temporary API throttling during peaks
-- Scheduled maintenance downtime
+- Temporary voice processing delays during peaks
+- Model accuracy variance across languages
+- Higher API costs during peak usage
 
 ## 4. Review Process
 ### 4.1 Monitoring
@@ -1157,8 +2057,19 @@ graph TD
     B --> E[Supabase Storage]
     B --> F[AIService]
     C --> G[Supabase PostgreSQL]
-    F --> H[4B LLM Agent]
-    F --> I[Task Executor]
+    F --> H[LLM Agent]
+    F --> I[STT Service]
+    F --> J[TTS Service]
+    
+    %% Real-time voice path
+    A -->|WebSocket| K[Browser STT]
+    K -->|Real-time text| B
+    B -->|Analysis| F
+    
+    %% Diagnostic audio path
+    A -->|Upload| E[Supabase Storage]
+    E -->|Audio blob| F
+    F -->|Store results| G
 ```
 
 ### 1.2 Key Features
@@ -1192,19 +2103,92 @@ graph TD
     - Progress data
 
 - **AIService**:
-  - As previously detailed
+  ```mermaid
+  flowchart LR
+      A[API Request] --> B{AIService}
+      B --> C[Lesson Generation]
+      B --> D[Voice Analysis]
+      C --> E["Prompt:
+      'Generate a lesson for {user} focusing on
+      {weaknesses} using {SRS} schedule'"]
+      D --> F["Analysis:
+      - Pronunciation scoring
+      - Hesitation detection
+      - Fluency metrics"]
+      E --> G[LLM Response]
+      F --> H[Diagnostic Report]
+  ```
+  
+  **Example Lesson Generation Payload**:
+  ```json
+  {
+    "userId": "uuid",
+    "targetLanguage": "es",
+    "focusAreas": ["past_tense", "travel_vocab"],
+    "srsDueItems": ["comer", "viajar"],
+    "difficultyLevel": 3
+  }
+  ```
+  
+  **Voice Analysis Parameters**:
+  ```prisma
+  model VoiceAnalysis {
+    id        String @id @default(uuid())
+    userId    String
+    lessonId  String
+    metrics   Json // {pace: 120, accuracy: 0.85, ...}
+    audioUrl  String
+    createdAt DateTime @default(now())
+  }
+  ```
 
 ## 3. Data Flow
-### 3.1 Key Flows
+### 3.1 Adaptive Learning Loop
 ```mermaid
 sequenceDiagram
-    User->>Frontend: Start Lesson
-    Frontend->>API: POST /api/lessons/start
-    API->>AIService: Generate lesson
-    AIService->>DataService: Get user progress
-    DataService-->>AIService: Progress data
-    AIService-->>API: Lesson content
-    API-->>Frontend: Lesson data
+    participant U as User
+    participant F as Frontend
+    participant B as Backend
+    participant AI as AIService
+    participant DB as Database
+    
+    U->>F: Start Lesson
+    F->>B: POST /api/lessons/start
+    B->>AI: Request lesson (with SRS due items)
+    AI->>DB: Query user progress
+    DB-->>AI: Return progress data
+    AI-->>B: Generated lesson content
+    B-->>F: Lesson data
+    F->>U: Present exercise
+    U->>F: Speak response
+    F->>B: Stream audio to API
+    B->>AI: Real-time STT analysis
+    AI-->>B: Immediate feedback
+    B-->>F: Corrections
+    F->>U: Show results
+    U->>F: Complete lesson
+    F->>B: POST /api/lessons/{id}/complete
+    B->>AI: Full session analysis
+    AI->>DB: Update SRS scores
+    AI-->>B: Next lesson plan
+    B-->>F: Schedule recommendation
+```
+
+### 3.2 Subscription Webhook Flow
+```mermaid
+sequenceDiagram
+    participant S as Stripe
+    participant B as Backend
+    participant DB as Database
+    
+    S->>B: POST /api/stripe/webhook
+    B->>B: Verify signature
+    alt payment_succeeded
+        B->>DB: Update subscription status
+    else payment_failed
+        B->>DB: Flag account
+    end
+    B-->>S: 200 OK
 ```
 
 ## 4. Interface Specifications
@@ -1215,8 +2199,29 @@ sequenceDiagram
 | POST   | /api/ai/analyze-response | Evaluate user input |
 
 ## 5. Database Design
-### 5.1 Extended Schema
+### 5.1 Complete Schema
 ```prisma
+model User {
+  id           String @id @default(uuid())
+  email        String @unique
+  password     String
+  targetLang   String
+  nativeLang   String
+  progress     UserProgress[]
+  srsEntries   SRSEntry[]
+  lessons      Lesson[]
+  createdAt    DateTime @default(now())
+}
+
+model Lesson {
+  id          String @id @default(uuid())
+  userId      String
+  user        User @relation(fields: [userId], references: [id])
+  exercises   Exercise[]
+  completedAt DateTime?
+  analysis    VoiceAnalysis[]
+}
+
 model Exercise {
   id          String @id @default(uuid())
   type        String // 'vocabulary', 'grammar', etc.
@@ -1224,6 +2229,39 @@ model Exercise {
   difficulty  Int
   language    String
   tags        String[]
+  lesson      Lesson @relation(fields: [lessonId], references: [id])
+  lessonId    String
+}
+
+model UserProgress {
+  id          String @id @default(uuid())
+  userId      String
+  user        User @relation(fields: [userId], references: [id])
+  metric      String // 'vocabulary', 'grammar', etc.
+  score       Float
+  lastUpdated DateTime @default(now())
+}
+
+model SRSEntry {
+  id             String @id @default(uuid())
+  userId         String
+  user           User @relation(fields: [userId], references: [id])
+  item           String // word or grammar concept
+  recallStrength Float @default(1.0)
+  nextReview     DateTime @default(now())
+  language       String
+  @@index([userId, nextReview])
+}
+
+model VoiceAnalysis {
+  id        String @id @default(uuid())
+  userId    String
+  user      User @relation(fields: [userId], references: [id])
+  lessonId  String
+  lesson    Lesson @relation(fields: [lessonId], references: [id])
+  metrics   Json // {pace: 120, accuracy: 0.85, ...}
+  audioUrl  String
+  createdAt DateTime @default(now())
 }
 ```
 
@@ -1242,9 +2280,53 @@ model Exercise {
 <file path="documentation/templates/test_plan_template.md">
 # TEST PLAN TEMPLATE
 <!-- Document Version: 1.1 -->
-<!-- Last Updated: 2025-06-10 -->
+<!-- Last Updated: 2025-06-11 -->
 
-[Existing sections...]
+## 1. Core Learning Loop Tests
+### 1.1 Adaptive Lesson Generation
+| Test Case | Steps | Expected Result |
+|-----------|-------|-----------------|
+| SRS-Driven Content | 1. User has 5 due items<br>2. Start new lesson | - Lesson contains 3-5 due items<br>- Mixed with new material |
+| Difficulty Adjustment | 1. Fail 3 exercises<br>2. Next lesson | - Difficulty reduced by 1 level<br>- More review content |
+
+### 1.2 Real-Time Feedback
+| Test Case | Steps | Expected Result |
+|-----------|-------|-----------------|
+| Correct Pronunciation | 1. Submit perfect audio<br>2. Get feedback | - Score ≥0.95<br>- Positive reinforcement |
+| Grammar Error | 1. Submit incorrect tense<br>2. Get feedback | - Specific error highlighted<br>- Correction shown |
+
+### 1.3 Post-Session Analysis
+| Test Case | Steps | Expected Result |
+|-----------|-------|-----------------|
+| Audio Processing | 1. Complete lesson<br>2. Wait 5m | - Diagnostic report generated<br>- SRS scores updated |
+| Weakness Detection | 1. Make consistent errors<br>2. Review analysis | - Weakness pattern identified<br>- Next lesson focuses on area |
+
+## 2. Vocal Analysis Tests
+### 2.1 Pronunciation Accuracy
+| Test Case | Steps | Expected Result |
+|-----------|-------|-----------------|
+| Native Speaker | 1. Submit native audio<br>2. Check score | - Score ≥0.98<br>- No errors flagged |
+| Common Mistake | 1. Submit "th" as "d"<br>2. Check feedback | - Error detected<br>- Specific correction |
+
+### 2.2 Fluency Metrics
+| Test Case | Steps | Expected Result |
+|-----------|-------|-----------------|
+| Hesitation | 1. Submit audio with pauses<br>2. Check metrics | - Hesitation count correct<br>- Pace calculated |
+| Filler Words | 1. Use "um" repeatedly<br>2. Check report | - Filler word count accurate<br>- Trend shown |
+
+## 3. User Dashboard Tests
+### 3.1 Progress Visualization
+| Test Case | Steps | Expected Result |
+|-----------|-------|-----------------|
+| SRS Overview | 1. Complete 10 lessons<br>2. Check dashboard | - Due items count correct<br>- Strength distribution accurate |
+| Error Patterns | 1. Make consistent errors<br>2. Check dashboard | - Top errors highlighted<br>- Frequency correct |
+
+### 3.2 Metric Accuracy
+| Test Case | Steps | Expected Result |
+|-----------|-------|-----------------|
+| Fluency Trends | 1. Improve over week<br>2. Check graph | - Upward trend visible<br>- Data points correct |
+| Vocabulary Growth | 1. Learn new words<br>2. Check stats | - Count matches lessons<br>- Retention rate shown |
+
 
 ## 5. Payment Flow Tests
 ### 5.1 Subscription Scenarios

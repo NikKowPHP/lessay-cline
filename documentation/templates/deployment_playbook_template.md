@@ -1,6 +1,6 @@
 # DEPLOYMENT PLAYBOOK TEMPLATE
 <!-- Document Version: 1.1 -->
-<!-- Last Updated: 2025-06-10 -->
+<!-- Last Updated: 2025-06-11 -->
 
 ## 1. Local Development (Mac)
 ### 1.1 Docker Setup
@@ -30,7 +30,108 @@ services:
 docker-compose -f docker-compose.mac.yml up -d
 ```
 
-## 2. Proxy Environment
+## 2. Staging Environment
+### 2.1 Configuration
+```yaml
+# docker-compose.stage.yml
+version: '3.8'
+services:
+  app:
+    image: lessay-app:stage
+    deploy:
+      replicas: 2
+    environment:
+      NODE_ENV: staging
+      DATABASE_URL: ${STAGE_DB_URL}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+```
+
+### 2.2 Deployment
+```bash
+docker stack deploy -c docker-compose.stage.yml lessay-stage
+```
+
+## 3. Production Environment
+### 3.1 Configuration
+```yaml
+# docker-compose.prod.yml
+version: '3.8'
+services:
+  app:
+    image: lessay-app:prod
+    deploy:
+      replicas: 4
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${PROD_DB_URL}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    configs:
+      - source: redis.conf
+        target: /usr/local/etc/redis/redis.conf
+```
+
+### 3.2 Deployment
+```bash
+docker stack deploy -c docker-compose.prod.yml lessay-prod
+```
+
+## 4. CI/CD Pipeline
+### 4.1 GitHub Actions Workflow
+```yaml
+name: Deploy Lessay
+on:
+  push:
+    branches:
+      - main
+      - release/*
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+
+  deploy-stage:
+    needs: build-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker-compose -f docker-compose.stage.yml up -d
+      - run: npm run migrate:stage
+
+  deploy-prod:
+    needs: deploy-stage
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker-compose -f docker-compose.prod.yml up -d
+      - run: npm run migrate:prod
+```
+
+## 5. Proxy Environment
 ### 2.1 Configuration
 ```yaml
 # docker-compose.proxy.yml
@@ -49,9 +150,27 @@ services:
 docker-compose -f docker-compose.proxy.yml up -d
 ```
 
-## 3. Environment Variables
+## 6. Secrets Management
+### 6.1 Environment Variables
 ### 3.1 Required Variables
 ```env
-STRIPE_SECRET_KEY=sk_test_***
-DATABASE_URL=postgres://user:pass@db:5432/lessay
-MOCK_AUTH=false # Production value
+### 6.1 Supabase Secrets
+```bash
+supabase secrets set STRIPE_SECRET_KEY=sk_live_***
+supabase secrets set AI_API_KEY=ai_***
+```
+
+### 6.2 Environment Hierarchy
+```env
+# Order of precedence (highest to lowest)
+1. Supabase secrets (production)
+2. .env.production.local
+3. .env.staging.local
+4. .env.local
+5. .env
+```
+
+### 6.3 Rotation Policy
+- API keys: Every 90 days
+- Database credentials: Every 180 days
+- Certificates: Annually
