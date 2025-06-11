@@ -90,6 +90,7 @@ documentation/
     logic_phase_1_todo.md
     logic_phase_2_todo.md
   2_development_plan/
+    dev_todo_phase_1.md
     dev_todo_phase_12.md
     dev_todo_phase_13.md
     dev_todo_phase_14.md
@@ -166,8 +167,10 @@ public/
 ARCHITECT_PLANNING_COMPLETE.md
 BLUEPRINT_COMPLETE.md
 eslint.config.mjs
+FIX_PLAN.md
 globals.css
 layout.tsx
+NEEDS_ASSISTANCE.md
 next.config.ts
 package.json
 page.tsx
@@ -179,167 +182,133 @@ tsconfig.json
 <files>
 This section contains the contents of the repository's files.
 
-<file path="documentation/2_development_plan/dev_todo_phase_13.md">
-# Development Phase 13: Environment Configurations
+<file path="documentation/2_development_plan/dev_todo_phase_1.md">
+# Development Phase 1: Core Backend & User Authentication
 
 ## Tasks for Developer AI
 
-### 1. Create Environment Configuration Files
-- **File:** `/lib/config.ts`
-- **Action:** Implement environment configuration loader
+### 1. Implement User Authentication
+- **File:** `/lib/supabase/server.ts`
+- **Action:** Create server-side Supabase client utilities
 - **Steps:**
-  1. Create `lib/config.ts` with environment validation
-  2. Define required environment variables:
-     ```typescript
-     interface AppConfig {
-       NODE_ENV: 'development' | 'production' | 'test';
-       DATABASE_URL: string;
-       SUPABASE_URL: string;
-       SUPABASE_KEY: string;
-     }
-     ```
-  3. Add validation for required variables
-- **Verification:** File exists and exports validated config object
+  1. Create directory `lib/supabase`
+  2. Create file `server.ts` with:
+     - `supabaseServerClient` function using `createServerComponentClient`
+     - `getUserSession` helper to fetch user session
+- **Verification:** File exports both functions with proper TypeScript types
 
-### 2. Update Environment Template File
-- **File:** `/.env.example`
-- **Action:** Create example environment file
-- **Steps:
-  1. List all required environment variables
-  2. Include comments explaining each variable
-  3. Add dummy values for sensitive fields
-- **Verification:** File contains all production-required variables
+### 2. Create Profile GET Route
+- **File:** `/app/api/users/profile/route.ts`
+- **Action:** Add authenticated profile retrieval
+- **Steps:**
+  1. Import `getUserSession` from `@/lib/supabase/server`
+  2. Add session check to GET function
+  3. Query Prisma for user data
+- **Verification:** Returns 401 when unauthenticated, profile data when valid
 
-### 3. Implement Environment-Specific Settings
-- **File:** `/lib/config.ts`
-- **Action:** Add environment-specific defaults
-- **Steps:
-  1. Add development-only defaults
-  2. Configure production security settings
-  3. Enable debug modes for development
-- **Verification:** Different settings load per NODE_ENV
+### 3. Implement Profile PUT Route
+- **File:** `/app/api/users/profile/route.ts`
+- **Action:** Add profile update functionality
+- **Steps:**
+  1. Reuse auth check from GET route
+  2. Add Prisma `user.update` call
+  3. Return updated profile
+- **Verification:** PUT requests update user data successfully
 
-### 4. Update Deployment Configuration
-- **File:** `/next.config.ts`
-- **Action:** Configure build-time environment
-- **Steps:
-  1. Add environment variable validation
-  2. Configure public runtime config
-  3. Set up build-time optimizations
-- **Verification:** Config is accessible in both server and client
+### 4. Create Auth UI Component
+- **File:** `/components/Auth.tsx`
+- **Action:** Build sign-up/sign-in interface
+- **Steps:**
+  1. Create client-side Supabase client
+  2. Add email/password fields
+  3. Implement sign-up/sign-in buttons
+- **Verification:** Component renders and allows user registration/login
 
-### 5. Create Environment Documentation
-- **File:** `/docs/environments.md`
-- **Action:** Document environment setup
-- **Steps:
-  1. List all environment variables
-  2. Explain deployment process
-  3. Add troubleshooting guide
-- **Verification:** Documentation file exists
-</file>
-
-<file path="documentation/2_development_plan/dev_todo_phase_14.md">
-# Development Phase 14: User Feedback System
-
-## Tasks for Developer AI
-
-### 1. Create Feedback API Endpoint
-- **File:** `/app/api/feedback/route.ts`
-- **Action:** Implement feedback submission endpoint
+### 5. Implement User Sync Endpoint
+- **File:** `/api/users/sync/route.ts`
+- **Action:** Create public profile after auth sign-up
 - **Steps:**
   1. Create new route file
-  2. Add POST handler to receive feedback
-  3. Validate input data
-  4. Store feedback in database
-- **Verification:** POST requests to `/api/feedback` return success status
+  2. Listen for Supabase auth events
+  3. Create corresponding Prisma user record
+- **Verification:** New auth users get public profiles automatically
 
-### 2. Add Feedback Model to Schema
-- **File:** `/prisma/schema.prisma`
-- **Action:** Define feedback data structure
-- **Steps:
-  1. Add Feedback model with fields:
-     - userId
-     - message
-     - createdAt
-  2. Run migration
-- **Verification:** New model appears in Prisma client
-
-### 3. Implement Feedback UI Component
-- **File:** `/components/FeedbackButton.tsx`
-- **Action:** Create feedback interface
-- **Steps:
-  1. Create client component
-  2. Add button to open feedback form
-  3. Implement form submission
-- **Verification:** Component renders and submits feedback
-
-### 4. Add Feedback Link to Navigation
-- **File:** `/components/Navbar.tsx`
-- **Action:** Make feedback accessible
-- **Steps:
-  1. Import FeedbackButton
-  2. Add to navigation menu
-- **Verification:** Feedback button appears in UI
-
-### 5. Setup Feedback Notifications
-- **File:** `/lib/notifications.ts`
-- **Action:** Alert admins of new feedback
-- **Steps:
-  1. Create notification function
-  2. Call from feedback endpoint
-  3. Test with sample submission
-- **Verification:** Notifications trigger on new feedback
+## Phase Completion Verification
+1. All 5 task verifications pass
+2. User can:
+   - Register/login via UI
+   - Access protected profile route
+   - Update profile information
+   - Have profile auto-created on sign-up
 </file>
 
-<file path="documentation/2_development_plan/dev_todo_phase_15.md">
-# Development Phase 15: AI Cost & Security Controls
+<file path="FIX_PLAN.md">
+# Architect AI Fix Plan
 
-## Tasks for Developer AI
+## Identified Issue
+Missing critical development phase file:  
+`documentation/2_development_plan/dev_todo_phase_1.md`
 
-### 1. Implement Usage Tracking
-- **File:** `/lib/ai-service.ts`
-- **Action:** Add usage metrics to AI calls
-- **Steps:**
-  1. Add usage tracking to `generateLessonForUser`
-  2. Add usage tracking to `analyzeAudioForDiagnostics`
-  3. Store usage in database
-- **Verification:** Usage data appears in database
+## Failure Type
+Atomic Failure - Missing single required file
 
-### 2. Add Rate Limiting
-- **File:** `/middleware/rate-limiter.ts`
-- **Action:** Protect AI endpoints
-- **Steps:
-  1. Create rate limiting middleware
-  2. Apply to AI API routes
-  3. Test with multiple requests
-- **Verification:** Requests are limited after threshold
+## Fix Steps
 
-### 3. Setup Usage Alerts
-- **File:** `/lib/alerts.ts`
-- **Action:** Notify on high usage
-- **Steps:
-  1. Create alert thresholds
-  2. Implement notification system
-  3. Test with simulated spikes
-- **Verification:** Alerts trigger correctly
+1. **Generate Phase 1 Development Plan**
+   - Source: `documentation/1_strategic_briefs/logic_phase_1_todo.md`
+   - Create file at `documentation/2_development_plan/dev_todo_phase_1.md`
+   - Content: Transform strategic brief into executable developer tasks
 
-### 4. Implement Tiered Access
-- **File:** `/app/api/lessons/start/route.ts`
-- **Action:** Enforce tier limits
-- **Steps:
-  1. Check user tier
-  2. Enforce daily limits
-  3. Return appropriate errors
-- **Verification:** Limits enforced per tier
+2. **File Structure Requirements**
+   ```markdown
+   # Development Phase 1: [Feature Name]
+   
+   ## Tasks
+   - [ ] Task 1: Description
+     - LLM Prompt: "Create file..."
+     - Verification: File exists at...
+   - [ ] Task 2: Description
+     ...
+   
+   ## Phase Completion Verification
+   - All files created
+   - All endpoints functional
+   ```
 
-### 5. Add Security Monitoring
-- **File:** `/lib/security.ts`
-- **Action:** Detect abuse patterns
-- **Steps:
-  1. Implement anomaly detection
-  2. Log suspicious activity
-  3. Create admin alerts
-- **Verification:** System detects test attacks
+3. **Verification**
+   - Confirm file exists at correct path
+   - Validate task structure matches template
+
+4. **Resume Development**
+   - Delete this `FIX_PLAN.md`
+   - Delete `NEEDS_ASSISTANCE.md`
+   - Developer AI will automatically proceed
+
+## Implementation Deadline
+Immediate - Blocking development progress
+
+## Required Approval
+Human review required before executing this fix plan
+</file>
+
+<file path="NEEDS_ASSISTANCE.md">
+# Developer AI Distress Signal
+
+**Date:** June 11, 2025  
+**Active Plan File:** documentation/2_development_plan/dev_todo_phase_1.md  
+**Task Title:** Execute Phase 1 Tasks  
+**Error Type:** File Not Found  
+
+## Error Details:
+The required development phase file `documentation/2_development_plan/dev_todo_phase_1.md` was not found. This file is listed in the master roadmap but is missing from the project directory.
+
+## Action Taken:
+1. Attempted to read `dev_todo_phase_1.md` using read_file tool.
+2. Received "File not found" error.
+3. Verified file absence in environment_details.
+
+## Requested Assistance:
+Please provide the correct `dev_todo_phase_1.md` file or update the master roadmap to reflect the current state of development phases.
 </file>
 
 <file path=".github/workflows/ci.yml">
@@ -711,76 +680,167 @@ export default function PricingPage() {
 - **Verification:** Full lesson flow works
 </file>
 
-<file path="documentation/2_development_plan/dev_todo_phase_12.md">
-# Development Phase 12: Client-Side State Management Implementation
+<file path="documentation/2_development_plan/dev_todo_phase_13.md">
+# Development Phase 13: Environment Configurations
 
 ## Tasks for Developer AI
 
-### 1. Implement Zustand Store with TypeScript
-- **File:** `/lib/stores/app-state.ts`
-- **Action:** Create global state store with user session and lesson progress
+### 1. Create Environment Configuration Files
+- **File:** `/lib/config.ts`
+- **Action:** Implement environment configuration loader
 - **Steps:**
-  1. Install zustand: `npm install zustand`
-  2. Create store with types:
+  1. Create `lib/config.ts` with environment validation
+  2. Define required environment variables:
      ```typescript
-     interface AppState {
-       user: { id: string; email: string } | null;
-       currentLesson: { id: string; progress: number } | null;
-       setUser: (user: AppState['user']) => void;
-       setLessonProgress: (lessonId: string, progress: number) => void;
+     interface AppConfig {
+       NODE_ENV: 'development' | 'production' | 'test';
+       DATABASE_URL: string;
+       SUPABASE_URL: string;
+       SUPABASE_KEY: string;
      }
      ```
-  3. Implement store with initial empty state
-- **Verification:** File exists and exports `useAppStore` hook
+  3. Add validation for required variables
+- **Verification:** File exists and exports validated config object
 
-### 2. Add Supabase Auth Integration
-- **File:** `/lib/stores/app-state.ts`
-- **Action:** Sync auth state with Supabase
-- **Steps:**
-  1. Import `supabase` client
-  2. Add auth listener in store setup:
-     ```typescript
-     supabase.auth.onAuthStateChange((event, session) => {
-       useAppStore.getState().setUser(session?.user ?? null);
-     })
-     ```
-- **Verification:** User state updates when logging in/out
-
-### 3. Implement LocalStorage Persistence
-- **File:** `/lib/stores/persist.ts`
-- **Action:** Add state persistence middleware
-- **Steps:**
-  1. Create middleware function
-  2. Handle JSON serialization of state
-  3. Add hydration on app load
-- **Verification:** State persists across page refreshes
-
-### 4. Update LessonView Component
-- **File:** `/components/LessonView.tsx`
-- **Action:** Migrate to global state
+### 2. Update Environment Template File
+- **File:** `/.env.example`
+- **Action:** Create example environment file
 - **Steps:
-  1. Import `useAppStore`
-  2. Replace `useState` with store hooks
-  3. Update lesson progress calls
-- **Verification:** Lesson progress updates work as before
+  1. List all required environment variables
+  2. Include comments explaining each variable
+  3. Add dummy values for sensitive fields
+- **Verification:** File contains all production-required variables
 
-### 5. Update PricingPage Component
-- **File:** `/components/PricingPage.tsx`
-- **Action:** Use store for user state
+### 3. Implement Environment-Specific Settings
+- **File:** `/lib/config.ts`
+- **Action:** Add environment-specific defaults
 - **Steps:
-  1. Import `useAppStore`
-  2. Check `user` state for auth status
-  3. Update button behavior accordingly
-- **Verification:** Pricing page reflects user auth state
+  1. Add development-only defaults
+  2. Configure production security settings
+  3. Enable debug modes for development
+- **Verification:** Different settings load per NODE_ENV
 
-### 6. Add State Management Documentation
-- **File:** `/docs/state-management.md`
-- **Action:** Create usage guide
+### 4. Update Deployment Configuration
+- **File:** `/next.config.ts`
+- **Action:** Configure build-time environment
 - **Steps:
-  1. Document store structure
-  2. Add usage examples
-  3. Include best practices
+  1. Add environment variable validation
+  2. Configure public runtime config
+  3. Set up build-time optimizations
+- **Verification:** Config is accessible in both server and client
+
+### 5. Create Environment Documentation
+- **File:** `/docs/environments.md`
+- **Action:** Document environment setup
+- **Steps:
+  1. List all environment variables
+  2. Explain deployment process
+  3. Add troubleshooting guide
 - **Verification:** Documentation file exists
+</file>
+
+<file path="documentation/2_development_plan/dev_todo_phase_14.md">
+# Development Phase 14: User Feedback System
+
+## Tasks for Developer AI
+
+### 1. Create Feedback API Endpoint
+- **File:** `/app/api/feedback/route.ts`
+- **Action:** Implement feedback submission endpoint
+- **Steps:**
+  1. Create new route file
+  2. Add POST handler to receive feedback
+  3. Validate input data
+  4. Store feedback in database
+- **Verification:** POST requests to `/api/feedback` return success status
+
+### 2. Add Feedback Model to Schema
+- **File:** `/prisma/schema.prisma`
+- **Action:** Define feedback data structure
+- **Steps:
+  1. Add Feedback model with fields:
+     - userId
+     - message
+     - createdAt
+  2. Run migration
+- **Verification:** New model appears in Prisma client
+
+### 3. Implement Feedback UI Component
+- **File:** `/components/FeedbackButton.tsx`
+- **Action:** Create feedback interface
+- **Steps:
+  1. Create client component
+  2. Add button to open feedback form
+  3. Implement form submission
+- **Verification:** Component renders and submits feedback
+
+### 4. Add Feedback Link to Navigation
+- **File:** `/components/Navbar.tsx`
+- **Action:** Make feedback accessible
+- **Steps:
+  1. Import FeedbackButton
+  2. Add to navigation menu
+- **Verification:** Feedback button appears in UI
+
+### 5. Setup Feedback Notifications
+- **File:** `/lib/notifications.ts`
+- **Action:** Alert admins of new feedback
+- **Steps:
+  1. Create notification function
+  2. Call from feedback endpoint
+  3. Test with sample submission
+- **Verification:** Notifications trigger on new feedback
+</file>
+
+<file path="documentation/2_development_plan/dev_todo_phase_15.md">
+# Development Phase 15: AI Cost & Security Controls
+
+## Tasks for Developer AI
+
+### 1. Implement Usage Tracking
+- **File:** `/lib/ai-service.ts`
+- **Action:** Add usage metrics to AI calls
+- **Steps:**
+  1. Add usage tracking to `generateLessonForUser`
+  2. Add usage tracking to `analyzeAudioForDiagnostics`
+  3. Store usage in database
+- **Verification:** Usage data appears in database
+
+### 2. Add Rate Limiting
+- **File:** `/middleware/rate-limiter.ts`
+- **Action:** Protect AI endpoints
+- **Steps:
+  1. Create rate limiting middleware
+  2. Apply to AI API routes
+  3. Test with multiple requests
+- **Verification:** Requests are limited after threshold
+
+### 3. Setup Usage Alerts
+- **File:** `/lib/alerts.ts`
+- **Action:** Notify on high usage
+- **Steps:
+  1. Create alert thresholds
+  2. Implement notification system
+  3. Test with simulated spikes
+- **Verification:** Alerts trigger correctly
+
+### 4. Implement Tiered Access
+- **File:** `/app/api/lessons/start/route.ts`
+- **Action:** Enforce tier limits
+- **Steps:
+  1. Check user tier
+  2. Enforce daily limits
+  3. Return appropriate errors
+- **Verification:** Limits enforced per tier
+
+### 5. Add Security Monitoring
+- **File:** `/lib/security.ts`
+- **Action:** Detect abuse patterns
+- **Steps:
+  1. Implement anomaly detection
+  2. Log suspicious activity
+  3. Create admin alerts
+- **Verification:** System detects test attacks
 </file>
 
 <file path="documentation/3_personas_and_rules/rules-developer.md">
@@ -3864,6 +3924,78 @@ export default function Home() {
 }
 </file>
 
+<file path="documentation/2_development_plan/dev_todo_phase_12.md">
+# Development Phase 12: Client-Side State Management Implementation
+
+## Tasks for Developer AI
+
+### 1. Implement Zustand Store with TypeScript
+- **File:** `/lib/stores/app-state.ts`
+- **Action:** Create global state store with user session and lesson progress
+- **Steps:**
+  1. Install zustand: `npm install zustand`
+  2. Create store with types:
+     ```typescript
+     interface AppState {
+       user: { id: string; email: string } | null;
+       currentLesson: { id: string; progress: number } | null;
+       setUser: (user: AppState['user']) => void;
+       setLessonProgress: (lessonId: string, progress: number) => void;
+     }
+     ```
+  3. Implement store with initial empty state
+- **Verification:** File exists and exports `useAppStore` hook
+
+### 2. Add Supabase Auth Integration
+- **File:** `/lib/stores/app-state.ts`
+- **Action:** Sync auth state with Supabase
+- **Steps:**
+  1. Import `supabase` client
+  2. Add auth listener in store setup:
+     ```typescript
+     supabase.auth.onAuthStateChange((event, session) => {
+       useAppStore.getState().setUser(session?.user ?? null);
+     })
+     ```
+- **Verification:** User state updates when logging in/out
+
+### 3. Implement LocalStorage Persistence
+- **File:** `/lib/stores/persist.ts`
+- **Action:** Add state persistence middleware
+- **Steps:**
+  1. Create middleware function
+  2. Handle JSON serialization of state
+  3. Add hydration on app load
+- **Verification:** State persists across page refreshes
+
+### 4. Update LessonView Component
+- **File:** `/components/LessonView.tsx`
+- **Action:** Migrate to global state
+- **Steps:
+  1. Import `useAppStore`
+  2. Replace `useState` with store hooks
+  3. Update lesson progress calls
+- **Verification:** Lesson progress updates work as before
+
+### 5. Update PricingPage Component
+- **File:** `/components/PricingPage.tsx`
+- **Action:** Use store for user state
+- **Steps:
+  1. Import `useAppStore`
+  2. Check `user` state for auth status
+  3. Update button behavior accordingly
+- **Verification:** Pricing page reflects user auth state
+
+### 6. Add State Management Documentation
+- **File:** `/docs/state-management.md`
+- **Action:** Create usage guide
+- **Steps:
+  1. Document store structure
+  2. Add usage examples
+  3. Include best practices
+- **Verification:** Documentation file exists
+</file>
+
 <file path="documentation/templates/compliance_framework_template.md">
 # COMPLIANCE FRAMEWORK TEMPLATE
 <!-- Document Version: 1.1 -->
@@ -6514,35 +6646,6 @@ next-env.d.ts
 }
 </file>
 
-<file path="ARCHITECT_PLANNING_COMPLETE.md">
-# Architect Planning Completion Notice
-
-**Date:** June 11, 2025  
-**Project:** Lessay Language Learning Platform  
-
-## Planning Phase Completion Confirmation
-
-The architectural planning phase is now **100% complete**. All required documentation has been generated and verified, including:
-
-- Core application logic plans (Phases 1-6)
-- Infrastructure and deployment strategies (Phases 7-9)
-- Production hardening requirements (Phases 10-12)
-- Final polish and security controls (Phases 13-15)
-
-### Key Statistics:
-- Total planning documents: 24
-- Development phases: 15
-- Estimated development timeline: 6-8 weeks
-- Total verification checks: 127
-
-## Next Steps:
-1. Developer AI should begin implementation using the generated todo files
-2. Refer to `documentation/architect_master_todo.md` for the complete roadmap
-3. Monitor progress through the defined verification checkpoints
-
-This file serves as official confirmation that the project blueprint meets all requirements for a production-grade service.
-</file>
-
 <file path=".roo/rules-architect/rules.md">
 Of course. Here are the modified rules for the Architect AI, incorporating the `repomix` workflow for codebase analysis and iterative planning.
 
@@ -6640,24 +6743,37 @@ When documents or data conflict, you must resolve the inconsistency by adhering 
 -   Your primary task is to generate `.md` files containing to-do lists for the Developer AI. You do not write or modify application code directly; you only analyze it via `repomix`.
 </file>
 
+<file path="ARCHITECT_PLANNING_COMPLETE.md">
+# Architect Planning Complete
+
+**Date:** June 11, 2025  
+**Status:** All planning phases completed successfully
+
+The Architect AI has finished generating all development plans and organizing the documentation structure. The Developer AI can now execute the master roadmap located at:
+
+`documentation/architect_master_todo.md`
+
+This file contains the ordered list of all development phases (1-15) that need to be implemented to reach production readiness.
+</file>
+
 <file path="documentation/architect_master_todo.md">
 # Developer Master Roadmap (0_to_prod)
 
-- [ ] Phase 1: Core Backend & User Auth (`/documentation/2_development_plan/dev_todo_phase_1.md`)
-- [ ] Phase 2: Learning Loop Logic (`/documentation/2_development_plan/dev_todo_phase_2.md`)
-- [ ] Phase 3: AI Service Integration (`/documentation/2_development_plan/dev_todo_phase_3.md`)
-- [ ] Phase 4: Dashboard & Payments (`/documentation/2_development_plan/dev_todo_phase_4.md`)
-- [ ] Phase 5: Production Hardening: Observability & Errors (`/documentation/2_development_plan/dev_todo_phase_5.md`)
-- [ ] Phase 6: Production Hardening: Security & Performance (`/documentation/2_development_plan/dev_todo_phase_6.md`)
-- [ ] Phase 7: Production Hardening: Testing (`/documentation/2_development_plan/dev_todo_phase_7.md`)
-- [ ] Phase 8: Asynchronous Processing & Distributed Caching (`/documentation/2_development_plan/dev_todo_phase_8.md`)
-- [ ] Phase 9: Comprehensive Testing (`/documentation/2_development_plan/dev_todo_phase_9.md`)
-- [ ] Phase 10: UI Implementation & Polish (`/documentation/2_development_plan/dev_todo_phase_10.md`)
-- [ ] Phase 11: Data Governance & Finalization (`/documentation/2_development_plan/dev_todo_phase_11.md`)
-- [ ] Phase 12: Client-Side State Management (`/documentation/2_development_plan/dev_todo_phase_12.md`)
-- [ ] Phase 13: Environment Configurations (`/documentation/2_development_plan/dev_todo_phase_13.md`)
-- [ ] Phase 14: User Feedback System (`/documentation/2_development_plan/dev_todo_phase_14.md`)
-- [ ] Phase 15: AI Cost & Security Controls (`/documentation/2_development_plan/dev_todo_phase_15.md`)
+- [ ] documentation/2_development_plan/dev_todo_phase_1.md
+- [ ] documentation/2_development_plan/dev_todo_phase_2.md
+- [ ] documentation/2_development_plan/dev_todo_phase_3.md
+- [ ] documentation/2_development_plan/dev_todo_phase_4.md
+- [ ] documentation/2_development_plan/dev_todo_phase_5.md
+- [ ] documentation/2_development_plan/dev_todo_phase_6.md
+- [ ] documentation/2_development_plan/dev_todo_phase_7.md
+- [ ] documentation/2_development_plan/dev_todo_phase_8.md
+- [ ] documentation/2_development_plan/dev_todo_phase_9.md
+- [ ] documentation/2_development_plan/dev_todo_phase_10.md
+- [ ] documentation/2_development_plan/dev_todo_phase_11.md
+- [ ] documentation/2_development_plan/dev_todo_phase_12.md
+- [ ] documentation/2_development_plan/dev_todo_phase_13.md
+- [ ] documentation/2_development_plan/dev_todo_phase_14.md
+- [ ] documentation/2_development_plan/dev_todo_phase_15.md
 </file>
 
 </files>

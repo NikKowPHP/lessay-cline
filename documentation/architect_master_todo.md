@@ -1,17 +1,17 @@
 # Developer Master Roadmap (0_to_prod)
 
-- [ ] Phase 1: Core Backend & User Auth (`/documentation/2_development_plan/dev_todo_phase_1.md`)
-- [ ] Phase 2: Learning Loop Logic (`/documentation/2_development_plan/dev_todo_phase_2.md`)
-- [ ] Phase 3: AI Service Integration (`/documentation/2_development_plan/dev_todo_phase_3.md`)
-- [ ] Phase 4: Dashboard & Payments (`/documentation/2_development_plan/dev_todo_phase_4.md`)
-- [ ] Phase 5: Production Hardening: Observability & Errors (`/documentation/2_development_plan/dev_todo_phase_5.md`)
-- [ ] Phase 6: Production Hardening: Security & Performance (`/documentation/2_development_plan/dev_todo_phase_6.md`)
-- [ ] Phase 7: Production Hardening: Testing (`/documentation/2_development_plan/dev_todo_phase_7.md`)
-- [ ] Phase 8: Asynchronous Processing & Distributed Caching (`/documentation/2_development_plan/dev_todo_phase_8.md`)
-- [ ] Phase 9: Comprehensive Testing (`/documentation/2_development_plan/dev_todo_phase_9.md`)
-- [ ] Phase 10: UI Implementation & Polish (`/documentation/2_development_plan/dev_todo_phase_10.md`)
-- [ ] Phase 11: Data Governance & Finalization (`/documentation/2_development_plan/dev_todo_phase_11.md`)
-- [ ] Phase 12: Client-Side State Management (`/documentation/2_development_plan/dev_todo_phase_12.md`)
-- [ ] Phase 13: Environment Configurations (`/documentation/2_development_plan/dev_todo_phase_13.md`)
-- [ ] Phase 14: User Feedback System (`/documentation/2_development_plan/dev_todo_phase_14.md`)
-- [ ] Phase 15: AI Cost & Security Controls (`/documentation/2_development_plan/dev_todo_phase_15.md`)
+- [ ] documentation/2_development_plan/dev_todo_phase_1.md
+- [ ] documentation/2_development_plan/dev_todo_phase_2.md
+- [ ] documentation/2_development_plan/dev_todo_phase_3.md
+- [ ] documentation/2_development_plan/dev_todo_phase_4.md
+- [ ] documentation/2_development_plan/dev_todo_phase_5.md
+- [ ] documentation/2_development_plan/dev_todo_phase_6.md
+- [ ] documentation/2_development_plan/dev_todo_phase_7.md
+- [ ] documentation/2_development_plan/dev_todo_phase_8.md
+- [ ] documentation/2_development_plan/dev_todo_phase_9.md
+- [ ] documentation/2_development_plan/dev_todo_phase_10.md
+- [ ] documentation/2_development_plan/dev_todo_phase_11.md
+- [ ] documentation/2_development_plan/dev_todo_phase_12.md
+- [ ] documentation/2_development_plan/dev_todo_phase_13.md
+- [ ] documentation/2_development_plan/dev_todo_phase_14.md
+- [ ] documentation/2_development_plan/dev_todo_phase_15.md
