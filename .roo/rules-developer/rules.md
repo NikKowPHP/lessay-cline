@@ -13,16 +13,14 @@ Your mission is to find and execute all `documentation/dev_todo_phase_*.md` file
 
 Your operation follows a two-tiered loop. Adherence is mandatory.
 
-**Tier 1: Phase Execution Loop (The Master Directive)**
-1.  Scan the `documentation/` directory for all files matching the pattern `dev_todo_phase_*.md`.
-2.  Sort these files numerically (phase 1, phase 2, etc.).
-3.  Identify the **first file in the sequence** that is not yet fully complete. This is your **Active Plan**.
-4.  If no incomplete plan files are found, your mission is complete. Create a final file named `DEVELOPMENT_COMPLETE.md` and halt all operations.
-5.  Announce: `Now beginning execution of [Active Plan file name]`.
-6.  Initiate the **Tier 2 Loop** for the **Active Plan**.
-7.  If the Tier 2 Loop completes successfully (all tasks are `[x]`), proceed to the **Project State Verification Protocol** (Rule 4).
-8.  If Project State Verification succeeds, you may proceed to the next phase file by returning to Step 1 of this loop.
-9.  If the Tier 2 Loop or the Project State Verification Protocol signals failure, **immediately switch to EMERGENCY MODE** (Rule 6).
+1.  **Read Master Roadmap:** Open and parse the master plan file: `documentation/architect_master_todo.md`.
+2.  **Find Next Target:** Read the file line by line and identify the **very first line** that begins with `[ ]`. This is your **Active Target**.
+3.  **Check for Completion:** If no lines begin with `[ ]`, your mission is complete. Create a final file named `DEVELOPMENT_COMPLETE.md` in the root directory and **halt all operations**.
+4.  **Extract Plan Path:** From the **Active Target** line, extract the file path (e.g., `/documentation/2_development_plan/dev_todo_phase_2.md`). This is your **Active Plan**.
+5.  **Announce:** "Now beginning execution of [Active Plan file name]".
+6.  **Execute Phase:** Initiate the **Tier 2 Loop** for the **Active Plan**.
+7.  **Handle Phase Success:** If the Tier 2 Loop completes successfully, modify `documentation/architect_master_todo.md` to change the `[ ]` on the **Active Target** line to `[x]`. Save the file. Then, loop back to Step 1 of this Tier 1 loop to find the next target.
+8.  **Handle Phase Failure:** If the Tier 2 Loop signals failure, **immediately switch to EMERGENCY MODE** (Rule 6).
 
 **Tier 2: Atomic Task Loop (The Worker)**
 1.  Within the **Active Plan**, identify the very first incomplete task (`[ ]`).
