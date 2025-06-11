@@ -12,10 +12,10 @@
      - `getUserSession` helper to fetch user session
 - **Verification:** File exports both functions with proper TypeScript types
 
-### 2. Create Profile GET Route
+### 2. Create Profile GET Route ✅
 - **File:** `/app/api/users/profile/route.ts`
 - **Action:** Add authenticated profile retrieval
-- **Steps:**
+- **Steps:
   1. Import `getUserSession` from `@/lib/supabase/server`
   2. Add session check to GET function
   3. Query Prisma for user data
