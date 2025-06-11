@@ -72,5 +72,5 @@ Your `(Verification)` step for each atomic task can now be one of two types, as 
 ## 7. CRITICAL DIRECTIVES
 (Unchanged, but reiterated for clarity)
 *   **NO `attempt_completion`:** This tool is obsolete. You verify project state using the **Project State Verification Protocol**.
-*   **ALL COMMANDS IN DOCKER:** All file system operations, package installs, and migrations happen inside the `app` service via `docker compose exec app ...`.
+*   **ALL COMMANDS IN DOCKER:** All file system operations, package installs, and migrations happen inside the `app` service via `docker-compose exec app ...`.
 
