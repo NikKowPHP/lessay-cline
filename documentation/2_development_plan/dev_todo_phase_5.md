@@ -1,112 +1,80 @@
-# Lessay Development Phase 5: Production Hardening - Observability & Error Handling
+# Developer To-Do List: Phase 5 - Error Handling & Resilience
 
-## Tasks for Developer AI
+**Objective:** Implement robust error handling patterns and fault tolerance mechanisms across the application.
 
-### 1. Install Logging Packages
-- [x] **Add pino and pino-pretty**
-  ```bash
-  npm install pino pino-pretty
-  ```
-  Verification: Packages appear in `package.json` dependencies
+## Tasks
 
-### 2. Create Logger Utility (`/lib/logger.ts`)
-- [x] **Implement centralized logger**
-  ```typescript
-  import pino from 'pino';
-
-  const logger = pino({
-    level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-    transport: {
-      target: 'pino-pretty',
-      options: {
-        colorize: true,
-        translateTime: 'SYS:standard'
-      }
-    }
-  });
-
-  export default logger;
-  ```
-  Verification: File exists and exports logger instance
-
-### 3. Replace Console Logs in API Routes
-- [ ] **Update all API routes to use logger**
-  Files to modify:
-  - `app/api/lessons/[id]/submit-answer/route.ts`
-  - `app/api/lessons/start/route.ts`
-  - `app/api/payments/create-subscription/route.ts`
-  - `app/api/stats/fluency/route.ts`
-  - `app/api/stats/srs-overview/route.ts`
-  - `app/api/stripe/webhook/route.ts`
-  - `app/api/users/profile/route.ts`
-
-  Verification: No `console.log` statements remain in API routes
-
-### 4. Implement Error Handling Utility (`/lib/errors.ts`)
-- [ ] **Create error handler**
-  ```typescript
-  import { NextResponse } from 'next/server';
-  import logger from '@/lib/logger';
-  import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-
-  export function handleError(error: unknown) {
-    if (error instanceof PrismaClientKnownRequestError) {
-      logger.error({ error }, 'Database error occurred');
+- [ ] **1. Create Error Handling Middleware (`/lib/errorHandler.ts`)**
+  - Implement Express-style error middleware for Next.js
+  - Structure:
+    ```typescript
+    export function errorHandler(err: Error, req: NextRequest) {
+      const statusCode = getStatusCodeFromError(err);
+      const errorId = generateUniqueErrorId();
+      logger.error({ errorId, err }, 'Request failed');
       return NextResponse.json(
-        { error: 'Database operation failed' },
-        { status: getPrismaErrorStatus(error) }
+        { 
+          error: err.message,
+          errorId,
+          statusCode 
+        },
+        { status: statusCode }
       );
     }
+    ```
+  - Verification: Middleware file exists with exported function
 
-    logger.error({ error }, 'Unexpected error occurred');
-    return NextResponse.json(
-      { error: 'An unexpected error occurred' },
-      { status: 500 }
-    );
-  }
+- [ ] **2. Standardize API Error Responses**
+  - Files to modify:
+    - `app/api/lessons/start/route.ts`
+    - `app/api/lessons/[id]/submit-answer/route.ts`
+    - `app/api/stats/srs-overview/route.ts`
+  - Replace all error responses with:
+    ```typescript
+    return errorHandler(error, request);
+    ```
+  - Verification: All modified routes return standardized error format
 
-  function getPrismaErrorStatus(error: PrismaClientKnownRequestError): number {
-    switch (error.code) {
-      case 'P2002': return 409; // Unique constraint
-      case 'P2025': return 404; // Not found
-      default: return 400; // Bad request
+- [ ] **3. Implement Error Classification System**
+  - Create `/lib/errors.ts` with:
+    ```typescript
+    export class AppError extends Error {
+      constructor(
+        public readonly type: 'validation'|'auth'|'database'|'payment',
+        public readonly code: string,
+        message: string
+      ) {
+        super(message);
+      }
     }
-  }
-  ```
-  Verification: File exists and handles Prisma/unknown errors
+    ```
+  - Verification: File exists with error class definition
 
-### 5. Add Health Check Endpoint (`/app/api/health/route.ts`)
-- [ ] **Implement health check**
-  ```typescript
-  import { NextResponse } from 'next/server';
-  import prisma from '@/lib/prisma';
-  import logger from '@/lib/logger';
-  import { handleError } from '@/lib/errors';
+- [ ] **4. Add Error Logging Integration**
+  - Modify `/lib/logger.ts` to:
+    - Include error type/code in logs
+    - Track error rates
+    - Link to error IDs
+  - Verification: Logger outputs enhanced error information
 
-  export async function GET() {
-    try {
-      await prisma.$queryRaw`SELECT 1`;
-      logger.info('Health check successful');
-      return NextResponse.json({ status: 'ok' }, { status: 200 });
-    } catch (error) {
-      return handleError(error);
+- [ ] **5. Implement Retry Logic for External Services**
+  - Create `/lib/retry.ts` with:
+    ```typescript
+    export async function withRetry(
+      fn: () => Promise<any>,
+      options: { retries: number }
+    ) {
+      // Implementation with exponential backoff
     }
-  }
-  ```
-  Verification: Endpoint returns 200 when database is accessible
+    ```
+  - Apply to:
+    - Supabase calls
+    - Stripe payments
+    - AI service calls
+  - Verification: Retry utility exists and is used in 3+ places
 
-### 6. Wrap API Routes in Try/Catch
-- [ ] **Update all API routes with error handling**
-  Example modification:
-  ```typescript
-  import { handleError } from '@/lib/errors';
-
-  export async function POST(request: Request) {
-    try {
-      // Route logic here
-    } catch (error) {
-      return handleError(error);
-    }
-  }
-  ```
-  Verification: All API routes have proper error handling
+- [ ] **6. Create Error Documentation (`/documentation/errors.md`)**
+  - List all error codes
+  - Include troubleshooting guide
+  - Add recovery procedures
+  - Verification: Documentation file exists with all sections

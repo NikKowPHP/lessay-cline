@@ -1,65 +1,56 @@
-# Lessay Development Phase 4: Dashboard & Payments Implementation
+# Developer To-Do List: Phase 4 - Observability Implementation
 
-## Tasks for Developer AI
+**Objective:** Implement comprehensive logging, metrics, and monitoring infrastructure.
 
-### 1. Implement Fluency Stats Route (`/app/api/stats/fluency/route.ts`)
-- [x] **Add Prisma aggregations**
-  ```typescript
-  const stats = await prisma.userProgress.groupBy({
-    by: ['createdAt'],
-    where: { userId: session.user.id },
-    _avg: { accuracyScore: true },
-    _count: { _all: true },
-    orderBy: { createdAt: 'asc' }
-  });
-  ```
-  Verification: Route returns daily accuracy averages and counts
+## Tasks
 
-### 2. Implement SRS Overview Route (`/app/api/stats/srs-overview/route.ts`)
-- [x] **Add SRS metrics**
-  ```typescript
-  const overview = await prisma.sRSEntry.groupBy({
-    by: ['exerciseType'],
-    where: { userId: session.user.id },
-    _count: { status: true },
-    _min: { nextReview: true },
-    _max: { nextReview: true },
-    _avg: { nextReview: true }
-  });
-  ```
-  Verification: Route returns grouped SRS metrics
+- [ ] **1. Enhance Logger Configuration (`/lib/logger.ts`)**
+  - Add structured logging with Pino
+  - Implement log levels (debug, info, warn, error)
+  - Add request ID correlation
+  - Verification: All API routes output structured JSON logs
 
-### 3. Update Dashboard View (`/components/DashboardView.tsx`)
-- [x] **Fetch and display stats**
-  - Use `useEffect` to fetch from both stats endpoints
+- [ ] **2. Instrument Key Endpoints**
+  - Files to modify:
+    - `app/api/lessons/start/route.ts`
+    - `app/api/lessons/[id]/submit-answer/route.ts` 
+    - `app/api/stats/srs-overview/route.ts`
+  - Add:
+    - Response time metrics
+    - Error rate tracking
+    - Request volume counters
+  - Verification: Endpoints log timing and success metrics
+
+- [ ] **3. Implement Metrics Endpoint (`/app/api/metrics/route.ts`)**
+  - Expose Prometheus-compatible metrics
+  - Track:
+    - API response times
+    - Error rates
+    - Active users
+    - Lesson completion rates
+  - Verification: `/api/metrics` returns valid Prometheus data
+
+- [ ] **4. Create Monitoring Dashboard**
+  - Install: `npm install @grafana/faro-web-sdk`
+  - File: `/components/Monitoring.tsx`
   - Implement:
-    - Line chart for accuracy trends
-    - Pie chart for SRS status distribution
-    - Table for recent activity
-  Verification: All visualizations render with real data
+    - Error rate visualization
+    - API latency heatmap
+    - System health status
+  - Verification: Dashboard renders with live data
 
-### 4. Implement Stripe Subscriptions (`/app/api/payments/create-subscription/route.ts`)
-- [x] **Install and configure Stripe**
-  ```bash
-  npm install stripe
-  ```
-  ```typescript
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-  const subscription = await stripe.subscriptions.create({
-    customer: req.body.customerId,
-    items: [{ price: req.body.priceId }],
-    payment_behavior: 'default_incomplete'
-  });
-  ```
-  Verification: Subscription objects created in Stripe dashboard
+- [ ] **5. Configure Alerting Rules**
+  - Create file: `/config/alert-rules.yaml`
+  - Define thresholds for:
+    - High error rate (>5%)
+    - Slow responses (>500ms p95)
+    - Service downtime
+  - Verification: Alert rules file exists with valid YAML
 
-### 5. Secure Webhook (`/app/api/stripe/webhook/route.ts`)
-- [x] **Add signature verification**
-  ```typescript
-  const event = stripe.webhooks.constructEvent(
-    req.body,
-    req.headers['stripe-signature'],
-    process.env.STRIPE_WEBHOOK_SECRET
-  );
-  ```
-  Verification: Webhook rejects invalid signatures
+- [ ] **6. Update Documentation**
+  - File: `/documentation/operations/observability.md`
+  - Add:
+    - Monitoring architecture overview
+    - Alert response procedures
+    - Dashboard usage guide
+  - Verification: Documentation file exists with all sections

@@ -67,6 +67,9 @@ app/
           route.ts
       start/
         route.ts
+    onboarding/
+      status/
+        route.ts
     payments/
       create-subscription/
         route.ts
@@ -89,8 +92,11 @@ app/
 components/
   Auth.tsx
   DashboardView.tsx
+  Help.tsx
   LessonView.tsx
   PricingPage.tsx
+  Tutorial.tsx
+  Welcome.tsx
 documentation/
   1_strategic_briefs/
     hardening_phase_1_todo.md
@@ -190,6 +196,7 @@ Dockerfile
 eslint.config.mjs
 globals.css
 layout.tsx
+NEEDS_ARCHITECTURAL_REVIEW.md
 next.config.ts
 package.json
 page.tsx
@@ -200,6 +207,17 @@ tsconfig.json
 
 <files>
 This section contains the contents of the repository's files.
+
+<file path="NEEDS_ARCHITECTURAL_REVIEW.md">
+## Original Problem:
+File not found
+
+## Failed Fix Attempt:
+File could not be read
+
+## New Error:
+Error reading file FIX_PLAN.md: {"name":"Error","message":"File not found: /home/kasjer/projects/lessay-cline/FIX_PLAN.md","stack":"Error: File not found: /home/kasjer/projects/lessay-cline/FIX_PLAN.md\n    at pJn (/home/kasjer/.vscode/extensions/rooveterinaryinc.roo-cline-3.19.7/dist/extension.js:4163:2252)\n    at async Promise.all (index 0)\n    at CJn (/home/kasjer/.vscode/extensions/rooveterinaryinc.roo-cline-3.19.7/dist/extension.js:4165:6293)\n    at Are (/home/kasjer/.vscode/extensions/rooveterinaryinc.roo-cline-3.19.7/dist/extension.js:4268:1349)"}
+</file>
 
 <file path=".roo/rules-architect-senior/rules.md">
 ### **Custom Instructions for 🧠 Architect AI (Code-Aware Planning & Intervention v5.0)**
@@ -551,6 +569,39 @@ customModes:
     source: global
 </file>
 
+<file path="app/api/onboarding/status/route.ts">
+import { NextResponse } from 'next/server'
+import prisma from '@/lib/prisma'
+
+export async function GET() {
+  try {
+    // TODO: Fetch real user ID from session
+    const userId = 'temp-user-id'
+    
+    const progress = await prisma.onboardingProgress.findUnique({
+      where: { userId },
+      select: {
+        welcomeComplete: true,
+        tutorialComplete: true,
+        profileSetupComplete: true
+      }
+    })
+
+    return NextResponse.json(progress || {
+      welcomeComplete: false,
+      tutorialComplete: false,
+      profileSetupComplete: false
+    })
+  } catch (error) {
+    console.error('Onboarding status error:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch onboarding status' },
+      { status: 500 }
+    )
+  }
+}
+</file>
+
 <file path="app/api/users/sync/route.ts">
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
@@ -862,6 +913,195 @@ const DashboardView = () => {
 export default DashboardView;
 </file>
 
+<file path="components/Help.tsx">
+'use client'
+import Link from 'next/link'
+
+export default function Help() {
+  const helpTopics = [
+    {
+      title: 'Getting Started',
+      items: [
+        'How to create an account',
+        'Taking your first lesson',
+        'Setting up your profile'
+      ]
+    },
+    {
+      title: 'Troubleshooting',
+      items: [
+        'Microphone not working',
+        'Lesson progress not saving',
+        'Payment issues'
+      ]
+    }
+  ]
+
+  const externalResources = [
+    {
+      name: 'User Guide',
+      url: '/documentation/user-guide'
+    },
+    {
+      name: 'FAQ',
+      url: '/documentation/faq'
+    },
+    {
+      name: 'Contact Support',
+      url: 'mailto:support@lessay.com'
+    }
+  ]
+
+  return (
+    <div className="help-container p-6 max-w-4xl mx-auto">
+      <h1 className="text-3xl font-bold mb-6">Help Center</h1>
+      
+      <div className="help-sections grid md:grid-cols-2 gap-6">
+        {helpTopics.map((section, index) => (
+          <div key={index} className="help-section bg-gray-50 p-4 rounded-lg">
+            <h2 className="text-xl font-semibold mb-3">{section.title}</h2>
+            <ul className="list-disc pl-5">
+              {section.items.map((item, itemIndex) => (
+                <li key={itemIndex} className="mb-2">{item}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+
+      <div className="external-resources mt-8">
+        <h2 className="text-2xl font-bold mb-4">Additional Resources</h2>
+        <div className="flex flex-wrap gap-4">
+          {externalResources.map((resource, index) => (
+            <Link
+              key={index}
+              href={resource.url}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              {resource.name}
+            </Link>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+</file>
+
+<file path="components/Tutorial.tsx">
+'use client'
+import { useState } from 'react'
+
+export default function Tutorial() {
+  const [currentStep, setCurrentStep] = useState(0)
+  
+  const steps = [
+    {
+      title: 'Welcome to Lessons',
+      content: 'Start your first lesson to begin learning.',
+      action: 'Start Lesson'
+    },
+    {
+      title: 'Practice Speaking',
+      content: 'Use the microphone to practice pronunciation.',
+      action: 'Try Speaking'
+    },
+    {
+      title: 'Track Progress',
+      content: 'Monitor your improvements over time.',
+      action: 'View Progress'
+    }
+  ]
+
+  const handleNext = () => {
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(currentStep + 1)
+    }
+  }
+
+  const handlePrev = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1)
+    }
+  }
+
+  return (
+    <div className="tutorial-container p-6 max-w-2xl mx-auto">
+      <h2 className="text-2xl font-bold mb-4">{steps[currentStep].title}</h2>
+      <p className="text-lg mb-6">{steps[currentStep].content}</p>
+      
+      <div className="navigation-controls flex justify-between">
+        <button
+          onClick={handlePrev}
+          disabled={currentStep === 0}
+          className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+        >
+          Previous
+        </button>
+        
+        <button
+          onClick={handleNext}
+          disabled={currentStep === steps.length - 1}
+          className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
+        >
+          {currentStep === steps.length - 1 ? 'Finish' : 'Next'}
+        </button>
+      </div>
+    </div>
+  )
+}
+</file>
+
+<file path="components/Welcome.tsx">
+'use client'
+import { useState } from 'react'
+
+export default function Welcome() {
+  const [progress] = useState(0)
+  
+  const steps = [
+    'Complete your profile',
+    'Take the placement test',
+    'Start your first lesson'
+  ]
+
+  return (
+    <div className="welcome-container p-6 max-w-2xl mx-auto">
+      <h1 className="text-3xl font-bold mb-4">Welcome to Lessay!</h1>
+      
+      <div className="greeting-section mb-8">
+        {/* eslint-disable-next-line react/no-unescaped-entities */}
+        <p className="text-lg mb-4">
+          Let's get you started on your language learning journey.
+        </p>
+      </div>
+
+      <div className="quickstart-section mb-8">
+        <h2 className="text-xl font-semibold mb-4">Quick Start Guide</h2>
+        <ul className="list-disc pl-6">
+          {steps.map((step, index) => (
+            <li key={index} className="mb-2">{step}</li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="progress-section">
+        <h3 className="text-lg font-medium mb-2">
+          Your Progress: {progress}% complete
+        </h3>
+        <div className="w-full bg-gray-200 rounded-full h-2.5">
+          <div 
+            className="bg-blue-600 h-2.5 rounded-full" 
+            style={{ width: `${progress}%` }}
+          ></div>
+        </div>
+      </div>
+    </div>
+  )
+}
+}
+</file>
+
 <file path="documentation/2_development_plan/dev_todo_phase_10.md">
 # Developer To-Do List: Phase 10 - UI Implementation & Polish
 
@@ -955,98 +1195,6 @@ export default DashboardView;
   - Ensure API routes have proper documentation
   - Verify component prop types
   - Verification: All major components and functions documented.
-</file>
-
-<file path="documentation/2_development_plan/dev_todo_phase_3.md">
-# Lessay Development Phase 3: AI Service Integration
-
-## Tasks for Developer AI
-
-### 1. Install Required Packages
-- [x] **Install Google AI SDKs**
-  ```bash
-  npm install @google/generative-ai @google-cloud/speech @google-cloud/text-to-speech
-  ```
-  Verification: Packages appear in `package.json` dependencies
-
-### 2. Initialize Google Cloud Clients (`/lib/ai-service.ts`)
-- [x] **Configure credential handling**
-  ```typescript
-  let geminiClient: GoogleGenerativeAI;
-  let speechClient: SpeechClient;
-  let textToSpeechClient: TextToSpeechClient;
-
-  if (process.env.GCP_CREDENTIALS_JSON) {
-    const credentials = JSON.parse(process.env.GCP_CREDENTIALS_JSON);
-    geminiClient = new GoogleGenerativeAI(process.env.AI_API_KEY);
-    speechClient = new SpeechClient({ credentials });
-    textToSpeechClient = new TextToSpeechClient({ credentials });
-  } else {
-    geminiClient = new GoogleGenerativeAI(process.env.AI_API_KEY);
-    speechClient = new SpeechClient({ keyFilename: './gcp-credentials.json' });
-    textToSpeechClient = new TextToSpeechClient({ keyFilename: './gcp-credentials.json' });
-  }
-  ```
-  Verification: Clients initialize without errors in dev/prod environments
-
-### 3. Implement Lesson Generation (`/lib/ai-service.ts`)
-- [x] **Replace generateLessonForUser stub**
-  ```typescript
-  async function generateLessonForUser(userId: string) {
-    const model = geminiClient.getGenerativeModel({
-      model: "gemini-pro",
-      generationConfig: {
-        temperature: 0.7,
-        maxOutputTokens: 2048
-      }
-    });
-
-    const prompt = `Generate a language lesson...`; // Detailed prompt per design doc
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-
-    return JSON.parse(response.text());
-  }
-  ```
-  Verification: Function returns valid lesson structure from API call
-
-### 4. Implement Speech-to-Text (`/lib/ai-service.ts`)
-- [x] **Create transcribeAudio function**
-  ```typescript
-  async function transcribeAudio(audioBuffer: Buffer): Promise<string> {
-    const [response] = await speechClient.recognize({
-      audio: { content: audioBuffer.toString('base64') },
-      config: {
-        encoding: 'WEBM_OPUS',
-        sampleRateHertz: 48000,
-        languageCode: 'en-US'
-      }
-    });
-    return response.results
-      .map(result => result.alternatives[0].transcript)
-      .join('\n');
-  }
-  ```
-  Verification: Audio files are accurately transcribed
-
-### 5. Implement Text-to-Speech (`/lib/ai-service.ts`)
-- [x] **Create synthesizeSpeech function**
-  ```typescript
-  async function synthesizeSpeech(text: string): Promise<Buffer> {
-    const [response] = await textToSpeechClient.synthesizeSpeech({
-      input: { text },
-      voice: {
-        languageCode: 'en-US',
-        name: 'en-US-Standard-C'
-      },
-      audioConfig: {
-        audioEncoding: 'MP3'
-      }
-    });
-    return Buffer.from(response.audioContent, 'base64');
-  }
-  ```
-  Verification: Text input produces valid audio output
 </file>
 
 <file path="documentation/2_development_plan/dev_todo_phase_6.md">
@@ -1790,46 +1938,6 @@ ALTER TABLE "VoiceAnalysis" ADD CONSTRAINT "VoiceAnalysis_lessonId_fkey" FOREIGN
 # Please do not edit this file manually
 # It should be added in your version-control system (e.g., Git)
 provider = "postgresql"
-</file>
-
-<file path="todos/master_development_plan.md">
-# Master Development Plan
-
-## Phase 1: Initial Development
-- [ ] Complete dev_todo_phase_1.md tasks
-
-## Phase 2: Transactional Integrity
-- [ ] Complete dev_todo_phase_2.md tasks
-
-## Phase 3: Onboarding
-- [ ] Complete dev_todo_phase_3.md tasks
-
-## Phase 4: Observability
-- [ ] Complete dev_todo_phase_4.md tasks
-
-## Phase 5: Error Handling
-- [ ] Complete dev_todo_phase_5.md tasks
-
-## Phase 6: Security
-- [ ] Complete dev_todo_phase_6.md tasks
-
-## Phase 7: Performance
-- [ ] Complete dev_todo_phase_7.md tasks
-
-## Phase 8: Testing
-- [ ] Complete dev_todo_phase_8.md tasks
-
-## Phase 9: State Management
-- [ ] Complete dev_todo_phase_9.md tasks
-
-## Phase 10: Environments
-- [ ] Complete dev_todo_phase_10.md tasks
-
-## Phase 11: Cost Control
-- [ ] Complete dev_todo_phase_11.md tasks
-
-## Phase 12: Authorization
-- [ ] Complete dev_todo_phase_12.md tasks
 </file>
 
 <file path="types/supabase.ts">
@@ -4919,118 +5027,86 @@ export default function LessonView() {
 </file>
 
 <file path="documentation/2_development_plan/dev_todo_phase_5.md">
-# Lessay Development Phase 5: Production Hardening - Observability & Error Handling
+# Developer To-Do List: Phase 5 - Error Handling & Resilience
 
-## Tasks for Developer AI
+**Objective:** Implement robust error handling patterns and fault tolerance mechanisms across the application.
 
-### 1. Install Logging Packages
-- [x] **Add pino and pino-pretty**
-  ```bash
-  npm install pino pino-pretty
-  ```
-  Verification: Packages appear in `package.json` dependencies
+## Tasks
 
-### 2. Create Logger Utility (`/lib/logger.ts`)
-- [x] **Implement centralized logger**
-  ```typescript
-  import pino from 'pino';
-
-  const logger = pino({
-    level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-    transport: {
-      target: 'pino-pretty',
-      options: {
-        colorize: true,
-        translateTime: 'SYS:standard'
-      }
-    }
-  });
-
-  export default logger;
-  ```
-  Verification: File exists and exports logger instance
-
-### 3. Replace Console Logs in API Routes
-- [ ] **Update all API routes to use logger**
-  Files to modify:
-  - `app/api/lessons/[id]/submit-answer/route.ts`
-  - `app/api/lessons/start/route.ts`
-  - `app/api/payments/create-subscription/route.ts`
-  - `app/api/stats/fluency/route.ts`
-  - `app/api/stats/srs-overview/route.ts`
-  - `app/api/stripe/webhook/route.ts`
-  - `app/api/users/profile/route.ts`
-
-  Verification: No `console.log` statements remain in API routes
-
-### 4. Implement Error Handling Utility (`/lib/errors.ts`)
-- [ ] **Create error handler**
-  ```typescript
-  import { NextResponse } from 'next/server';
-  import logger from '@/lib/logger';
-  import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-
-  export function handleError(error: unknown) {
-    if (error instanceof PrismaClientKnownRequestError) {
-      logger.error({ error }, 'Database error occurred');
+- [ ] **1. Create Error Handling Middleware (`/lib/errorHandler.ts`)**
+  - Implement Express-style error middleware for Next.js
+  - Structure:
+    ```typescript
+    export function errorHandler(err: Error, req: NextRequest) {
+      const statusCode = getStatusCodeFromError(err);
+      const errorId = generateUniqueErrorId();
+      logger.error({ errorId, err }, 'Request failed');
       return NextResponse.json(
-        { error: 'Database operation failed' },
-        { status: getPrismaErrorStatus(error) }
+        { 
+          error: err.message,
+          errorId,
+          statusCode 
+        },
+        { status: statusCode }
       );
     }
+    ```
+  - Verification: Middleware file exists with exported function
 
-    logger.error({ error }, 'Unexpected error occurred');
-    return NextResponse.json(
-      { error: 'An unexpected error occurred' },
-      { status: 500 }
-    );
-  }
+- [ ] **2. Standardize API Error Responses**
+  - Files to modify:
+    - `app/api/lessons/start/route.ts`
+    - `app/api/lessons/[id]/submit-answer/route.ts`
+    - `app/api/stats/srs-overview/route.ts`
+  - Replace all error responses with:
+    ```typescript
+    return errorHandler(error, request);
+    ```
+  - Verification: All modified routes return standardized error format
 
-  function getPrismaErrorStatus(error: PrismaClientKnownRequestError): number {
-    switch (error.code) {
-      case 'P2002': return 409; // Unique constraint
-      case 'P2025': return 404; // Not found
-      default: return 400; // Bad request
+- [ ] **3. Implement Error Classification System**
+  - Create `/lib/errors.ts` with:
+    ```typescript
+    export class AppError extends Error {
+      constructor(
+        public readonly type: 'validation'|'auth'|'database'|'payment',
+        public readonly code: string,
+        message: string
+      ) {
+        super(message);
+      }
     }
-  }
-  ```
-  Verification: File exists and handles Prisma/unknown errors
+    ```
+  - Verification: File exists with error class definition
 
-### 5. Add Health Check Endpoint (`/app/api/health/route.ts`)
-- [ ] **Implement health check**
-  ```typescript
-  import { NextResponse } from 'next/server';
-  import prisma from '@/lib/prisma';
-  import logger from '@/lib/logger';
-  import { handleError } from '@/lib/errors';
+- [ ] **4. Add Error Logging Integration**
+  - Modify `/lib/logger.ts` to:
+    - Include error type/code in logs
+    - Track error rates
+    - Link to error IDs
+  - Verification: Logger outputs enhanced error information
 
-  export async function GET() {
-    try {
-      await prisma.$queryRaw`SELECT 1`;
-      logger.info('Health check successful');
-      return NextResponse.json({ status: 'ok' }, { status: 200 });
-    } catch (error) {
-      return handleError(error);
+- [ ] **5. Implement Retry Logic for External Services**
+  - Create `/lib/retry.ts` with:
+    ```typescript
+    export async function withRetry(
+      fn: () => Promise<any>,
+      options: { retries: number }
+    ) {
+      // Implementation with exponential backoff
     }
-  }
-  ```
-  Verification: Endpoint returns 200 when database is accessible
+    ```
+  - Apply to:
+    - Supabase calls
+    - Stripe payments
+    - AI service calls
+  - Verification: Retry utility exists and is used in 3+ places
 
-### 6. Wrap API Routes in Try/Catch
-- [ ] **Update all API routes with error handling**
-  Example modification:
-  ```typescript
-  import { handleError } from '@/lib/errors';
-
-  export async function POST(request: Request) {
-    try {
-      // Route logic here
-    } catch (error) {
-      return handleError(error);
-    }
-  }
-  ```
-  Verification: All API routes have proper error handling
+- [ ] **6. Create Error Documentation (`/documentation/errors.md`)**
+  - List all error codes
+  - Include troubleshooting guide
+  - Add recovery procedures
+  - Verification: Documentation file exists with all sections
 </file>
 
 <file path="documentation/3_personas_and_rules/orchestrator_entrypoint.md">
@@ -5748,6 +5824,46 @@ if (process.env.NODE_ENV === 'development') global.prisma = prisma
 
 export default prisma
 export type { PrismaClient }
+</file>
+
+<file path="todos/master_development_plan.md">
+# Master Development Plan
+
+## Phase 1: Initial Development
+- [ ] Complete dev_todo_phase_1.md tasks
+
+## Phase 2: Transactional Integrity
+- [x] Complete dev_todo_phase_2.md tasks
+
+## Phase 3: Onboarding
+- [x] Complete dev_todo_phase_3.md tasks
+
+## Phase 4: Observability
+- [x] Complete dev_todo_phase_4.md tasks
+
+## Phase 5: Error Handling
+- [ ] Complete dev_todo_phase_5.md tasks
+
+## Phase 6: Security
+- [ ] Complete dev_todo_phase_6.md tasks
+
+## Phase 7: Performance
+- [ ] Complete dev_todo_phase_7.md tasks
+
+## Phase 8: Testing
+- [ ] Complete dev_todo_phase_8.md tasks
+
+## Phase 9: State Management
+- [ ] Complete dev_todo_phase_9.md tasks
+
+## Phase 10: Environments
+- [ ] Complete dev_todo_phase_10.md tasks
+
+## Phase 11: Cost Control
+- [ ] Complete dev_todo_phase_11.md tasks
+
+## Phase 12: Authorization
+- [ ] Complete dev_todo_phase_12.md tasks
 </file>
 
 <file path="docker-compose.yml">
@@ -7755,72 +7871,113 @@ export async function PUT(request: Request) {
    - Track progress
 </file>
 
-<file path="documentation/2_development_plan/dev_todo_phase_4.md">
-# Lessay Development Phase 4: Dashboard & Payments Implementation
+<file path="documentation/2_development_plan/dev_todo_phase_3.md">
+# Development Phase 3: User Onboarding
 
 ## Tasks for Developer AI
 
-### 1. Implement Fluency Stats Route (`/app/api/stats/fluency/route.ts`)
-- [x] **Add Prisma aggregations**
-  ```typescript
-  const stats = await prisma.userProgress.groupBy({
-    by: ['createdAt'],
-    where: { userId: session.user.id },
-    _avg: { accuracyScore: true },
-    _count: { _all: true },
-    orderBy: { createdAt: 'asc' }
-  });
-  ```
-  Verification: Route returns daily accuracy averages and counts
+### 1. Create Welcome Component
+- [x] **File:** `/components/Welcome.tsx`
+- [x] **Action:** Build onboarding interface for new users
+- [x] **Steps:**
+  1. Create component with greeting message
+  2. Add quick start guide section
+  3. Include progress tracker
+- [x] **Verification:** Component renders correctly for new users
 
-### 2. Implement SRS Overview Route (`/app/api/stats/srs-overview/route.ts`)
-- [x] **Add SRS metrics**
-  ```typescript
-  const overview = await prisma.sRSEntry.groupBy({
-    by: ['exerciseType'],
-    where: { userId: session.user.id },
-    _count: { status: true },
-    _min: { nextReview: true },
-    _max: { nextReview: true },
-    _avg: { nextReview: true }
-  });
-  ```
-  Verification: Route returns grouped SRS metrics
+### 2. Implement Tutorial System
+- [x] **File:** `/components/Tutorial.tsx`
+- [x] **Action:** Create interactive tutorial
+- [x] **Steps:
+  1. Build step-by-step guide component
+  2. Connect to lesson API
+  3. Add navigation controls
+- [x] **Verification:** Tutorial walks through app features
 
-### 3. Update Dashboard View (`/components/DashboardView.tsx`)
-- [x] **Fetch and display stats**
-  - Use `useEffect` to fetch from both stats endpoints
+### 3. Set Up Onboarding Progress
+- [x] **File:** `/app/api/onboarding/status/route.ts`
+- [x] **Action:** Track user onboarding completion
+- [x] **Steps:**
+  1. Create API endpoint
+  2. Store progress in database
+  3. Add completion check
+- [x] **Verification:** API returns correct onboarding status
+
+### 4. Add Help Documentation
+- [x] **File:** `/components/Help.tsx`
+- [x] **Action:** Create in-app documentation
+- [x] **Steps:
+  1. Build help interface
+  2. Add search functionality
+  3. Link to external resources
+- [x] **Verification:** Help content accessible throughout app
+
+## Phase Completion Verification
+1. All 4 task verifications pass
+2. New users can:
+   - Complete welcome tour
+   - Access tutorials
+   - View progress
+   - Find help docs
+</file>
+
+<file path="documentation/2_development_plan/dev_todo_phase_4.md">
+# Developer To-Do List: Phase 4 - Observability Implementation
+
+**Objective:** Implement comprehensive logging, metrics, and monitoring infrastructure.
+
+## Tasks
+
+- [ ] **1. Enhance Logger Configuration (`/lib/logger.ts`)**
+  - Add structured logging with Pino
+  - Implement log levels (debug, info, warn, error)
+  - Add request ID correlation
+  - Verification: All API routes output structured JSON logs
+
+- [ ] **2. Instrument Key Endpoints**
+  - Files to modify:
+    - `app/api/lessons/start/route.ts`
+    - `app/api/lessons/[id]/submit-answer/route.ts` 
+    - `app/api/stats/srs-overview/route.ts`
+  - Add:
+    - Response time metrics
+    - Error rate tracking
+    - Request volume counters
+  - Verification: Endpoints log timing and success metrics
+
+- [ ] **3. Implement Metrics Endpoint (`/app/api/metrics/route.ts`)**
+  - Expose Prometheus-compatible metrics
+  - Track:
+    - API response times
+    - Error rates
+    - Active users
+    - Lesson completion rates
+  - Verification: `/api/metrics` returns valid Prometheus data
+
+- [ ] **4. Create Monitoring Dashboard**
+  - Install: `npm install @grafana/faro-web-sdk`
+  - File: `/components/Monitoring.tsx`
   - Implement:
-    - Line chart for accuracy trends
-    - Pie chart for SRS status distribution
-    - Table for recent activity
-  Verification: All visualizations render with real data
+    - Error rate visualization
+    - API latency heatmap
+    - System health status
+  - Verification: Dashboard renders with live data
 
-### 4. Implement Stripe Subscriptions (`/app/api/payments/create-subscription/route.ts`)
-- [x] **Install and configure Stripe**
-  ```bash
-  npm install stripe
-  ```
-  ```typescript
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-  const subscription = await stripe.subscriptions.create({
-    customer: req.body.customerId,
-    items: [{ price: req.body.priceId }],
-    payment_behavior: 'default_incomplete'
-  });
-  ```
-  Verification: Subscription objects created in Stripe dashboard
+- [ ] **5. Configure Alerting Rules**
+  - Create file: `/config/alert-rules.yaml`
+  - Define thresholds for:
+    - High error rate (>5%)
+    - Slow responses (>500ms p95)
+    - Service downtime
+  - Verification: Alert rules file exists with valid YAML
 
-### 5. Secure Webhook (`/app/api/stripe/webhook/route.ts`)
-- [x] **Add signature verification**
-  ```typescript
-  const event = stripe.webhooks.constructEvent(
-    req.body,
-    req.headers['stripe-signature'],
-    process.env.STRIPE_WEBHOOK_SECRET
-  );
-  ```
-  Verification: Webhook rejects invalid signatures
+- [ ] **6. Update Documentation**
+  - File: `/documentation/operations/observability.md`
+  - Add:
+    - Monitoring architecture overview
+    - Alert response procedures
+    - Dashboard usage guide
+  - Verification: Documentation file exists with all sections
 </file>
 
 <file path="tsconfig.json">
