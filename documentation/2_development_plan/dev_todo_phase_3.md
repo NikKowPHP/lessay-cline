@@ -12,13 +12,13 @@
 - [x] **Verification:** Component renders correctly for new users
 
 ### 2. Implement Tutorial System
-- **File:** `/components/Tutorial.tsx`
-- **Action:** Create interactive tutorial
-- **Steps:
+- [x] **File:** `/components/Tutorial.tsx`
+- [x] **Action:** Create interactive tutorial
+- [x] **Steps:
   1. Build step-by-step guide component
   2. Connect to lesson API
   3. Add navigation controls
-- **Verification:** Tutorial walks through app features
+- [x] **Verification:** Tutorial walks through app features
 
 ### 3. Set Up Onboarding Progress
 - **File:** `/app/api/onboarding/status/route.ts`
