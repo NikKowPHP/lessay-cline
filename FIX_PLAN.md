@@ -1,13 +1,15 @@
-# Fix Plan for Missing Execution Plans
+# Emergency Fix Plan for Missing Development Plans
 
-- [x] **Task 1: Create master development plan**
-    - **LLM Prompt:** "Create a todos/master_development_plan.md file with phase definitions for the project."
-    - **Verification:** The file todos/master_development_plan.md exists in the root directory.
+- [x] **Task 1: Verify and link existing phase 2 development plan**
+    - **LLM Prompt:** "Confirm `documentation/2_development_plan/dev_todo_phase_2.md` exists and contains valid phase 2 tasks"
+    - **Verification:** File exists and matches phase 2 requirements from architectural plan
 
-- [ ] **Task 2: Alternative - Create basic FIX_PLAN.md**
-    - **LLM Prompt:** "If Task 1 is not feasible, create a basic FIX_PLAN.md with initial remediation steps."
-    - **Verification:** The file FIX_PLAN.md exists in the root directory.
+- [ ] **Task 2: Force remove distress signal**
+    - **Command:** `rm -f NEEDS_ASSISTANCE.md`
+    - **Verification:** `ls NEEDS_ASSISTANCE.md` returns "No such file or directory"
 
-- [x] **Task 3: Clean up and reset for autonomous handoff**
-    - **LLM Prompt:** "Delete the file NEEDS_ASSISTANCE.md from the root directory."
-    - **Verification:** The file NEEDS_ASSISTANCE.md no longer exists.
+- [ ] **Task 3: Clean up and reset for autonomous handoff**
+    - **LLM Prompt:** "Delete the file `NEEDS_ASSISTANCE.md` from the root directory if still present"
+    - **Verification:** 
+        1. `NEEDS_ASSISTANCE.md` not present in root directory
+        2. Orchestrator can resume normal operations
