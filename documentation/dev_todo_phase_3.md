@@ -3,14 +3,14 @@
 ## Tasks for Developer AI
 
 ### 1. Install Required Packages
-- [ ] **Install Google AI SDKs**
+- [x] **Install Google AI SDKs**
   ```bash
   npm install @google/generative-ai @google-cloud/speech @google-cloud/text-to-speech
   ```
   Verification: Packages appear in `package.json` dependencies
 
 ### 2. Initialize Google Cloud Clients (`/lib/ai-service.ts`)
-- [ ] **Configure credential handling**
+- [x] **Configure credential handling**
   ```typescript
   let geminiClient: GoogleGenerativeAI;
   let speechClient: SpeechClient;
@@ -30,28 +30,28 @@
   Verification: Clients initialize without errors in dev/prod environments
 
 ### 3. Implement Lesson Generation (`/lib/ai-service.ts`)
-- [ ] **Replace generateLessonForUser stub**
+- [x] **Replace generateLessonForUser stub**
   ```typescript
   async function generateLessonForUser(userId: string) {
-    const model = geminiClient.getGenerativeModel({ 
+    const model = geminiClient.getGenerativeModel({
       model: "gemini-pro",
       generationConfig: {
         temperature: 0.7,
         maxOutputTokens: 2048
       }
     });
-    
+
     const prompt = `Generate a language lesson...`; // Detailed prompt per design doc
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    
+
     return JSON.parse(response.text());
   }
   ```
   Verification: Function returns valid lesson structure from API call
 
 ### 4. Implement Speech-to-Text (`/lib/ai-service.ts`)
-- [ ] **Create transcribeAudio function**
+- [x] **Create transcribeAudio function**
   ```typescript
   async function transcribeAudio(audioBuffer: Buffer): Promise<string> {
     const [response] = await speechClient.recognize({
@@ -70,7 +70,7 @@
   Verification: Audio files are accurately transcribed
 
 ### 5. Implement Text-to-Speech (`/lib/ai-service.ts`)
-- [ ] **Create synthesizeSpeech function**
+- [x] **Create synthesizeSpeech function**
   ```typescript
   async function synthesizeSpeech(text: string): Promise<Buffer> {
     const [response] = await textToSpeechClient.synthesizeSpeech({

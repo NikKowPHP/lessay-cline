@@ -21,7 +21,7 @@ Your mission is to perform a single, definitive analysis of the repository and i
           - **Terminate all processes.** This is the final success state.
 
     b. **If `NEEDS_ASSISTANCE.md` exists:**
-        - Announce: "Distress signal detected. Switching to Emergency mode."
+        - Announce: "Distress signal detected. Switching to Architect mode for planning"
         - Execute the command: **`<mode>architect</mode>`**.
 
     c. **If `FIX_PLAN.md` exists:**

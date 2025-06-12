@@ -12,7 +12,7 @@
     ```
   - Verification: Route returns 401 for unauthenticated requests
 
-- [ ] **Implement lesson generation**
+- [x] **Implement lesson generation**
   - Call `AIService.generateLessonForUser(session.user.id)`
   - Store returned lesson data in Prisma:
     ```typescript
@@ -25,7 +25,7 @@
     ```
   - Verification: New lesson appears in database after API call
 
-- [ ] **Create exercise record**
+- [x] **Create exercise record**
   - Add exercise creation after lesson creation:
     ```typescript
     const exercise = await prisma.exercise.create({
