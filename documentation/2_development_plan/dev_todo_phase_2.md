@@ -12,13 +12,13 @@
 - [x] **Verification:** New models exist in schema and migration file created
 
 ### 2. Create Lesson API Endpoints
-- **File:** `/app/api/lessons/start/route.ts`
-- **Action:** Implement lesson initialization
-- **Steps:
+- [x] **File:** `/app/api/lessons/start/route.ts`
+- [x] **Action:** Implement lesson initialization
+- [x] **Steps:
   1. Create route handler for POST requests
   2. Validate user session
   3. Create new Progress record
-- **Verification:** Returns 401 when unauthenticated, lesson data when valid
+- [x] **Verification:** Returns 401 when unauthenticated, lesson data when valid
 
 ### 3. Build Lesson Interface
 - **File:** `/components/LessonView.tsx`
