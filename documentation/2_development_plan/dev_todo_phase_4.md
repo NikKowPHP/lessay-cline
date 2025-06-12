@@ -54,7 +54,7 @@
   Verification: Subscription objects created in Stripe dashboard
 
 ### 5. Secure Webhook (`/app/api/stripe/webhook/route.ts`)
-- [ ] **Add signature verification**
+- [x] **Add signature verification**
   ```typescript
   const event = stripe.webhooks.constructEvent(
     req.body,
