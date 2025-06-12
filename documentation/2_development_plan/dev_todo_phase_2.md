@@ -30,13 +30,13 @@
 - [x] **Verification:** Component renders lesson content correctly
 
 ### 4. Add Answer Submission
-- **File:** `/app/api/lessons/[id]/submit-answer/route.ts`
-- **Action:** Handle user answers
-- **Steps:
+- [x] **File:** `/app/api/lessons/[id]/submit-answer/route.ts`
+- [x] **Action:** Handle user answers
+- [x] **Steps:
   1. Create dynamic route handler
   2. Validate and score user responses
   3. Update Progress record
-- **Verification:** POST requests update progress correctly
+- [x] **Verification:** POST requests update progress correctly
 
 ## Phase Completion Verification
 1. All 4 task verifications pass

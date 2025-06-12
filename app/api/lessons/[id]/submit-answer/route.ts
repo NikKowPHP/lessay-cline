@@ -1,11 +1,54 @@
 import { NextResponse } from 'next/server'
-import logger from '@/lib/logger'
+import prisma from '@/lib/prisma'
+import { getUserSession } from '@/lib/supabase/server'
 
 export async function POST(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  const body = await request.json()
-  logger.info({ lessonId: params.id, answer: body }, 'Received answer submission')
-  return NextResponse.json({ correct: true })
+  const session = await getUserSession()
+  
+  if (!session) {
+    return NextResponse.json(
+      { error: 'Unauthorized' },
+      { status: 401 }
+    )
+  }
+
+  try {
+    const { answer } = await request.json()
+    const lessonId = params.id
+
+    // Update progress with the submitted answer
+    const progress = await prisma.progress.update({
+      where: { 
+        userId_lessonId: {
+          userId: session.user.id,
+          lessonId: lessonId
+        }
+      },
+      data: {
+        completedAt: new Date(),
+        lesson: {
+          update: {
+            content: JSON.stringify({ answer })
+          }
+        }
+      },
+      include: {
+        lesson: true
+      }
+    })
+
+    return NextResponse.json({ 
+      success: true,
+      progress
+    })
+  } catch (error) {
+    console.error('Answer submission failed:', error)
+    return NextResponse.json(
+      { error: 'Answer submission failed' },
+      { status: 500 }
+    )
+  }
 }
