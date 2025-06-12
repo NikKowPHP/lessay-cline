@@ -1,7 +1,18 @@
 import { NextResponse } from 'next/server';
+import Stripe from 'stripe';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
+  apiVersion: '2023-08-16'
+});
 
 export async function POST(request: Request) {
-  const { tier } = await request.json();
-  console.log('Creating subscription for tier:', tier);
-  return NextResponse.json({ status: 'active' });
+  const { customerId, priceId } = await request.json();
+  
+  const subscription = await stripe.subscriptions.create({
+    customer: customerId,
+    items: [{ price: priceId }],
+    payment_behavior: 'default_incomplete'
+  });
+
+  return NextResponse.json({ subscription });
 }
