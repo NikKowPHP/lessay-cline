@@ -3,7 +3,7 @@
 ## Tasks for Developer AI
 
 ### 1. Install Logging Packages
-- [ ] **Add pino and pino-pretty**
+- [x] **Add pino and pino-pretty**
   ```bash
   npm install pino pino-pretty
   ```
