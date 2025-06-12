@@ -3,7 +3,7 @@
 ## Tasks for Developer AI
 
 ### 1. Implement Fluency Stats Route (`/app/api/stats/fluency/route.ts`)
-- [ ] **Add Prisma aggregations**
+- [x] **Add Prisma aggregations**
   ```typescript
   const stats = await prisma.userProgress.groupBy({
     by: ['createdAt'],
