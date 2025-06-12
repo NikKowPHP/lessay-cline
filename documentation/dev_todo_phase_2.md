@@ -3,7 +3,7 @@
 ## Tasks for Developer AI
 
 ### 1. Implement Lesson Start Route (`/app/api/lessons/start/route.ts`)
-- [ ] **Add authentication check**
+- [x] **Add authentication check**
   - Import `getUserSession` from `@/lib/supabase-server`
   - At start of POST function, add:
     ```typescript

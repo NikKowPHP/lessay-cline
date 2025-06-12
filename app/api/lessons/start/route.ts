@@ -1,45 +1,35 @@
 import { NextResponse } from 'next/server';
-import { supabaseServerClient } from '@/lib/supabase/server';
+import { getUserSession } from '@/lib/supabase/server';
 import prisma from '@/lib/prisma';
 
 export async function POST(request: Request) {
-  const supabase = supabaseServerClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
-
-  if (error || !user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const session = await getUserSession();
+  if (!session) {
+    return new Response('Unauthorized', { status: 401 });
   }
 
-  try {
-    const { lessonId } = await request.json();
-    
-    // Check if progress already exists
-    const existingProgress = await prisma.progress.findFirst({
-      where: {
-        userId: user.id,
-        lessonId
-      }
-    });
+  const { lessonId } = await request.json();
 
-    if (existingProgress) {
-      return NextResponse.json(existingProgress);
+  // Check if progress already exists
+  const existingProgress = await prisma.progress.findFirst({
+    where: {
+      userId: session.user.id,
+      lessonId
     }
+  });
 
-    // Create new progress record
-    const progress = await prisma.progress.create({
-      data: {
-        userId: user.id,
-        lessonId,
-        startedAt: new Date()
-      }
-    });
-
-    return NextResponse.json(progress);
-  } catch (err) {
-    console.error('Error starting lesson:', err);
-    return NextResponse.json(
-      { error: 'Failed to start lesson' },
-      { status: 500 }
-    );
+  if (existingProgress) {
+    return NextResponse.json(existingProgress);
   }
+
+  // Create new progress record
+  const progress = await prisma.progress.create({
+    data: {
+      userId: session.user.id,
+      lessonId,
+      startedAt: new Date()
+    }
+  });
+
+  return NextResponse.json(progress);
 }
