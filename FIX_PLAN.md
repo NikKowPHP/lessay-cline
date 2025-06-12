@@ -11,11 +11,11 @@
   - **Verification:** File compiles without module resolution errors
 
 ## 3. Update Supabase Provider Configuration
-- [ ] **Task 3: Modernize Supabase provider setup**
+- [x] **Task 3: Modernize Supabase provider setup**
   - **LLM Prompt:** "Update lib/auth.ts to use @auth/supabase provider instead of next-auth/supabase-provider"
   - **Verification:** NextAuth initializes without provider-related errors
 
 ## 4. Clean Up and Reset
-- [ ] **Task 4: Remove distress signal**
+- [x] **Task 4: Remove distress signal**
   - **LLM Prompt:** "Delete NEEDS_ASSISTANCE.md from root directory"
   - **Verification:** Distress file no longer exists

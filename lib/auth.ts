@@ -1,16 +1,16 @@
 /// <reference types="../typings/next-auth" />
-import { NextAuthOptions, Session, User, JWT } from 'next-auth';
-import SupabaseProvider from 'next-auth/supabase-provider';
+import { NextAuthOptions, Session, JWT } from 'next-auth';
+import { SupabaseAdapter } from '@auth/supabase-adapter';
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export const authOptions: NextAuthOptions = {
   providers: [
-    SupabaseProvider({
-      client: createClient(supabaseUrl, supabaseAnonKey),
-      checkType: 'email',
+    SupabaseAdapter({
+      supabase,
     }),
   ],
   callbacks: {
@@ -20,7 +20,7 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
-    async jwt({ token, user }: { token: JWT; user?: User }): Promise<JWT> {
+    async jwt({ token, user }) {
       if (user) {
         token.sub = user.id;
       }

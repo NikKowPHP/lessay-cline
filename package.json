@@ -10,6 +10,7 @@
     "test": "echo 'No tests yet' && exit 0"
   },
   "dependencies": {
+    "@auth/supabase-adapter": "^1.9.1",
     "@google-cloud/speech": "^7.1.0",
     "@google-cloud/text-to-speech": "^6.1.0",
     "@google/generative-ai": "^0.24.1",
