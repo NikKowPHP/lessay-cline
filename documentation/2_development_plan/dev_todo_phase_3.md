@@ -1,89 +1,47 @@
-# Lessay Development Phase 3: AI Service Integration
+# Development Phase 3: User Onboarding
 
 ## Tasks for Developer AI
 
-### 1. Install Required Packages
-- [x] **Install Google AI SDKs**
-  ```bash
-  npm install @google/generative-ai @google-cloud/speech @google-cloud/text-to-speech
-  ```
-  Verification: Packages appear in `package.json` dependencies
+### 1. Create Welcome Component
+- [x] **File:** `/components/Welcome.tsx`
+- [x] **Action:** Build onboarding interface for new users
+- [x] **Steps:**
+  1. Create component with greeting message
+  2. Add quick start guide section
+  3. Include progress tracker
+- [x] **Verification:** Component renders correctly for new users
 
-### 2. Initialize Google Cloud Clients (`/lib/ai-service.ts`)
-- [x] **Configure credential handling**
-  ```typescript
-  let geminiClient: GoogleGenerativeAI;
-  let speechClient: SpeechClient;
-  let textToSpeechClient: TextToSpeechClient;
+### 2. Implement Tutorial System
+- **File:** `/components/Tutorial.tsx`
+- **Action:** Create interactive tutorial
+- **Steps:
+  1. Build step-by-step guide component
+  2. Connect to lesson API
+  3. Add navigation controls
+- **Verification:** Tutorial walks through app features
 
-  if (process.env.GCP_CREDENTIALS_JSON) {
-    const credentials = JSON.parse(process.env.GCP_CREDENTIALS_JSON);
-    geminiClient = new GoogleGenerativeAI(process.env.AI_API_KEY);
-    speechClient = new SpeechClient({ credentials });
-    textToSpeechClient = new TextToSpeechClient({ credentials });
-  } else {
-    geminiClient = new GoogleGenerativeAI(process.env.AI_API_KEY);
-    speechClient = new SpeechClient({ keyFilename: './gcp-credentials.json' });
-    textToSpeechClient = new TextToSpeechClient({ keyFilename: './gcp-credentials.json' });
-  }
-  ```
-  Verification: Clients initialize without errors in dev/prod environments
+### 3. Set Up Onboarding Progress
+- **File:** `/app/api/onboarding/status/route.ts`
+- **Action:** Track user onboarding completion
+- **Steps:**
+  1. Create API endpoint
+  2. Store progress in database
+  3. Add completion check
+- **Verification:** API returns correct onboarding status
 
-### 3. Implement Lesson Generation (`/lib/ai-service.ts`)
-- [x] **Replace generateLessonForUser stub**
-  ```typescript
-  async function generateLessonForUser(userId: string) {
-    const model = geminiClient.getGenerativeModel({
-      model: "gemini-pro",
-      generationConfig: {
-        temperature: 0.7,
-        maxOutputTokens: 2048
-      }
-    });
+### 4. Add Help Documentation
+- **File:** `/components/Help.tsx`
+- **Action:** Create in-app documentation
+- **Steps:
+  1. Build help interface
+  2. Add search functionality
+  3. Link to external resources
+- **Verification:** Help content accessible throughout app
 
-    const prompt = `Generate a language lesson...`; // Detailed prompt per design doc
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-
-    return JSON.parse(response.text());
-  }
-  ```
-  Verification: Function returns valid lesson structure from API call
-
-### 4. Implement Speech-to-Text (`/lib/ai-service.ts`)
-- [x] **Create transcribeAudio function**
-  ```typescript
-  async function transcribeAudio(audioBuffer: Buffer): Promise<string> {
-    const [response] = await speechClient.recognize({
-      audio: { content: audioBuffer.toString('base64') },
-      config: {
-        encoding: 'WEBM_OPUS',
-        sampleRateHertz: 48000,
-        languageCode: 'en-US'
-      }
-    });
-    return response.results
-      .map(result => result.alternatives[0].transcript)
-      .join('\n');
-  }
-  ```
-  Verification: Audio files are accurately transcribed
-
-### 5. Implement Text-to-Speech (`/lib/ai-service.ts`)
-- [x] **Create synthesizeSpeech function**
-  ```typescript
-  async function synthesizeSpeech(text: string): Promise<Buffer> {
-    const [response] = await textToSpeechClient.synthesizeSpeech({
-      input: { text },
-      voice: {
-        languageCode: 'en-US',
-        name: 'en-US-Standard-C'
-      },
-      audioConfig: {
-        audioEncoding: 'MP3'
-      }
-    });
-    return Buffer.from(response.audioContent, 'base64');
-  }
-  ```
-  Verification: Text input produces valid audio output
+## Phase Completion Verification
+1. All 4 task verifications pass
+2. New users can:
+   - Complete welcome tour
+   - Access tutorials
+   - View progress
+   - Find help docs
