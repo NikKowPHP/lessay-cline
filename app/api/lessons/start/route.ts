@@ -2,15 +2,28 @@ import { NextResponse } from 'next/server';
 import { getUserSession } from '@/lib/supabase/server';
 import prisma from '@/lib/prisma';
 import { generateLessonForUser } from '@/lib/ai-service';
+import logger from '@/lib/logger';
 
-export async function POST(request: Request) {
+export async function POST() {
   const session = await getUserSession();
   if (!session) {
     return new Response('Unauthorized', { status: 401 });
   }
 
+  logger.info({ userId: session.user.id }, 'Starting lesson generation');
+
   // Generate lesson using AI service
-  const generatedLesson = await generateLessonForUser(session.user.id);
+  let generatedLesson;
+  try {
+    generatedLesson = await generateLessonForUser(session.user.id);
+    logger.debug({ userId: session.user.id }, 'AI lesson generated successfully');
+  } catch (error) {
+    logger.error({ userId: session.user.id, error }, 'Failed to generate lesson');
+    return NextResponse.json(
+      { error: 'Lesson generation failed' },
+      { status: 500 }
+    );
+  }
 
   // Create lesson record in database
   const lesson = await prisma.lesson.create({
@@ -37,6 +50,13 @@ export async function POST(request: Request) {
       startedAt: new Date()
     }
   });
+
+  logger.info({
+    userId: session.user.id,
+    lessonId: lesson.id,
+    exerciseId: exercise.id,
+    progressId: progress.id
+  }, 'Lesson created successfully');
 
   return NextResponse.json({
     lessonId: lesson.id,

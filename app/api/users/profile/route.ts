@@ -1,16 +1,20 @@
 import { NextResponse } from 'next/server'
 import { getUserSession } from '@/lib/supabase/server'
 import prisma from '@/lib/prisma'
+import logger from '@/lib/logger'
 
 export async function GET() {
   const session = await getUserSession()
   
   if (!session) {
+    logger.warn('Unauthorized profile access attempt');
     return NextResponse.json(
       { error: 'Unauthorized' },
       { status: 401 }
     )
   }
+
+  logger.info({ userId: session.user.id }, 'Fetching user profile');
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
@@ -24,6 +28,7 @@ export async function GET() {
   })
 
   if (!user) {
+    logger.warn({ userId: session.user.id }, 'User profile not found');
     return NextResponse.json(
       { error: 'User not found' },
       { status: 404 }
@@ -37,11 +42,14 @@ export async function PUT(request: Request) {
   const session = await getUserSession();
   
   if (!session) {
+    logger.warn('Unauthorized profile update attempt');
     return NextResponse.json(
       { error: 'Unauthorized' },
       { status: 401 }
     );
   }
+
+  logger.info({ userId: session.user.id }, 'Updating user profile');
 
   const body = await request.json();
   
@@ -61,9 +69,19 @@ export async function PUT(request: Request) {
       }
     });
 
+    logger.debug({
+      userId: session.user.id,
+      updates: body
+    }, 'Profile updated successfully');
+
     return NextResponse.json(updatedUser);
   } catch (error) {
-    console.error('Profile update failed:', error);
+    logger.error({
+      userId: session.user.id,
+      error,
+      updateData: body
+    }, 'Profile update failed');
+
     return NextResponse.json(
       { error: 'Profile update failed' },
       { status: 500 }

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import logger from '@/lib/logger';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -14,10 +15,10 @@ export async function POST(req: Request) {
       process.env.STRIPE_WEBHOOK_SECRET!
     );
 
-    console.log('Stripe webhook verified:', event.type);
+    logger.info({ eventType: event.type }, 'Stripe webhook verified');
     return NextResponse.json({ received: true }, { status: 200 });
   } catch (err) {
-    console.error('Stripe webhook verification failed:', err);
+    logger.error({ error: err }, 'Stripe webhook verification failed');
     return NextResponse.json(
       { error: 'Webhook signature verification failed' },
       { status: 400 }
