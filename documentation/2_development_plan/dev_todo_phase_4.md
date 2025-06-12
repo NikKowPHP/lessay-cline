@@ -16,7 +16,7 @@
   Verification: Route returns daily accuracy averages and counts
 
 ### 2. Implement SRS Overview Route (`/app/api/stats/srs-overview/route.ts`)
-- [ ] **Add SRS metrics**
+- [x] **Add SRS metrics**
   ```typescript
   const overview = await prisma.sRSEntry.groupBy({
     by: ['exerciseType'],
