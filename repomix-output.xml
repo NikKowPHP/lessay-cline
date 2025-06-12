@@ -172,6 +172,7 @@ lib/
     server.ts
   ai-service.ts
   auth.ts
+  errorHandler.ts
   logger.ts
   prisma.ts
 prisma/
@@ -194,6 +195,7 @@ types/
 docker-compose.yml
 Dockerfile
 eslint.config.mjs
+FIX_PLAN.md
 globals.css
 layout.tsx
 NEEDS_ARCHITECTURAL_REVIEW.md
@@ -207,17 +209,6 @@ tsconfig.json
 
 <files>
 This section contains the contents of the repository's files.
-
-<file path="NEEDS_ARCHITECTURAL_REVIEW.md">
-## Original Problem:
-File not found
-
-## Failed Fix Attempt:
-File could not be read
-
-## New Error:
-Error reading file FIX_PLAN.md: {"name":"Error","message":"File not found: /home/kasjer/projects/lessay-cline/FIX_PLAN.md","stack":"Error: File not found: /home/kasjer/projects/lessay-cline/FIX_PLAN.md\n    at pJn (/home/kasjer/.vscode/extensions/rooveterinaryinc.roo-cline-3.19.7/dist/extension.js:4163:2252)\n    at async Promise.all (index 0)\n    at CJn (/home/kasjer/.vscode/extensions/rooveterinaryinc.roo-cline-3.19.7/dist/extension.js:4165:6293)\n    at Are (/home/kasjer/.vscode/extensions/rooveterinaryinc.roo-cline-3.19.7/dist/extension.js:4268:1349)"}
-</file>
 
 <file path=".roo/rules-architect-senior/rules.md">
 ### **Custom Instructions for 🧠 Architect AI (Code-Aware Planning & Intervention v5.0)**
@@ -1800,6 +1791,24 @@ export const getUserSession = async () => {
 }
 </file>
 
+<file path="lib/errorHandler.ts">
+import { NextResponse } from 'next/server'
+
+export function errorHandler(err: Error, req: NextRequest) {
+  const statusCode = 500;
+  const errorId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  console.error({ errorId, err }, 'Request failed');
+  return NextResponse.json(
+    { 
+      error: err.message,
+      errorId,
+      statusCode 
+    },
+    { status: statusCode }
+  );
+}
+</file>
+
 <file path="lib/logger.ts">
 import pino from 'pino';
 
@@ -2004,6 +2013,17 @@ export type Database = {
     }
   }
 }
+</file>
+
+<file path="NEEDS_ARCHITECTURAL_REVIEW.md">
+## Original Problem:
+File not found
+
+## Failed Fix Attempt:
+File could not be read
+
+## New Error:
+Error reading file FIX_PLAN.md: {"name":"Error","message":"File not found: /home/kasjer/projects/lessay-cline/FIX_PLAN.md","stack":"Error: File not found: /home/kasjer/projects/lessay-cline/FIX_PLAN.md\n    at pJn (/home/kasjer/.vscode/extensions/rooveterinaryinc.roo-cline-3.19.7/dist/extension.js:4163:2252)\n    at async Promise.all (index 0)\n    at CJn (/home/kasjer/.vscode/extensions/rooveterinaryinc.roo-cline-3.19.7/dist/extension.js:4165:6293)\n    at Are (/home/kasjer/.vscode/extensions/rooveterinaryinc.roo-cline-3.19.7/dist/extension.js:4268:1349)"}
 </file>
 
 <file path=".github/workflows/ci.yml">
@@ -5026,89 +5046,6 @@ export default function LessonView() {
 - **Verification:** Documentation file exists
 </file>
 
-<file path="documentation/2_development_plan/dev_todo_phase_5.md">
-# Developer To-Do List: Phase 5 - Error Handling & Resilience
-
-**Objective:** Implement robust error handling patterns and fault tolerance mechanisms across the application.
-
-## Tasks
-
-- [ ] **1. Create Error Handling Middleware (`/lib/errorHandler.ts`)**
-  - Implement Express-style error middleware for Next.js
-  - Structure:
-    ```typescript
-    export function errorHandler(err: Error, req: NextRequest) {
-      const statusCode = getStatusCodeFromError(err);
-      const errorId = generateUniqueErrorId();
-      logger.error({ errorId, err }, 'Request failed');
-      return NextResponse.json(
-        { 
-          error: err.message,
-          errorId,
-          statusCode 
-        },
-        { status: statusCode }
-      );
-    }
-    ```
-  - Verification: Middleware file exists with exported function
-
-- [ ] **2. Standardize API Error Responses**
-  - Files to modify:
-    - `app/api/lessons/start/route.ts`
-    - `app/api/lessons/[id]/submit-answer/route.ts`
-    - `app/api/stats/srs-overview/route.ts`
-  - Replace all error responses with:
-    ```typescript
-    return errorHandler(error, request);
-    ```
-  - Verification: All modified routes return standardized error format
-
-- [ ] **3. Implement Error Classification System**
-  - Create `/lib/errors.ts` with:
-    ```typescript
-    export class AppError extends Error {
-      constructor(
-        public readonly type: 'validation'|'auth'|'database'|'payment',
-        public readonly code: string,
-        message: string
-      ) {
-        super(message);
-      }
-    }
-    ```
-  - Verification: File exists with error class definition
-
-- [ ] **4. Add Error Logging Integration**
-  - Modify `/lib/logger.ts` to:
-    - Include error type/code in logs
-    - Track error rates
-    - Link to error IDs
-  - Verification: Logger outputs enhanced error information
-
-- [ ] **5. Implement Retry Logic for External Services**
-  - Create `/lib/retry.ts` with:
-    ```typescript
-    export async function withRetry(
-      fn: () => Promise<any>,
-      options: { retries: number }
-    ) {
-      // Implementation with exponential backoff
-    }
-    ```
-  - Apply to:
-    - Supabase calls
-    - Stripe payments
-    - AI service calls
-  - Verification: Retry utility exists and is used in 3+ places
-
-- [ ] **6. Create Error Documentation (`/documentation/errors.md`)**
-  - List all error codes
-  - Include troubleshooting guide
-  - Add recovery procedures
-  - Verification: Documentation file exists with all sections
-</file>
-
 <file path="documentation/3_personas_and_rules/orchestrator_entrypoint.md">
 You have asked the most advanced question in the entire operational design process. You are asking to close the final manual gap and create a truly **lights-out, fully autonomous development factory**.
 
@@ -5826,46 +5763,6 @@ export default prisma
 export type { PrismaClient }
 </file>
 
-<file path="todos/master_development_plan.md">
-# Master Development Plan
-
-## Phase 1: Initial Development
-- [ ] Complete dev_todo_phase_1.md tasks
-
-## Phase 2: Transactional Integrity
-- [x] Complete dev_todo_phase_2.md tasks
-
-## Phase 3: Onboarding
-- [x] Complete dev_todo_phase_3.md tasks
-
-## Phase 4: Observability
-- [x] Complete dev_todo_phase_4.md tasks
-
-## Phase 5: Error Handling
-- [ ] Complete dev_todo_phase_5.md tasks
-
-## Phase 6: Security
-- [ ] Complete dev_todo_phase_6.md tasks
-
-## Phase 7: Performance
-- [ ] Complete dev_todo_phase_7.md tasks
-
-## Phase 8: Testing
-- [ ] Complete dev_todo_phase_8.md tasks
-
-## Phase 9: State Management
-- [ ] Complete dev_todo_phase_9.md tasks
-
-## Phase 10: Environments
-- [ ] Complete dev_todo_phase_10.md tasks
-
-## Phase 11: Cost Control
-- [ ] Complete dev_todo_phase_11.md tasks
-
-## Phase 12: Authorization
-- [ ] Complete dev_todo_phase_12.md tasks
-</file>
-
 <file path="docker-compose.yml">
 version: '3.3'
 
@@ -6048,6 +5945,89 @@ export async function POST(req: Request) {
     );
   }
 }
+</file>
+
+<file path="documentation/2_development_plan/dev_todo_phase_5.md">
+# Developer To-Do List: Phase 5 - Error Handling & Resilience
+
+**Objective:** Implement robust error handling patterns and fault tolerance mechanisms across the application.
+
+## Tasks
+
+- [ ] **1. Create Error Handling Middleware (`/lib/errorHandler.ts`)**
+  - Implement Express-style error middleware for Next.js
+  - Structure:
+    ```typescript
+    export function errorHandler(err: Error, req: NextRequest) {
+      const statusCode = getStatusCodeFromError(err);
+      const errorId = generateUniqueErrorId();
+      logger.error({ errorId, err }, 'Request failed');
+      return NextResponse.json(
+        { 
+          error: err.message,
+          errorId,
+          statusCode 
+        },
+        { status: statusCode }
+      );
+    }
+    ```
+  - Verification: Middleware file exists with exported function
+
+- [ ] **2. Standardize API Error Responses**
+  - Files to modify:
+    - `app/api/lessons/start/route.ts`
+    - `app/api/lessons/[id]/submit-answer/route.ts`
+    - `app/api/stats/srs-overview/route.ts`
+  - Replace all error responses with:
+    ```typescript
+    return errorHandler(error, request);
+    ```
+  - Verification: All modified routes return standardized error format
+
+- [ ] **3. Implement Error Classification System**
+  - Create `/lib/errors.ts` with:
+    ```typescript
+    export class AppError extends Error {
+      constructor(
+        public readonly type: 'validation'|'auth'|'database'|'payment',
+        public readonly code: string,
+        message: string
+      ) {
+        super(message);
+      }
+    }
+    ```
+  - Verification: File exists with error class definition
+
+- [ ] **4. Add Error Logging Integration**
+  - Modify `/lib/logger.ts` to:
+    - Include error type/code in logs
+    - Track error rates
+    - Link to error IDs
+  - Verification: Logger outputs enhanced error information
+
+- [ ] **5. Implement Retry Logic for External Services**
+  - Create `/lib/retry.ts` with:
+    ```typescript
+    export async function withRetry(
+      fn: () => Promise<any>,
+      options: { retries: number }
+    ) {
+      // Implementation with exponential backoff
+    }
+    ```
+  - Apply to:
+    - Supabase calls
+    - Stripe payments
+    - AI service calls
+  - Verification: Retry utility exists and is used in 3+ places
+
+- [ ] **6. Create Error Documentation (`/documentation/errors.md`)**
+  - List all error codes
+  - Include troubleshooting guide
+  - Add recovery procedures
+  - Verification: Documentation file exists with all sections
 </file>
 
 <file path="documentation/templates/api_spec_template.md">
@@ -7650,6 +7630,46 @@ model VoiceAnalysis {
 }
 </file>
 
+<file path="todos/master_development_plan.md">
+# Master Development Plan
+
+## Phase 1: Initial Development
+- [ ] Complete dev_todo_phase_1.md tasks
+
+## Phase 2: Transactional Integrity
+- [x] Complete dev_todo_phase_2.md tasks
+
+## Phase 3: Onboarding
+- [x] Complete dev_todo_phase_3.md tasks
+
+## Phase 4: Observability
+- [x] Complete dev_todo_phase_4.md tasks
+
+## Phase 5: Error Handling
+- [ ] Complete dev_todo_phase_5.md tasks
+
+## Phase 6: Security
+- [ ] Complete dev_todo_phase_6.md tasks
+
+## Phase 7: Performance
+- [ ] Complete dev_todo_phase_7.md tasks
+
+## Phase 8: Testing
+- [ ] Complete dev_todo_phase_8.md tasks
+
+## Phase 9: State Management
+- [ ] Complete dev_todo_phase_9.md tasks
+
+## Phase 10: Environments
+- [ ] Complete dev_todo_phase_10.md tasks
+
+## Phase 11: Cost Control
+- [ ] Complete dev_todo_phase_11.md tasks
+
+## Phase 12: Authorization
+- [ ] Complete dev_todo_phase_12.md tasks
+</file>
+
 <file path=".gitignore">
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
@@ -7921,6 +7941,36 @@ export async function PUT(request: Request) {
    - Find help docs
 </file>
 
+<file path="tsconfig.json">
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "node_modules/next-auth", "typings/**/*.d.ts"],
+  "exclude": ["node_modules"]
+}
+</file>
+
 <file path="documentation/2_development_plan/dev_todo_phase_4.md">
 # Developer To-Do List: Phase 4 - Observability Implementation
 
@@ -7978,36 +8028,6 @@ export async function PUT(request: Request) {
     - Alert response procedures
     - Dashboard usage guide
   - Verification: Documentation file exists with all sections
-</file>
-
-<file path="tsconfig.json">
-{
-  "compilerOptions": {
-    "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
-    "paths": {
-      "@/*": ["./*"]
-    }
-  },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "node_modules/next-auth", "typings/**/*.d.ts"],
-  "exclude": ["node_modules"]
-}
 </file>
 
 <file path=".roo/rules-emergency/rules.md">
@@ -8309,6 +8329,40 @@ If the failing task is from a `FIX_PLAN.md` file, this indicates a deep strategi
     "typescript": "^5"
   }
 }
+</file>
+
+<file path="FIX_PLAN.md">
+# INTERVENTION FIX PLAN (ATOMIC)
+
+**Problem:** The Developer AI failed to create the error handling middleware file (`/lib/errorHandler.ts`).
+
+- [ ] **Task 1: Create the error handling middleware file**
+    - **(File):** `lib/errorHandler.ts`
+    - **(LLM Prompt):** "Create a new file at `lib/errorHandler.ts` with the following content:"
+    ```typescript
+    import { NextResponse } from 'next/server'
+
+    export function errorHandler(err: Error, req: NextRequest) {
+      const statusCode = 500;
+      const errorId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      console.error({ errorId, err }, 'Request failed');
+      return NextResponse.json(
+        { 
+          error: err.message,
+          errorId,
+          statusCode 
+        },
+        { status: statusCode }
+      );
+    }
+    ```
+    - **(Verification):** "The file `lib/errorHandler.ts` exists and contains the specified content."
+    - **(Commit):** "git add lib/errorHandler.ts && git commit -m 'feat: Create error handling middleware'"
+
+- [ ] **Task 2: Clean up and reset for autonomous handoff**
+    - **LLM Prompt:** "Delete the file `NEEDS_ARCHITECTURAL_REVIEW.md` from the root directory."
+    - **(Verification):** The file `NEEDS_ARCHITECTURAL_REVIEW.md` no longer exists.
+    - **(Commit):** "git add NEEDS_ARCHITECTURAL_REVIEW.md && git commit -m 'feat: Delete NEEDS_ARCHITECTURAL_REVIEW.md'"
 </file>
 
 <file path="documentation/architect_master_todo.md">

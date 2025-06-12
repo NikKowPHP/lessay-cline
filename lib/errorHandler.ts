@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, NextRequest } from 'next/server'
 
 export function errorHandler(err: Error, req: NextRequest) {
   const statusCode = 500;
