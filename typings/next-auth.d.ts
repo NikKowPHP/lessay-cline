@@ -1,3 +1,5 @@
+import { Provider } from 'next-auth/providers';
+
 declare module 'next-auth' {
   import { DefaultSession, DefaultUser } from 'next-auth';
 
@@ -13,5 +15,17 @@ declare module 'next-auth' {
 
   export interface JWT {
     sub?: string;
+  }
+
+  export interface NextAuthOptions {
+    providers: Provider[];
+    secret?: string;
+    session?: {
+      strategy: 'jwt' | 'database';
+    };
+    callbacks?: {
+      jwt?: (params: { token: JWT; user?: User }) => Promise<JWT>;
+      session?: (params: { session: Session; token: JWT }) => Promise<Session>;
+    };
   }
 }
