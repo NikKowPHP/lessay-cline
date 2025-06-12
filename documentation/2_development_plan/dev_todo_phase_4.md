@@ -30,7 +30,7 @@
   Verification: Route returns grouped SRS metrics
 
 ### 3. Update Dashboard View (`/components/DashboardView.tsx`)
-- [ ] **Fetch and display stats**
+- [x] **Fetch and display stats**
   - Use `useEffect` to fetch from both stats endpoints
   - Implement:
     - Line chart for accuracy trends
