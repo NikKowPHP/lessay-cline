@@ -21,13 +21,13 @@
 - [x] **Verification:** Returns 401 when unauthenticated, lesson data when valid
 
 ### 3. Build Lesson Interface
-- **File:** `/components/LessonView.tsx`
-- **Action:** Create lesson presentation component
-- **Steps:**
+- [x] **File:** `/components/LessonView.tsx`
+- [x] **Action:** Create lesson presentation component
+- [x] **Steps:**
   1. Fetch and display lesson content
   2. Add navigation controls
   3. Implement progress saving
-- **Verification:** Component renders lesson content correctly
+- [x] **Verification:** Component renders lesson content correctly
 
 ### 4. Add Answer Submission
 - **File:** `/app/api/lessons/[id]/submit-answer/route.ts`
