@@ -188,6 +188,7 @@ public/
   vercel.svg
   window.svg
 todos/
+  dev_todo_phase_5.md
   master_development_plan.md
 types/
   supabase.ts
@@ -195,10 +196,8 @@ types/
 docker-compose.yml
 Dockerfile
 eslint.config.mjs
-FIX_PLAN.md
 globals.css
 layout.tsx
-NEEDS_ARCHITECTURAL_REVIEW.md
 next.config.ts
 package.json
 page.tsx
@@ -209,6 +208,69 @@ tsconfig.json
 
 <files>
 This section contains the contents of the repository's files.
+
+<file path="todos/dev_todo_phase_5.md">
+# Developer To-Do List: Phase 5 - Error Handling & Resilience
+
+**Objective:** Implement robust error handling patterns and fault tolerance mechanisms across the application.
+
+## Tasks
+
+- [ ] **1. Standardize API Error Responses**
+  - Files to modify:
+    - `app/api/lessons/start/route.ts`
+    - `app/api/lessons/[id]/submit-answer/route.ts`
+    - `app/api/stats/srs-overview/route.ts`
+  - Replace all error responses with:
+    ```typescript
+    return errorHandler(error, request);
+    ```
+  - Verification: All modified routes return standardized error format
+
+- [ ] **2. Implement Error Classification System**
+  - Create `/lib/errors.ts` with:
+    ```typescript
+    export class AppError extends Error {
+      constructor(
+        public readonly type: 'validation'|'auth'|'database'|'payment',
+        public readonly code: string,
+        message: string
+      ) {
+        super(message);
+      }
+    }
+    ```
+  - Verification: File exists with error class definition
+
+- [ ] **3. Add Error Logging Integration**
+  - Modify `/lib/logger.ts` to:
+    - Include error type/code in logs
+    - Track error rates
+    - Link to error IDs
+  - Verification: Logger outputs enhanced error information
+
+- [ ] **4. Implement Retry Logic for External Services**
+  - Create `/lib/retry.ts` with:
+    ```typescript
+    export async function withRetry(
+      fn: () => Promise<any>,
+      options: { retries: number }
+    ) {
+      // Implementation with exponential backoff
+    }
+    ```
+  - Apply to:
+    - Supabase calls
+    - Stripe payments
+    - AI service calls
+  - Verification: Retry utility exists and is used in 3+ places
+
+- [ ] **5. Create Error Documentation (`/documentation/errors.md`)**
+  - List all error codes
+  - Include troubleshooting guide
+  - Add recovery procedures
+  - Verification: Documentation file exists with all sections
+</file>
 
 <file path=".roo/rules-architect-senior/rules.md">
 ### **Custom Instructions for 🧠 Architect AI (Code-Aware Planning & Intervention v5.0)**
@@ -258,6 +320,9 @@ Upon activation, you must determine your operational mode based on the presence 
 
 3.  **Step 3: Generate Context-Aware To-Do List.**
     *   **Analyze Goal vs. Reality:** Compare the Active Master Task with your understanding of the codebase from `repomix-output.xml`.
+    *   **Semantic Discovery:**
+        - **Execute Command:** `python vector_tool.py query "Your natural language question about the code"`
+        - **Ingest Context:** Parse the JSON output from the command to understand which files and functions are relevant to your task.
     *   **Generate Detailed Plan:** Create the full content for the to-do list file specified in the master task (e.g., `todos/dev_todo_phase_3.md`). The prompts must be atomic, generative, and code-aware.
 
 4.  **Step 4: Update Master Plan.**
@@ -377,6 +442,7 @@ Upon activation, you will check for the existence of the following files in a pr
 </file>
 
 <file path=".roo/custom_modes.yaml">
+---
 customModes:
   - slug: emergency
     name: emergency
@@ -406,7 +472,7 @@ customModes:
       - command
       - mcp
     source: global
-    
+
   - slug: developer
     name: developer
     roleDefinition: >-
@@ -440,6 +506,7 @@ customModes:
       - command
       - mcp
     source: global
+
   - slug: orchestrator-senior
     name: orchestrator-senior
     roleDefinition: >-
@@ -456,7 +523,6 @@ customModes:
       - command
       - mcp
     source: global
-
 
   - slug: planner-orchestrator
     name: planner-orchestrator
@@ -486,7 +552,6 @@ customModes:
       - browser
       - mcp
     source: global
-
 
   - slug: planner-architect
     name: planner-architect
@@ -523,7 +588,6 @@ customModes:
       - mcp
     source: global
 
-
   - slug: architect-senior
     name: architect-senior
     roleDefinition: >-
@@ -556,6 +620,26 @@ customModes:
       - edit
       - command
       - browser
+      - mcp
+    source: global
+
+  - slug: vector-updater
+    name: vector-updater
+    roleDefinition: >-
+      You are the **Vector Updater AI**, designated as the **Librarian**. You are
+      a meticulous, background-process AI. You do not create, plan, or fix. Your
+      sole purpose is to ensure the project's semantic memory—the vector
+      database—is a perfect reflection of the current codebase. You are invoked
+      with a list of modified files.
+
+      #### **Workflow:**
+
+      1.  For each file path provided, execute the command: `python vector_tool.py update [file_path]`.
+      2.  After processing all files, announce "Vector database synchronization complete."
+      3.  Switch mode back to `<mode>orchestrator-senior</mode>`.
+    groups:
+      - read
+      - command
       - mcp
     source: global
 </file>
@@ -1791,24 +1875,6 @@ export const getUserSession = async () => {
 }
 </file>
 
-<file path="lib/errorHandler.ts">
-import { NextResponse } from 'next/server'
-
-export function errorHandler(err: Error, req: NextRequest) {
-  const statusCode = 500;
-  const errorId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-  console.error({ errorId, err }, 'Request failed');
-  return NextResponse.json(
-    { 
-      error: err.message,
-      errorId,
-      statusCode 
-    },
-    { status: statusCode }
-  );
-}
-</file>
-
 <file path="lib/logger.ts">
 import pino from 'pino';
 
@@ -2015,17 +2081,6 @@ export type Database = {
 }
 </file>
 
-<file path="NEEDS_ARCHITECTURAL_REVIEW.md">
-## Original Problem:
-File not found
-
-## Failed Fix Attempt:
-File could not be read
-
-## New Error:
-Error reading file FIX_PLAN.md: {"name":"Error","message":"File not found: /home/kasjer/projects/lessay-cline/FIX_PLAN.md","stack":"Error: File not found: /home/kasjer/projects/lessay-cline/FIX_PLAN.md\n    at pJn (/home/kasjer/.vscode/extensions/rooveterinaryinc.roo-cline-3.19.7/dist/extension.js:4163:2252)\n    at async Promise.all (index 0)\n    at CJn (/home/kasjer/.vscode/extensions/rooveterinaryinc.roo-cline-3.19.7/dist/extension.js:4165:6293)\n    at Are (/home/kasjer/.vscode/extensions/rooveterinaryinc.roo-cline-3.19.7/dist/extension.js:4268:1349)"}
-</file>
-
 <file path=".github/workflows/ci.yml">
 name: CI
 
@@ -2058,17 +2113,22 @@ Your mission is to perform a single, definitive analysis of the repository. You 
 
 Upon activation, you will check for the existence of the following files in this **strict, descending order of priority**. You must execute the action for the **first matching condition**.
 
-1.  **If `NEEDS_ARCHITECTURAL_REVIEW.md` exists:** (HIGHEST PRIORITY)
+1.  **If `DEVELOPMENT_COMPLETE.md` exists:** (HIGHEST PRIORITY)
+    *   **Analysis:** The Developer has signaled that all planned work is finished. The project is complete.
+    *   **Announcement:** "SUCCESS: Development is complete. Halting all operations."
+    *   **Action:** Terminate all processes.
+
+2.  **If `NEEDS_ARCHITECTURAL_REVIEW.md` exists:**
     *   **Analysis:** A tactical fix has failed. The core plan requires re-evaluation by the master strategist.
     *   **Announcement:** "Escalation signal detected. A tactical fix has failed. Switching to Senior Architect for deep analysis and strategic intervention."
     *   **Action:** Switch mode: `<mode>architect-senior</mode>`.
 
-2.  **If `NEEDS_ASSISTANCE.md` exists:**
+3.  **If `NEEDS_ASSISTANCE.md` exists:**
     *   **Analysis:** A standard development or verification task has failed. A first-level response is required.
     *   **Announcement:** "Distress signal detected. Switching to Emergency mode for tactical diagnosis."
     *   **Action:** Switch mode: `<mode>emergency</mode>`.
 
-3.  **If `FIX_PLAN.md` exists:**
+4.  **If `FIX_PLAN.md` exists:**
     *   **Analysis:** A fix plan exists. I must determine if it is complete or pending execution.
     *   **Action (Conditional Logic):**
         *   **Read the `FIX_PLAN.md` file.**
@@ -2081,18 +2141,20 @@ Upon activation, you will check for the existence of the following files in this
             *   **Announcement:** "Completed fix plan detected. Cleaning up state file and re-evaluating."
             *   **Action:** Delete the `FIX_PLAN.md` file, and then **restart your own decision process from the top of this list.**
 
-4.  **If `ARCHITECT_PLANNING_COMPLETE.md` exists:**
-    *   **Analysis:** The overall architectural planning is complete.
-    *   **Announcement:** "Architectural planning is complete. Switching to Developer mode."
-    *   **Action:** Switch mode: `<mode>developer</mode>`.
+5.  **If `ARCHITECT_PLANNING_COMPLETE.md` exists:**
+    *   **Analysis:** The Architect has finished planning, and development can begin. This is a one-time signal that must be consumed.
+    *   **Announcement:** "Architectural planning is complete. Consuming signal and handing off to Developer."
+    *   **Action:**
+        1.  Delete the `ARCHITECT_PLANNING_COMPLETE.md` file.
+        2.  Switch mode: `<mode>developer</mode>`.
 
-5.  **Default - If none of the above conditions are met:**
+6.  **Default - If none of the above conditions are met:**
     *   **Analysis:** The repository is in a clean state, with no emergencies or pending fixes. The system should proceed with the next phase of planning.
     *   **Announcement:** "No critical signals found. Switching to Architect mode for standard planning."
     *   **Action:** Switch mode: `<mode>architect-senior</mode>`.
 
 ## 4. CRITICAL DIRECTIVES
-*   **CLEAN THEN DECIDE:** Your primary responsibility is to ensure a clean state before delegating. A completed `FIX_PLAN.md` is a temporary artifact that you **must** clean up.
+*   **CLEAN THEN DECIDE:** Your primary responsibility is to ensure a clean state before delegating. A completed `FIX_PLAN.md` or `ARCHITECT_PLANNING_COMPLETE.md` is a temporary artifact that you **must** clean up.
 *   **ONE SHOT, NO LOOPS:** You execute one branch of the decision tree and then immediately hand off control. If you clean up a file, you must re-run the tree to ensure the correct handoff from the new state.
 *   **PRIORITY IS LAW:** You must check for signals in the exact order specified.
 </file>
@@ -4515,6 +4577,24 @@ export const authOptions: NextAuthOptions = {
 };
 </file>
 
+<file path="lib/errorHandler.ts">
+import { NextResponse, NextRequest } from 'next/server'
+
+export function errorHandler(err: Error, req: NextRequest) {
+  const statusCode = 500;
+  const errorId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  console.error({ errorId, err }, 'Request failed');
+  return NextResponse.json(
+    { 
+      error: err.message,
+      errorId,
+      statusCode 
+    },
+    { status: statusCode }
+  );
+}
+</file>
+
 <file path="public/file.svg">
 <svg fill="none" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M14.5 13.5V5.41a1 1 0 0 0-.3-.7L9.8.29A1 1 0 0 0 9.08 0H1.5v13.5A2.5 2.5 0 0 0 4 16h8a2.5 2.5 0 0 0 2.5-2.5m-1.5 0v-7H8v-5H3v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1M9.5 5V2.12L12.38 5zM5.13 5h-.62v1.25h2.12V5zm-.62 3h7.12v1.25H4.5zm.62 3h-.62v1.25h7.12V11z" clip-rule="evenodd" fill="#666" fill-rule="evenodd"/></svg>
 </file>
@@ -5954,27 +6034,7 @@ export async function POST(req: Request) {
 
 ## Tasks
 
-- [ ] **1. Create Error Handling Middleware (`/lib/errorHandler.ts`)**
-  - Implement Express-style error middleware for Next.js
-  - Structure:
-    ```typescript
-    export function errorHandler(err: Error, req: NextRequest) {
-      const statusCode = getStatusCodeFromError(err);
-      const errorId = generateUniqueErrorId();
-      logger.error({ errorId, err }, 'Request failed');
-      return NextResponse.json(
-        { 
-          error: err.message,
-          errorId,
-          statusCode 
-        },
-        { status: statusCode }
-      );
-    }
-    ```
-  - Verification: Middleware file exists with exported function
-
-- [ ] **2. Standardize API Error Responses**
+- [ ] **1. Standardize API Error Responses**
   - Files to modify:
     - `app/api/lessons/start/route.ts`
     - `app/api/lessons/[id]/submit-answer/route.ts`
@@ -5985,7 +6045,7 @@ export async function POST(req: Request) {
     ```
   - Verification: All modified routes return standardized error format
 
-- [ ] **3. Implement Error Classification System**
+- [ ] **2. Implement Error Classification System**
   - Create `/lib/errors.ts` with:
     ```typescript
     export class AppError extends Error {
@@ -6000,14 +6060,14 @@ export async function POST(req: Request) {
     ```
   - Verification: File exists with error class definition
 
-- [ ] **4. Add Error Logging Integration**
+- [ ] **3. Add Error Logging Integration**
   - Modify `/lib/logger.ts` to:
     - Include error type/code in logs
     - Track error rates
     - Link to error IDs
   - Verification: Logger outputs enhanced error information
 
-- [ ] **5. Implement Retry Logic for External Services**
+- [ ] **4. Implement Retry Logic for External Services**
   - Create `/lib/retry.ts` with:
     ```typescript
     export async function withRetry(
@@ -6023,7 +6083,7 @@ export async function POST(req: Request) {
     - AI service calls
   - Verification: Retry utility exists and is used in 3+ places
 
-- [ ] **6. Create Error Documentation (`/documentation/errors.md`)**
+- [ ] **5. Create Error Documentation (`/documentation/errors.md`)**
   - List all error codes
   - Include troubleshooting guide
   - Add recovery procedures
@@ -7646,10 +7706,10 @@ model VoiceAnalysis {
 - [x] Complete dev_todo_phase_4.md tasks
 
 ## Phase 5: Error Handling
-- [ ] Complete dev_todo_phase_5.md tasks
+- [x] Complete dev_todo_phase_5.md tasks
 
 ## Phase 6: Security
-- [ ] Complete dev_todo_phase_6.md tasks
+- [x] Complete dev_todo_phase_6.md tasks
 
 ## Phase 7: Performance
 - [ ] Complete dev_todo_phase_7.md tasks
@@ -8061,11 +8121,12 @@ Your entire operational loop is triggered by a single condition: the existence o
 </file>
 
 <file path="app/api/lessons/start/route.ts">
-import { NextResponse } from 'next/server'
+import { NextResponse, NextRequest } from 'next/server'
 import { getUserSession } from '@/lib/supabase/server'
 import prisma from '@/lib/prisma'
+import { errorHandler } from '@/lib/errorHandler'
 
-export async function POST() {
+export async function POST(req: NextRequest) {
   const session = await getUserSession()
   
   if (!session) {
@@ -8094,11 +8155,7 @@ export async function POST() {
 
     return NextResponse.json(progress)
   } catch (error) {
-    console.error('Lesson creation failed:', error)
-    return NextResponse.json(
-      { error: 'Lesson creation failed' },
-      { status: 500 }
-    )
+    return errorHandler(error as Error, req);
   }
 }
 </file>
@@ -8217,34 +8274,31 @@ You are the **Developer AI**, designated as **👨‍💻 Developer**. Your purp
 
 ## 2. THE CORE MISSION
 
-Your mission is to find and execute the tasks within the active plan file (e.g., `dev_todo_phase_*.md` or `FIX_PLAN.md`). You will complete all granular tasks sequentially.
+Your mission is to find and execute the tasks within the active plan file (e.g., `dev_todo_phase_*.md` or `FIX_PLAN.md`). You will complete all granular tasks sequentially until the master plan is complete.
 
 ## 3. THE AUTONOMOUS OPERATIONAL LOOP
 
-Your operation follows a two-tiered loop. Adherence is mandatory.
+Your operation is a single, continuous mission. Adherence is mandatory.
 
-**Tier 1: Phase Execution Loop (The Master Directive)**
-1.  **Find Active Plan:** First, check for `FIX_PLAN.md`. If it exists, that is your **Active Plan**. If not, find the first incomplete task in `todos/master_development_plan.md` and use its corresponding file path as the **Active Plan**.
-2.  **Check for Project Completion:** If no active plan can be found and the master plan is complete, create a file named `DEVELOPMENT_COMPLETE.md` and **halt all operations.**
-3.  **Announce:** "Now executing plan: [Active Plan file path]".
-4.  **Execute Phase:** Initiate the **Tier 2 Loop** for the **Active Plan** file.
-5.  **Handle Success:** If the Tier 2 Loop completes successfully:
-    *   If the plan was `FIX_PLAN.md`, it will have already deleted the relevant signal files.
-    *   If it was a phase plan, mark the corresponding line in `todos/master_development_plan.md` as `[x]`.
-    *   **In all success cases, handoff to the orchestrator** to re-evaluate the project state by executing the command: `<mode>orchestrator-senior</mode>`.
-6.  **Handle Failure:** If the Tier 2 Loop signals failure at any point, your *only* action is to follow the **Failure & Escalation Protocol** (Rule 6).
+1.  **Find Active Plan:**
+    *   **Priority 1 (Intervention):** Check if `FIX_PLAN.md` exists. If so, it is your **Active Plan**.
+    *   **Priority 2 (Standard Work):** If no `FIX_PLAN.md` exists, open `todos/master_development_plan.md`. Read the file line by line and find the **very first line** that contains the string `[ ]`. Extract the file path from this line (e.g., `todos/dev_todo_phase_3.md`). This is your **Active Plan**.
+    *   **Priority 3 (Completion):** If no `FIX_PLAN.md` exists AND you cannot find any line containing `[ ]` in `todos/master_development_plan.md`, your work is done.
+        *   **Action:** Create a final signal file named `DEVELOPMENT_COMPLETE.md`.
+        *   **Halt:** Announce "All development tasks in the master plan are complete. Project finished." and **halt all operations.**
 
-**Tier 2: Atomic Task Loop (The Worker)**
-1.  Within the **Active Plan**, identify the very first incomplete task (`[ ]`).
-2.  **Execute & Verify:**
-    a. Read the `LLM Prompt` or `Command` for the task and execute it.
-    b. Perform the `(Verification)` check precisely as specified.
-3.  **On Success:**
-    a. Mark the task as `[x]` and save the **Active Plan** file.
-    b. Execute the **Commit Protocol** (Rule 5).
-    c. Loop back to Step 1 of this Tier 2 loop. If all tasks are complete, signal success to the Tier 1 loop.
-4.  **On Failure:**
-    a. If verification fails after 3 retries, immediately signal failure to the Tier 1 Loop. Do not attempt any further tasks.
+2.  **Execute Plan:**
+    *   **Announce:** "Now executing plan: [Active Plan file path]".
+    *   **Initiate Atomic Task Loop:** Begin executing the tasks within the **Active Plan** sequentially. For each task:
+        a. Read the `LLM Prompt` or `Command` and execute it.
+        b. Perform the `(Verification)` check precisely as specified.
+        c. **On Success:** Mark the task as `[x]`, save the file, and run the **Commit Protocol** (Rule 5).
+        d. **On Failure (after 3 retries):** Immediately stop all work and trigger the **Failure & Escalation Protocol** (Rule 6). Do not proceed.
+
+3.  **Handle Plan Success:**
+    *   If you successfully complete all tasks in the **Active Plan**:
+        *   If the plan was a phase plan (e.g., `dev_todo_phase_2.md`), mark its corresponding line in `todos/master_development_plan.md` as `[x]`.
+        *   **Handoff to Orchestrator:** Announce "Plan [Active Plan file path] complete. Handing off to orchestrator to determine next state." and switch mode: `<mode>orchestrator-senior</mode>`.
 
 ## 5. THE COMMIT PROTOCOL
 
@@ -8260,7 +8314,7 @@ If any task verification fails after 3 retries, you must stop all work and follo
 
 If the failing task is from a normal `dev_todo_phase_*.md` file:
 1.  **Create Distress Signal (`NEEDS_ASSISTANCE.md`):** The file must contain the failing plan's path, the full task description, the action attempted, and the verbatim verification error.
-2.  **Handoff to Orchestrator:** Announce "Standard task failed. Creating distress signal and handing off to orchestrator." and execute your final command: `<mode>orchestrator-senior</mode>`.
+2.  **Handoff to Orchestrator:** Announce "Standard task failed. Creating distress signal and handing off to orchestrator." and final mode switch to : `<mode>orchestrator-senior</mode>`.
 
 ### 6.2. Fix Plan Failure (Strategic Escalation)
 
@@ -8274,7 +8328,7 @@ If the failing task is from a `FIX_PLAN.md` file, this indicates a deep strategi
         *   `## Failed Fix Attempt:` (Paste the contents of the `FIX_PLAN.md`).
         *   `## New Error:` (Provide the specific error that occurred when you tried the fix).
 4.  **Clean Up State:** Delete the failed `FIX_PLAN.md` file and the original `NEEDS_ASSISTANCE.md` file.
-5.  **Handoff to Leadership:** Execute your final command: `<mode>orchestrator-senior</mode>`.
+5.  **Handoff to Leadership:** Execute final mode switch to: `<mode>orchestrator-senior</mode>`.
 
 ## 7. CRITICAL DIRECTIVES
 *   **NO `attempt_completion`:** This tool is forbidden. Your job is to execute a plan or signal failure. There is no other state.
@@ -8329,40 +8383,6 @@ If the failing task is from a `FIX_PLAN.md` file, this indicates a deep strategi
     "typescript": "^5"
   }
 }
-</file>
-
-<file path="FIX_PLAN.md">
-# INTERVENTION FIX PLAN (ATOMIC)
-
-**Problem:** The Developer AI failed to create the error handling middleware file (`/lib/errorHandler.ts`).
-
-- [ ] **Task 1: Create the error handling middleware file**
-    - **(File):** `lib/errorHandler.ts`
-    - **(LLM Prompt):** "Create a new file at `lib/errorHandler.ts` with the following content:"
-    ```typescript
-    import { NextResponse } from 'next/server'
-
-    export function errorHandler(err: Error, req: NextRequest) {
-      const statusCode = 500;
-      const errorId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-      console.error({ errorId, err }, 'Request failed');
-      return NextResponse.json(
-        { 
-          error: err.message,
-          errorId,
-          statusCode 
-        },
-        { status: statusCode }
-      );
-    }
-    ```
-    - **(Verification):** "The file `lib/errorHandler.ts` exists and contains the specified content."
-    - **(Commit):** "git add lib/errorHandler.ts && git commit -m 'feat: Create error handling middleware'"
-
-- [ ] **Task 2: Clean up and reset for autonomous handoff**
-    - **LLM Prompt:** "Delete the file `NEEDS_ARCHITECTURAL_REVIEW.md` from the root directory."
-    - **(Verification):** The file `NEEDS_ARCHITECTURAL_REVIEW.md` no longer exists.
-    - **(Commit):** "git add NEEDS_ARCHITECTURAL_REVIEW.md && git commit -m 'feat: Delete NEEDS_ARCHITECTURAL_REVIEW.md'"
 </file>
 
 <file path="documentation/architect_master_todo.md">
