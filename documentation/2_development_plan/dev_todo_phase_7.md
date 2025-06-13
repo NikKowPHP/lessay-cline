@@ -38,6 +38,6 @@
   - Verification: Smaller response sizes in network tab
 
 ### 7. Upgrade Node.js Version
-- [ ] **Update to Node.js 20.x**
+- [x] **Update to Node.js 20.x**
   - Use nvm or system package manager
   - Verification: `node -v` shows v20.x
