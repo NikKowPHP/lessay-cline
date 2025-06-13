@@ -6,7 +6,7 @@
   - **Verification:** Config is imported and used consistently across the app
 
 ### 2. Test Environment Isolation
-- [ ] **Task 2: Update test setup**
+- [x] **Task 2: Update test setup**
   - **LLM Prompt:** "Modify `tests/setupEnv.ts` to load test-specific config and verify Supabase URL"
   - **Verification:** Tests run without needing production credentials
 
