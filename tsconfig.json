@@ -7,6 +7,8 @@
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
+    "skipDefaultLibCheck": true,
+    "assumeChangesOnlyAffectDirectDependencies": true,
     "module": "esnext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
