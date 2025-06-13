@@ -21,7 +21,7 @@
     - `jest.setup.ts`: Add test container setup
     - `prisma/schema.prisma`: Update test database URL
 
-- [ ] **Task 3: Add configuration validation**
+- [x] **Task 3: Add configuration validation**
   - **LLM Prompt:** "Add runtime checks for required environment variables in jest.setup.ts"
   - **Files to modify:**
     - `jest.setup.ts`: Add validation checks
