@@ -173,6 +173,8 @@ lib/
   ai-service.ts
   auth.ts
   cache.ts
+  config.ts
+  db.ts
   errorHandler.ts
   lessons.ts
   logger.ts
@@ -198,6 +200,7 @@ tests/
   setupEnv.ts
 todos/
   dev_todo_phase_5.md
+  dev_todo_phase_7.md
   master_development_plan.md
 types/
   supabase.ts
@@ -205,13 +208,10 @@ types/
 docker-compose.yml
 Dockerfile
 eslint.config.mjs
-FIX_PLAN.md
 globals.css
 jest.config.ts
 jest.setup.ts
 layout.tsx
-NEEDS_ARCHITECTURAL_REVIEW.md
-NEEDS_ASSISTANCE.md
 next.config.ts
 package.json
 page.tsx
@@ -225,51 +225,151 @@ tsconfig.json
 <files>
 This section contains the contents of the repository's files.
 
-<file path="tests/cache.test.ts">
-import { cache } from '../lib/cache'
+<file path="todos/dev_todo_phase_7.md">
+# Developer To-Do List: Phase 7 - Performance Optimization
 
-describe('Redis Cache', () => {
-  const testKey = 'testKey'
-  const testValue = { data: 'testValue' }
-  const ttl = 5 // 5 seconds
+**Objective:** Implement comprehensive performance improvements across the application stack.
 
-  afterEach(async () => {
-    await cache.del(testKey)
-  })
+## Tasks
 
-  test('should set and get value correctly', async () => {
-    await cache.set(testKey, testValue, ttl)
-    const result = await cache.get<typeof testValue>(testKey)
-    expect(result).toEqual(testValue)
-  })
+### 1. Implement Redis Caching Layer
+- [ ] **Install Redis dependencies**
+  - **Command:** `npm install redis @types/redis`
+  - **Verification:** `package.json` includes `redis` in dependencies
 
-  test('should return null for non-existent key', async () => {
-    const result = await cache.get(testKey)
-    expect(result).toBeNull()
-  })
+- [ ] **Create Redis client utility (`/lib/redis.ts`)**
+  - **Code:**
+    ```typescript
+    import { createClient } from 'redis'
+    import { config } from './config'
 
-  test('should delete key correctly', async () => {
-    await cache.set(testKey, testValue, ttl)
-    await cache.del(testKey)
-    const result = await cache.get(testKey)
-    expect(result).toBeNull()
-  })
+    const redisClient = createClient({
+      url: config.redis.url
+    })
 
-  test('should respect TTL', async () => {
-    await cache.set(testKey, testValue, ttl)
-    // Wait for TTL to expire
-    await new Promise(resolve => setTimeout(resolve, (ttl + 1) * 1000))
-    const result = await cache.get(testKey)
-    expect(result).toBeNull()
-  }, (ttl + 2) * 1000) // Set longer timeout for this test
-})
-</file>
+    redisClient.on('error', (err) => console.error('Redis error:', err))
 
-<file path="tsconfig.bundle.json">
-{
-  "extends": "./tsconfig.json",
-  "exclude": ["tests/**/*"]
-}
+    export async function connectRedis() {
+      if (!redisClient.isOpen) {
+        await redisClient.connect()
+      }
+      return redisClient
+    }
+
+    export async function cacheGet(key: string) {
+      const client = await connectRedis()
+      return client.get(key)
+    }
+
+    export async function cacheSet(key: string, value: string, ttl?: number) {
+      const client = await connectRedis()
+      if (ttl) {
+        return client.setEx(key, ttl, value)
+      }
+      return client.set(key, value)
+    }
+    ```
+  - **Verification:** File exists with exported functions
+
+### 2. Optimize Database Queries
+- [ ] **Add indexes to Prisma schema (`/prisma/schema.prisma`)**
+  - **Modifications:**
+    ```prisma
+    model Lesson {
+      @@index([userId, difficulty])
+    }
+    model Progress {
+      @@index([userId, completedAt])
+    }
+    ```
+  - **Command:** `npx prisma migrate dev --name add_performance_indexes`
+  - **Verification:** New migration file created
+
+- [ ] **Implement query logging**
+  - **Modify `/lib/prisma.ts`:**
+    ```typescript
+    const prisma = new PrismaClient({
+      log: [
+        { level: 'warn', emit: 'event' },
+        { level: 'error', emit: 'event' },
+        { level: 'query', emit: 'event' }
+      ]
+    })
+
+    prisma.$on('query', (e) => {
+      logger.debug({
+        query: e.query,
+        duration: e.duration,
+        params: e.params
+      }, 'Database query executed')
+    })
+    ```
+  - **Verification:** Queries appear in logs with timing
+
+### 3. Optimize API Endpoints
+- [ ] **Cache lesson data in `/app/api/lessons/start/route.ts`**
+  - **Modifications:**
+    ```typescript
+    const cacheKey = `lesson-start:${session.user.id}`
+    const cached = await cacheGet(cacheKey)
+    if (cached) {
+      return NextResponse.json(JSON.parse(cached))
+    }
+    // ... existing code ...
+    await cacheSet(cacheKey, JSON.stringify(progress), 300) // 5 minute cache
+    ```
+  - **Verification:** Subsequent requests return cached data
+
+- [ ] **Batch dashboard requests in `/components/DashboardView.tsx`**
+  - **Modify useEffect:**
+    ```typescript
+    const response = await fetch('/api/stats/dashboard')
+    const { fluency, srs } = await response.json()
+    ```
+  - **Create new endpoint `/app/api/stats/dashboard/route.ts`**
+  - **Verification:** Single API call fetches all dashboard data
+
+### 4. Implement Performance Monitoring
+- [ ] **Add Prometheus metrics endpoint (`/app/api/metrics/route.ts`)**
+  - **Install:** `npm install prom-client`
+  - **Code:**
+    ```typescript
+    import { register, collectDefaultMetrics } from 'prom-client'
+
+    collectDefaultMetrics()
+
+    export async function GET() {
+      const metrics = await register.metrics()
+      return new Response(metrics, {
+        headers: { 'Content-Type': register.contentType }
+      })
+    }
+    ```
+  - **Verification:** `/api/metrics` returns metrics data
+
+### 5. Optimize Build Process
+- [ ] **Implement module precompilation**
+  - **Command:** `npm install @vercel/ncc`
+  - **Add script to `package.json`:**
+    ```json
+    "scripts": {
+      "bundle": "NCC_CONFIG_TS_CONFIG=tsconfig.bundle.json ncc build app/api/lessons/start/route.ts -o dist"
+    }
+    ```
+  - **Verification:** `dist/` directory created with bundled code
+
+### 6. Cleanup and Final Verification
+- [ ] **Run performance benchmarks**
+  - **Command:** `npm run test:performance`
+  - **Verification:** Benchmark results show improved metrics
+
+- [ ] **Update documentation (`/documentation/performance.md`)**
+  - **Add:** Caching strategy, index details, monitoring setup
+  - **Verification:** Documentation file exists with all sections
+
+- [ ] **Clean up and reset for autonomous handoff**
+  - **LLM Prompt:** "Update todos/master_development_plan.md to mark Phase 7 as complete"
+  - **Verification:** Phase 7 marked [x] in master plan
 </file>
 
 <file path=".roo/rules-planner-architect/rules.md">
@@ -854,55 +954,6 @@ export default function Tutorial() {
 }
 </file>
 
-<file path="components/Welcome.tsx">
-'use client'
-import { useState } from 'react'
-
-export default function Welcome() {
-  const [progress] = useState(0)
-  
-  const steps = [
-    'Complete your profile',
-    'Take the placement test',
-    'Start your first lesson'
-  ]
-
-  return (
-    <div className="welcome-container p-6 max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold mb-4">Welcome to Lessay!</h1>
-      
-      <div className="greeting-section mb-8">
-        {/* eslint-disable-next-line react/no-unescaped-entities */}
-        <p className="text-lg mb-4">
-          Let's get you started on your language learning journey.
-        </p>
-      </div>
-
-      <div className="quickstart-section mb-8">
-        <h2 className="text-xl font-semibold mb-4">Quick Start Guide</h2>
-        <ul className="list-disc pl-6">
-          {steps.map((step, index) => (
-            <li key={index} className="mb-2">{step}</li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="progress-section">
-        <h3 className="text-lg font-medium mb-2">
-          Your Progress: {progress}% complete
-        </h3>
-        <div className="w-full bg-gray-200 rounded-full h-2.5">
-          <div 
-            className="bg-blue-600 h-2.5 rounded-full" 
-            style={{ width: `${progress}%` }}
-          ></div>
-        </div>
-      </div>
-    </div>
-  )
-}
-</file>
-
 <file path="documentation/2_development_plan/dev_todo_phase_10.md">
 # Developer To-Do List: Phase 10 - UI Implementation & Polish
 
@@ -1381,6 +1432,119 @@ Here are the separate, simplified to-do files for each phase. Each task is desig
     - **Verification:** The file `/.github/workflows/ci.yml` exists and contains the string `npm run lint`.
 </file>
 
+<file path="documentation/app_description.md">
+## **Lessay: Software Documentation Overview**
+
+### **1. Introduction: Our Philosophy**
+
+Lessay is an AI-powered language learning platform designed to create a deeply personal and efficient path to fluency. Unlike one-size-fits-all learning apps, Lessay's core engine is built to **listen, understand, and adapt** to each unique learner. Our philosophy is to **measure everything**, transforming every interaction into a data point that refines the learning path. We move beyond generic exercises by integrating AI-driven diagnostics with proven cognitive science principles, like **Spaced Repetition**, to provide a hyper-personalized experience that makes every minute of practice count.
+
+This document provides a high-level overview of the learner's journey and the intelligent systems that power this adaptive ecosystem, all aligned with best practices in both language acquisition and scalable software development.
+
+---
+
+### **2. The Learner's Journey**
+
+This is the typical path a user takes from their first interaction to becoming an active learner in our continuous improvement cycle.
+
+#### **Step 1: Getting to Know You**
+When a new user joins, Lessay begins by gathering foundational data:
+*   What is your native language?
+*   What language do you want to learn **first**? (You can switch or add other languages at any time from your profile).
+*   What is your primary goal (e.g., travel, business, conversation)?
+*   What is your self-assessed comfort level (Beginner, Intermediate, Advanced)?
+
+This initial information calibrates the app's voice, translations, and the starting difficulty for the user's first experience.
+
+#### **Step 2: The Initial Diagnostic**
+Before creating lessons, Lessay conducts a short, voice-based diagnostic. This low-pressure placement exercise uses a series of adaptive questions to give our AI a quick but accurate baseline of the user's current vocabulary, grammar, and pronunciation.
+
+#### **Step 3: Your First Personalized Lessons**
+Immediately after the diagnostic, the results are analyzed. Lessay doesn't just provide a score; it identifies the most critical areas for improvement. The app instantly generates a set of personalized lessons tailored to this baseline.
+
+#### **Step 4: The Learning Loop (Practice & Improve)**
+This is the core of the app experience, presented in a simple, chat-like interface.
+*   **Listen:** The user hears prompts and correct pronunciations from the app's voice.
+*   **Speak:** The user practices by speaking their answers. The app listens **in real-time**, using live speech-to-text to provide immediate feedback on the content of their response.
+*   **Get Feedback:** The user receives instant corrections and guidance, reinforcing learning in the moment.
+
+#### **Step 5: Growing With You (The Adaptive Cycle)**
+This is where Lessay truly stands apart. After each lesson, the system analyzes the user's entire performance. It moves beyond right or wrong answers to perform a deep analysis of the **raw audio recording** of the session. Based on this, it not only identifies new areas for improvement but also **updates its understanding of what the user is close to forgetting**, scheduling concepts for review at the perfect moment. The app automatically generates the **next** set of lessons, creating a continuous, adaptive learning loop where the curriculum evolves with the user.
+
+#### **Step 6: Your Progress Dashboard**
+Lessay believes in transparent learning. Users have access to a detailed statistics and measurements dashboard that visualizes their progress over time. This includes:
+*   **Skill Mastery Charts:** Tracking progress across competencies like grammar, vocabulary themes, and pronunciation.
+*   **Fluency Metrics:** Visualizing improvements in speaking pace, reduction in hesitation, and use of filler words.
+*   **Recall Strength (SRS View):** A dynamic view of their known vocabulary and grammar rules, showing which concepts are "cemented," "maturing," or "due for review" based on the Spaced Repetition algorithm.
+*   **Error Analysis:** Highlighting recurring mistakes so the user is consciously aware of what the AI is helping them fix.
+*   **Activity Log:** A history of completed lessons and performance scores.
+
+---
+
+### **3. How Lessay Works: The Technology**
+
+Lessay's adaptive experience is powered by a few key technological components working in synergy.
+
+*   **The Brain (Artificial Intelligence):**
+    At the heart of Lessay is an advanced AI (e.g., Google Gemini). This "Brain" has two primary jobs:
+    1.  **Expert Lesson Designer:** It acts as a master tutor, creating new, relevant lesson plans and exercises from scratch based on a user's detailed performance profile.
+    2.  **Expert Language & Vocal Analyst:** It reviews a user's session recordings to perform a deep diagnostic, identifying subtle pronunciation errors, grammatical patterns, and vocal delivery issues that are invisible to most apps.
+
+*   **The Ears (Speech Recognition & Capture):**
+    When a user speaks, our system performs two tasks simultaneously:
+    1.  **Real-Time Transcription:** It uses a high-speed API (Google Speech-to-Text) to instantly convert speech to text for immediate answer validation within the lesson.
+    2.  **Diagnostic Recording:** It captures a high-fidelity audio blob of the user's speech. This raw audio is sent to our AI Brain after the session for the deeper diagnostic analysis (pronunciation, hesitation, etc.).
+
+*   **The Voice (Text-to-Speech):**
+    To provide clear examples and prompts, the app's "Voice" (powered by Google TTS and AWS Polly) converts all lesson text into natural-sounding audio, crucial for modeling correct pronunciation and intonation.
+
+*   **The Memory (Comprehensive User Profile & Database):**
+    Lessay securely stores a rich, evolving profile of each user's journey. This is a multi-faceted dataset including:
+    *   Performance scores and a history of all AI-generated lessons.
+    *   A detailed list of identified weaknesses and mastered concepts.
+    *   Vocal & Fluency Metrics over time.
+    *   **A Spaced Repetition System (SRS) Engine:** This is the core of long-term retention. For **every single vocabulary word and grammar concept** the user learns, the Memory tracks:
+        *   **Recall Strength Score:** A dynamic score indicating how well the user knows the item.
+        *   **Next Review Date:** The optimal date for the user to be tested on this item again.
+    This comprehensive memory is the fuel for the AI Brain, ensuring every new lesson is both personalized and strategically timed for maximum retention.
+
+---
+
+### **4. The Adaptive Learning Method: Our "Secret Sauce"**
+
+Lessay’s hyper-personalization is based on a four-step, data-driven cycle that intelligently blends new material with targeted review.
+
+#### **Step 1: Capture & Measure**
+During a lesson, the app records the complete audio of the user's responses. This high-fidelity recording provides a complete, contextualized dataset of the user's speaking performance, capturing not just *what* they said, but *how* they said it.
+
+#### **Step 2: Analyze & Diagnose**
+Once the lesson is complete, the AI Analyst (The Brain) scrutinizes the entire audio recording and session data. It looks for a wide array of specific, nuanced details:
+*   **Phonetic Accuracy:** *Are you pronouncing "ü" correctly in German? Is your "r" sound in Spanish a tap or a trill?*
+*   **Vocal Delivery & Fluency:** *What is your speaking pace? Do you hesitate frequently? Are there patterns to your hesitations (e.g., before certain verb conjugations)? Are you using filler words ("um," "uh") excessively?*
+*   **Grammatical Patterns:** *Did you consistently use the correct verb endings or sentence structure, even if the individual words were correct?*
+*   **Vocabulary Recall:** *Are you using newly learned words correctly and confidently, or do you stumble over them?*
+
+Crucially, during this analysis, the AI also **updates the SRS scores in The Memory**. If a user recalled a vocabulary word quickly and pronounced it well, its "Recall Strength" increases, and its "Next Review Date" is pushed further into the future. If they hesitated or made a grammatical error related to a known concept, the strength score for that item decreases, and it is scheduled for an earlier review.
+
+#### **Step 3: Prioritize & Plan**
+The system then synthesizes this new diagnosis with the user's historical data to decide what the next lesson should contain. It prioritizes tasks in a specific, pedagogically-sound order:
+
+1.  **Spaced Repetition Reviews (Top Priority):** It first queries the SRS Engine for any vocabulary or grammar concepts that are **due for review**. Preventing knowledge decay is paramount.
+2.  **Critical Weaknesses:** It then identifies the most significant pronunciation, grammar, or fluency issues from the most recent session analysis. These need immediate attention.
+3.  **Struggling Concepts:** It targets topics the user has consistently made mistakes on in recent lessons, providing further reinforcement.
+4.  **New Material:** Finally, it introduces new vocabulary and grammar that align with the user's stated goals, expanding their knowledge base.
+
+#### **Step 4: Create & Adapt**
+With this clear, prioritized plan, the AI Lesson Designer gets to work. It generates a brand new, custom-built lesson that seamlessly integrates these different elements.
+
+For example, if the analysis showed a user struggles with the "ch" sound in German and makes mistakes with dative case articles, **and the SRS indicates they are due to review the vocabulary for 'train station' and 'ticket'**, the next lesson will be a conversational exercise about buying a train ticket. This single, natural-sounding scenario forces the user to:
+*   Practice the difficult "ch" sound (e.g., in "ich möchte").
+*   Correctly use dative articles (e.g., "an de**m** Schalter").
+*   Actively recall the review vocabulary ('Bahnhof', 'Ticket').
+
+This integrated **Capture -> Analyze -> Plan (with SRS) -> Create** cycle ensures the user is always working on a balanced mix of retaining old knowledge, fixing current weaknesses, and learning new material in the most efficient way possible.
+</file>
+
 <file path="lib/supabase/server.ts">
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
@@ -1398,28 +1562,74 @@ export const getUserSession = async () => {
 }
 </file>
 
-<file path="lib/cache.ts">
-import { Redis } from '@upstash/redis'
+<file path="lib/config.ts">
+import { z } from 'zod';
 
-if (!process.env.REDIS_URL || !process.env.REDIS_TOKEN) {
-  throw new Error('Missing Redis configuration')
+const envSchema = z.object({
+  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+  SUPABASE_URL: z.string().url(),
+  SUPABASE_ANON_KEY: z.string().min(20),
+  AI_API_KEY: z.string().min(20),
+  GCP_CREDENTIALS_JSON: z.string().optional(),
+  DATABASE_URL: z.string().url().optional(),
+});
+
+const env = envSchema.safeParse(process.env);
+
+if (!env.success) {
+  console.error('❌ Invalid environment variables:', env.error.format());
+  throw new Error('Invalid environment variables');
 }
 
-const redis: Redis = new Redis({
-  url: process.env.REDIS_URL,
-  token: process.env.REDIS_TOKEN,
-})
+export const config = {
+  env: env.data.NODE_ENV,
+  supabase: {
+    url: env.data.SUPABASE_URL,
+    anonKey: env.data.SUPABASE_ANON_KEY,
+  },
+  ai: {
+    apiKey: env.data.AI_API_KEY,
+    gcpCredentials: env.data.GCP_CREDENTIALS_JSON 
+      ? JSON.parse(env.data.GCP_CREDENTIALS_JSON)
+      : undefined,
+  },
+  databaseUrl: env.data.DATABASE_URL,
+};
+</file>
 
-export const cache = {
-  get: async <T>(key: string): Promise<T | null> => {
-    const result = await redis.get<string>(key)
-    return result ? JSON.parse(result) as T : null
+<file path="lib/db.ts">
+import { PrismaClient } from '@prisma/client';
+import { config } from './config';
+import logger from './logger';
+
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: config.databaseUrl,
+    },
   },
-  set: async <T>(key: string, value: T, ttl: number) => {
-    await redis.setex(key, ttl, JSON.stringify(value))
-  },
-  del: async (key: string) => await redis.del(key)
+});
+
+export async function verifyDbConnection(): Promise<void> {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    logger.info('Database connection verified');
+  } catch (error) {
+    logger.error('Database connection failed', error);
+    throw new Error('Unable to connect to database. Please check your database configuration.');
+  }
 }
+
+export async function disconnectDb(): Promise<void> {
+  try {
+    await prisma.$disconnect();
+    logger.info('Database disconnected');
+  } catch (error) {
+    logger.error('Error disconnecting from database', error);
+  }
+}
+
+export default prisma;
 </file>
 
 <file path="lib/logger.ts">
@@ -1562,34 +1772,44 @@ ALTER TABLE "VoiceAnalysis" ADD CONSTRAINT "VoiceAnalysis_lessonId_fkey" FOREIGN
 provider = "postgresql"
 </file>
 
-<file path="tests/__mocks__/supabaseClient.ts">
-import { AuthError } from '@supabase/supabase-js';
+<file path="tests/cache.test.ts">
+import { cache } from '../lib/cache'
 
-import { SupabaseClient } from '@supabase/supabase-js';
+describe('Redis Cache', () => {
+  const testKey = 'testKey'
+  const testValue = { data: 'testValue' }
+  const ttl = 5 // 5 seconds
 
-export const supabase: SupabaseClient = {
-  auth: {
-    signUp: jest.fn().mockImplementation(({ email }) => {
-      if (email === 'test@example.com') {
-        return Promise.resolve({ data: { user: { id: '123' } }, error: null });
-      }
-      return Promise.resolve({ data: null, error: new AuthError('User already exists', 400) });
-    }),
-    signInWithPassword: jest.fn().mockImplementation(({ email, password }) => {
-      if (email === 'test@example.com' && password === 'password123') {
-        return Promise.resolve({ data: { user: { id: '123' } }, error: null });
-      }
-      return Promise.resolve({ data: null, error: new AuthError('Invalid credentials', 401) });
-    }),
-  },
-  supabaseUrl: 'http://mock.supabase.co',
-  supabaseKey: 'mock-key',
-  // Add other required properties with mock implementations
-  // @ts-ignore - We're only mocking the methods we need for tests
-  from: () => ({ select: jest.fn() }),
-  // @ts-ignore
-  realtime: { channel: jest.fn() },
-} as unknown as SupabaseClient;
+  afterEach(async () => {
+    await cache.del(testKey)
+  })
+
+  test('should set and get value correctly', async () => {
+    await cache.set(testKey, testValue, ttl)
+    const result = await cache.get<typeof testValue>(testKey)
+    expect(result).toEqual(testValue)
+  })
+
+  test('should return null for non-existent key', async () => {
+    const result = await cache.get(testKey)
+    expect(result).toBeNull()
+  })
+
+  test('should delete key correctly', async () => {
+    await cache.set(testKey, testValue, ttl)
+    await cache.del(testKey)
+    const result = await cache.get(testKey)
+    expect(result).toBeNull()
+  })
+
+  test('should respect TTL', async () => {
+    await cache.set(testKey, testValue, ttl)
+    // Wait for TTL to expire
+    await new Promise(resolve => setTimeout(resolve, (ttl + 1) * 1000))
+    const result = await cache.get(testKey)
+    expect(result).toBeNull()
+  }, (ttl + 2) * 1000) // Set longer timeout for this test
+})
 </file>
 
 <file path="tests/lessons.test.ts">
@@ -1613,11 +1833,6 @@ describe('Lesson Flow', () => {
     expect(response.feedback).toBeDefined()
   })
 })
-</file>
-
-<file path="tests/setupEnv.ts">
-import dotenv from 'dotenv';
-dotenv.config({ path: '.env.test' });
 </file>
 
 <file path="todos/dev_todo_phase_5.md">
@@ -2234,6 +2449,13 @@ Statistical profiling result from isolate-0x6228c659e4c0-287982-v8.log, (1179 ti
      15    1.3%  epoll_pwait@@GLIBC_2.6
 </file>
 
+<file path="tsconfig.bundle.json">
+{
+  "extends": "./tsconfig.json",
+  "exclude": ["tests/**/*"]
+}
+</file>
+
 <file path=".github/workflows/ci.yml">
 name: CI
 
@@ -2711,6 +2933,55 @@ export default function PricingPage() {
       </section>
     </div>
   );
+}
+</file>
+
+<file path="components/Welcome.tsx">
+'use client'
+import { useState } from 'react'
+
+export default function Welcome() {
+  const [progress] = useState(0)
+  
+  const steps = [
+    'Complete your profile',
+    'Take the placement test',
+    'Start your first lesson'
+  ]
+
+  return (
+    <div className="welcome-container p-6 max-w-2xl mx-auto">
+      <h1 className="text-3xl font-bold mb-4">Welcome to Lessay!</h1>
+      
+      <div className="greeting-section mb-8">
+        {/* eslint-disable-next-line react/no-unescaped-entities */}
+        <p className="text-lg mb-4">
+          Let's get you started on your language learning journey.
+        </p>
+      </div>
+
+      <div className="quickstart-section mb-8">
+        <h2 className="text-xl font-semibold mb-4">Quick Start Guide</h2>
+        <ul className="list-disc pl-6">
+          {steps.map((step, index) => (
+            <li key={index} className="mb-2">{step}</li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="progress-section">
+        <h3 className="text-lg font-medium mb-2">
+          Your Progress: {progress}% complete
+        </h3>
+        <div className="w-full bg-gray-200 rounded-full h-2.5">
+          <div 
+            className="bg-blue-600 h-2.5 rounded-full" 
+            style={{ width: `${progress}%` }}
+          ></div>
+        </div>
+      </div>
+    </div>
+  )
 }
 </file>
 
@@ -3192,119 +3463,6 @@ sequenceDiagram
 ### 5.1 Payment Metadata
 - Retention period: 7 years (tax compliance)
 - Deletion method: Cryptographic shredding
-</file>
-
-<file path="documentation/app_description.md">
-## **Lessay: Software Documentation Overview**
-
-### **1. Introduction: Our Philosophy**
-
-Lessay is an AI-powered language learning platform designed to create a deeply personal and efficient path to fluency. Unlike one-size-fits-all learning apps, Lessay's core engine is built to **listen, understand, and adapt** to each unique learner. Our philosophy is to **measure everything**, transforming every interaction into a data point that refines the learning path. We move beyond generic exercises by integrating AI-driven diagnostics with proven cognitive science principles, like **Spaced Repetition**, to provide a hyper-personalized experience that makes every minute of practice count.
-
-This document provides a high-level overview of the learner's journey and the intelligent systems that power this adaptive ecosystem, all aligned with best practices in both language acquisition and scalable software development.
-
----
-
-### **2. The Learner's Journey**
-
-This is the typical path a user takes from their first interaction to becoming an active learner in our continuous improvement cycle.
-
-#### **Step 1: Getting to Know You**
-When a new user joins, Lessay begins by gathering foundational data:
-*   What is your native language?
-*   What language do you want to learn **first**? (You can switch or add other languages at any time from your profile).
-*   What is your primary goal (e.g., travel, business, conversation)?
-*   What is your self-assessed comfort level (Beginner, Intermediate, Advanced)?
-
-This initial information calibrates the app's voice, translations, and the starting difficulty for the user's first experience.
-
-#### **Step 2: The Initial Diagnostic**
-Before creating lessons, Lessay conducts a short, voice-based diagnostic. This low-pressure placement exercise uses a series of adaptive questions to give our AI a quick but accurate baseline of the user's current vocabulary, grammar, and pronunciation.
-
-#### **Step 3: Your First Personalized Lessons**
-Immediately after the diagnostic, the results are analyzed. Lessay doesn't just provide a score; it identifies the most critical areas for improvement. The app instantly generates a set of personalized lessons tailored to this baseline.
-
-#### **Step 4: The Learning Loop (Practice & Improve)**
-This is the core of the app experience, presented in a simple, chat-like interface.
-*   **Listen:** The user hears prompts and correct pronunciations from the app's voice.
-*   **Speak:** The user practices by speaking their answers. The app listens **in real-time**, using live speech-to-text to provide immediate feedback on the content of their response.
-*   **Get Feedback:** The user receives instant corrections and guidance, reinforcing learning in the moment.
-
-#### **Step 5: Growing With You (The Adaptive Cycle)**
-This is where Lessay truly stands apart. After each lesson, the system analyzes the user's entire performance. It moves beyond right or wrong answers to perform a deep analysis of the **raw audio recording** of the session. Based on this, it not only identifies new areas for improvement but also **updates its understanding of what the user is close to forgetting**, scheduling concepts for review at the perfect moment. The app automatically generates the **next** set of lessons, creating a continuous, adaptive learning loop where the curriculum evolves with the user.
-
-#### **Step 6: Your Progress Dashboard**
-Lessay believes in transparent learning. Users have access to a detailed statistics and measurements dashboard that visualizes their progress over time. This includes:
-*   **Skill Mastery Charts:** Tracking progress across competencies like grammar, vocabulary themes, and pronunciation.
-*   **Fluency Metrics:** Visualizing improvements in speaking pace, reduction in hesitation, and use of filler words.
-*   **Recall Strength (SRS View):** A dynamic view of their known vocabulary and grammar rules, showing which concepts are "cemented," "maturing," or "due for review" based on the Spaced Repetition algorithm.
-*   **Error Analysis:** Highlighting recurring mistakes so the user is consciously aware of what the AI is helping them fix.
-*   **Activity Log:** A history of completed lessons and performance scores.
-
----
-
-### **3. How Lessay Works: The Technology**
-
-Lessay's adaptive experience is powered by a few key technological components working in synergy.
-
-*   **The Brain (Artificial Intelligence):**
-    At the heart of Lessay is an advanced AI (e.g., Google Gemini). This "Brain" has two primary jobs:
-    1.  **Expert Lesson Designer:** It acts as a master tutor, creating new, relevant lesson plans and exercises from scratch based on a user's detailed performance profile.
-    2.  **Expert Language & Vocal Analyst:** It reviews a user's session recordings to perform a deep diagnostic, identifying subtle pronunciation errors, grammatical patterns, and vocal delivery issues that are invisible to most apps.
-
-*   **The Ears (Speech Recognition & Capture):**
-    When a user speaks, our system performs two tasks simultaneously:
-    1.  **Real-Time Transcription:** It uses a high-speed API (Google Speech-to-Text) to instantly convert speech to text for immediate answer validation within the lesson.
-    2.  **Diagnostic Recording:** It captures a high-fidelity audio blob of the user's speech. This raw audio is sent to our AI Brain after the session for the deeper diagnostic analysis (pronunciation, hesitation, etc.).
-
-*   **The Voice (Text-to-Speech):**
-    To provide clear examples and prompts, the app's "Voice" (powered by Google TTS and AWS Polly) converts all lesson text into natural-sounding audio, crucial for modeling correct pronunciation and intonation.
-
-*   **The Memory (Comprehensive User Profile & Database):**
-    Lessay securely stores a rich, evolving profile of each user's journey. This is a multi-faceted dataset including:
-    *   Performance scores and a history of all AI-generated lessons.
-    *   A detailed list of identified weaknesses and mastered concepts.
-    *   Vocal & Fluency Metrics over time.
-    *   **A Spaced Repetition System (SRS) Engine:** This is the core of long-term retention. For **every single vocabulary word and grammar concept** the user learns, the Memory tracks:
-        *   **Recall Strength Score:** A dynamic score indicating how well the user knows the item.
-        *   **Next Review Date:** The optimal date for the user to be tested on this item again.
-    This comprehensive memory is the fuel for the AI Brain, ensuring every new lesson is both personalized and strategically timed for maximum retention.
-
----
-
-### **4. The Adaptive Learning Method: Our "Secret Sauce"**
-
-Lessay’s hyper-personalization is based on a four-step, data-driven cycle that intelligently blends new material with targeted review.
-
-#### **Step 1: Capture & Measure**
-During a lesson, the app records the complete audio of the user's responses. This high-fidelity recording provides a complete, contextualized dataset of the user's speaking performance, capturing not just *what* they said, but *how* they said it.
-
-#### **Step 2: Analyze & Diagnose**
-Once the lesson is complete, the AI Analyst (The Brain) scrutinizes the entire audio recording and session data. It looks for a wide array of specific, nuanced details:
-*   **Phonetic Accuracy:** *Are you pronouncing "ü" correctly in German? Is your "r" sound in Spanish a tap or a trill?*
-*   **Vocal Delivery & Fluency:** *What is your speaking pace? Do you hesitate frequently? Are there patterns to your hesitations (e.g., before certain verb conjugations)? Are you using filler words ("um," "uh") excessively?*
-*   **Grammatical Patterns:** *Did you consistently use the correct verb endings or sentence structure, even if the individual words were correct?*
-*   **Vocabulary Recall:** *Are you using newly learned words correctly and confidently, or do you stumble over them?*
-
-Crucially, during this analysis, the AI also **updates the SRS scores in The Memory**. If a user recalled a vocabulary word quickly and pronounced it well, its "Recall Strength" increases, and its "Next Review Date" is pushed further into the future. If they hesitated or made a grammatical error related to a known concept, the strength score for that item decreases, and it is scheduled for an earlier review.
-
-#### **Step 3: Prioritize & Plan**
-The system then synthesizes this new diagnosis with the user's historical data to decide what the next lesson should contain. It prioritizes tasks in a specific, pedagogically-sound order:
-
-1.  **Spaced Repetition Reviews (Top Priority):** It first queries the SRS Engine for any vocabulary or grammar concepts that are **due for review**. Preventing knowledge decay is paramount.
-2.  **Critical Weaknesses:** It then identifies the most significant pronunciation, grammar, or fluency issues from the most recent session analysis. These need immediate attention.
-3.  **Struggling Concepts:** It targets topics the user has consistently made mistakes on in recent lessons, providing further reinforcement.
-4.  **New Material:** Finally, it introduces new vocabulary and grammar that align with the user's stated goals, expanding their knowledge base.
-
-#### **Step 4: Create & Adapt**
-With this clear, prioritized plan, the AI Lesson Designer gets to work. It generates a brand new, custom-built lesson that seamlessly integrates these different elements.
-
-For example, if the analysis showed a user struggles with the "ch" sound in German and makes mistakes with dative case articles, **and the SRS indicates they are due to review the vocabulary for 'train station' and 'ticket'**, the next lesson will be a conversational exercise about buying a train ticket. This single, natural-sounding scenario forces the user to:
-*   Practice the difficult "ch" sound (e.g., in "ich möchte").
-*   Correctly use dative articles (e.g., "an de**m** Schalter").
-*   Actively recall the review vocabulary ('Bahnhof', 'Ticket').
-
-This integrated **Capture -> Analyze -> Plan (with SRS) -> Create** cycle ensures the user is always working on a balanced mix of retaining old knowledge, fixing current weaknesses, and learning new material in the most efficient way possible.
 </file>
 
 <file path="documentation/dev_todo_phase_1.md">
@@ -5022,6 +5180,30 @@ if (body.audioBlobUrl) {
 - Every API endpoint enforces resource-level permissions
 </file>
 
+<file path="lib/cache.ts">
+import { Redis } from '@upstash/redis'
+
+if (!process.env.REDIS_URL || !process.env.REDIS_TOKEN) {
+  throw new Error('Missing Redis configuration')
+}
+
+const redis: Redis = new Redis({
+  url: process.env.REDIS_URL,
+  token: process.env.REDIS_TOKEN,
+})
+
+export const cache = {
+  get: async <T>(key: string): Promise<T | null> => {
+    const result = await redis.get<string>(key)
+    return result ? JSON.parse(result) as T : null
+  },
+  set: async <T>(key: string, value: T, ttl: number) => {
+    await redis.setex(key, ttl, JSON.stringify(value))
+  },
+  del: async (key: string) => await redis.del(key)
+}
+</file>
+
 <file path="lib/errorHandler.ts">
 import { NextResponse, NextRequest } from 'next/server'
 
@@ -5130,6 +5312,85 @@ export async function submitAnswer(exerciseId: string, answer: string) {
 <svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.5 2.5h13v10a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1zM0 1h16v11.5a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 0 12.5zm3.75 4.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5M7 4.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0m1.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5" fill="#666"/></svg>
 </file>
 
+<file path="tests/__mocks__/supabaseClient.ts">
+import { AuthError, Session, SupabaseClient, User } from '@supabase/supabase-js';
+
+let mockUser: User | null = null;
+const mockSession: Session = {
+  access_token: 'mock-token',
+  token_type: 'bearer',
+  expires_in: 3600,
+  refresh_token: 'mock-refresh-token',
+  user: {
+    id: '123',
+    email: 'test@example.com',
+    app_metadata: {},
+    user_metadata: {},
+    aud: 'authenticated',
+    created_at: new Date().toISOString(),
+  },
+  expires_at: Math.floor(Date.now() / 1000) + 3600,
+};
+
+export const supabase: SupabaseClient = {
+  auth: {
+    signUp: jest.fn().mockImplementation(({ email, password }) => {
+      if (email === 'test@example.com' && password === 'password123') {
+        mockUser = {
+          id: '123',
+          email,
+          app_metadata: {},
+          user_metadata: {},
+          aud: 'authenticated',
+          created_at: new Date().toISOString(),
+        };
+        return Promise.resolve({ data: { user: mockUser }, error: null });
+      }
+      return Promise.resolve({ data: null, error: new AuthError('Signup failed', 400) });
+    }),
+    signInWithPassword: jest.fn().mockImplementation(({ email, password }) => {
+      if (email === 'test@example.com' && password === 'password123') {
+        mockUser = {
+          id: '123',
+          email,
+          app_metadata: {},
+          user_metadata: {},
+          aud: 'authenticated',
+          created_at: new Date().toISOString(),
+        };
+        return Promise.resolve({ data: { user: mockUser, session: mockSession }, error: null });
+      }
+      return Promise.resolve({ data: null, error: new AuthError('Invalid credentials', 401) });
+    }),
+    getUser: jest.fn().mockImplementation(() => {
+      return Promise.resolve({ data: { user: mockUser }, error: null });
+    }),
+    signOut: jest.fn().mockImplementation(() => {
+      mockUser = null;
+      return Promise.resolve({ error: null });
+    }),
+    onAuthStateChange: jest.fn().mockImplementation((callback) => {
+      callback('SIGNED_IN', mockSession);
+      return { data: { subscription: { unsubscribe: jest.fn() } }, error: null };
+    }),
+    getSession: jest.fn().mockImplementation(() => {
+      return Promise.resolve({ data: { session: mockUser ? mockSession : null }, error: null });
+    }),
+  },
+  supabaseUrl: 'http://mock.supabase.co',
+  supabaseKey: 'mock-key',
+  from: jest.fn().mockReturnValue({
+    select: jest.fn().mockReturnThis(),
+    insert: jest.fn().mockReturnThis(),
+    update: jest.fn().mockReturnThis(),
+    delete: jest.fn().mockReturnThis(),
+    eq: jest.fn().mockReturnThis(),
+    single: jest.fn().mockResolvedValue({ data: null, error: null }),
+  }),
+  realtime: { channel: jest.fn() },
+} as unknown as SupabaseClient;
+</file>
+
 <file path="tests/auth.test.ts">
 import { describe, it, expect, jest } from '@jest/globals'
 import { signUp, signIn } from '@/lib/auth'
@@ -5158,6 +5419,21 @@ describe('Authentication', () => {
     expect(result.error).toMatch(/invalid credentials/i)
   })
 })
+</file>
+
+<file path="tests/setupEnv.ts">
+import dotenv from 'dotenv';
+import { config } from '../lib/config';
+
+dotenv.config({ path: '.env.test' });
+
+if (!config.supabase.url) {
+  throw new Error('Supabase URL is required for tests');
+}
+
+if (!config.supabase.url.includes('test')) {
+  throw new Error('Tests must use test Supabase URL');
+}
 </file>
 
 <file path="Dockerfile">
@@ -6387,76 +6663,6 @@ This plan is structured to follow the logical flow of the Software Development L
         *   Update the `Troubleshooting` table with common issues related to voice recognition or lesson generation.
 </file>
 
-<file path="lib/ai-service.ts">
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import { SpeechClient } from '@google-cloud/speech';
-import { TextToSpeechClient } from '@google-cloud/text-to-speech';
-
-let geminiClient: GoogleGenerativeAI;
-let speechClient: SpeechClient;
-let textToSpeechClient: TextToSpeechClient;
-
-if (process.env.GCP_CREDENTIALS_JSON) {
-  const credentials = JSON.parse(process.env.GCP_CREDENTIALS_JSON);
-  geminiClient = new GoogleGenerativeAI(process.env.AI_API_KEY);
-  speechClient = new SpeechClient({ credentials });
-  textToSpeechClient = new TextToSpeechClient({ credentials });
-} else {
-  geminiClient = new GoogleGenerativeAI(process.env.AI_API_KEY);
-  speechClient = new SpeechClient({ keyFilename: './gcp-credentials.json' });
-  textToSpeechClient = new TextToSpeechClient({ keyFilename: './gcp-credentials.json' });
-}
-
-export async function generateLessonForUser(userId: string) {
-  const model = geminiClient.getGenerativeModel({
-    model: "gemini-pro",
-    generationConfig: {
-      temperature: 0.7,
-      maxOutputTokens: 2048
-    }
-  });
-
-  const prompt = `Generate a language lesson...`; // Detailed prompt per design doc
-  const result = await model.generateContent(prompt);
-  const response = await result.response;
-
-  return JSON.parse(response.text());
-}
-
-export async function transcribeAudio(audioBuffer: Buffer): Promise<string> {
-  const [response] = await speechClient.recognize({
-    audio: { content: audioBuffer.toString('base64') },
-    config: {
-      encoding: 'WEBM_OPUS',
-      sampleRateHertz: 48000,
-      languageCode: 'en-US'
-    }
-  });
-  return response.results
-    .map(result => result.alternatives[0].transcript)
-    .join('\n');
-}
-
-export async function synthesizeSpeech(text: string): Promise<Buffer> {
-  const [response] = await textToSpeechClient.synthesizeSpeech({
-    input: { text },
-    voice: {
-      languageCode: 'en-US',
-      name: 'en-US-Standard-C'
-    },
-    audioConfig: {
-      audioEncoding: 'MP3'
-    }
-  });
-  return Buffer.from(response.audioContent, 'base64');
-}
-
-export async function analyzeAudioForDiagnostics() {
-  console.log('AI Service: Analyzing audio');
-  return { fluencyScore: 85, pronunciationAccuracy: 90 };
-}
-</file>
-
 <file path="lib/prisma.ts">
 import { PrismaClient } from '@prisma/client'
 
@@ -6557,80 +6763,6 @@ const config: Config.InitialOptions = {
 }
 
 export default config
-</file>
-
-<file path="NEEDS_ARCHITECTURAL_REVIEW.md">
-## Original Problem:
-Testing phase failures due to:
-1. Supabase adapter configuration issues ("supabaseUrl is required")
-2. Database connection failures ("Can't reach database server at db.supabase.co:5432")
-
-## Failed Fix Attempt:
-1. Updated Jest configuration to handle ES modules
-2. Modified environment variables in `.env.test` and `lib/auth.ts`
-3. Verified package installations and configurations
-
-## New Error:
-Tests still fail with the same errors after multiple fixes:
-- Auth tests: "supabaseUrl is required"
-- Lesson tests: Database connection failures
-</file>
-
-<file path="app/api/lessons/[id]/submit-answer/route.ts">
-import { NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
-import { getUserSession } from '@/lib/supabase/server'
-
-export async function POST(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
-  const session = await getUserSession()
-  
-  if (!session) {
-    return NextResponse.json(
-      { error: 'Unauthorized' },
-      { status: 401 }
-    )
-  }
-
-  try {
-    const { answer } = await request.json()
-    const lessonId = params.id
-
-    // Update progress with the submitted answer
-    const progress = await prisma.progress.update({
-      where: { 
-        userId_lessonId: {
-          userId: session.user.id,
-          lessonId: lessonId
-        }
-      },
-      data: {
-        completedAt: new Date(),
-        lesson: {
-          update: {
-            content: JSON.stringify({ answer })
-          }
-        }
-      },
-      include: {
-        lesson: true
-      }
-    })
-
-    return NextResponse.json({ 
-      success: true,
-      progress
-    })
-  } catch (error) {
-    console.error('Answer submission failed:', error)
-    return NextResponse.json(
-      { error: 'Answer submission failed' },
-      { status: 500 }
-    )
-  }
-}
 </file>
 
 <file path="app/api/stats/fluency/route.ts">
@@ -8347,6 +8479,75 @@ next-env.d.ts
 /app/generated/prisma
 </file>
 
+<file path="app/api/lessons/[id]/submit-answer/route.ts">
+import { NextResponse } from 'next/server'
+import prisma from '@/lib/prisma'
+import { getUserSession } from '@/lib/supabase/server'
+
+export async function POST(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  const session = await getUserSession()
+  
+  if (!session) {
+    return NextResponse.json(
+      { error: 'Unauthorized' },
+      { status: 401 }
+    )
+  }
+
+  try {
+    const { answer } = await request.json()
+    const lessonId = params.id
+
+    // First find the progress record
+    const existingProgress = await prisma.progress.findFirst({
+      where: {
+        userId: session.user.id,
+        lessonId: lessonId
+      }
+    })
+
+    if (!existingProgress) {
+      return NextResponse.json(
+        { error: 'Progress record not found' },
+        { status: 404 }
+      )
+    }
+
+    // Update progress with the submitted answer
+    const progress = await prisma.progress.update({
+      where: {
+        id: existingProgress.id
+      },
+      data: {
+        completedAt: new Date(),
+        lesson: {
+          update: {
+            content: JSON.stringify({ answer })
+          }
+        }
+      },
+      include: {
+        lesson: true
+      }
+    })
+
+    return NextResponse.json({ 
+      success: true,
+      progress
+    })
+  } catch (error) {
+    console.error('Answer submission failed:', error)
+    return NextResponse.json(
+      { error: 'Answer submission failed' },
+      { status: 500 }
+    )
+  }
+}
+</file>
+
 <file path="app/api/payments/create-subscription/route.ts">
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
@@ -8635,6 +8836,87 @@ export async function PUT(request: Request) {
   - Verification: Documentation file exists with all sections
 </file>
 
+<file path="lib/ai-service.ts">
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { SpeechClient } from '@google-cloud/speech';
+import { TextToSpeechClient } from '@google-cloud/text-to-speech';
+import { config } from './config';
+
+let geminiClient: GoogleGenerativeAI;
+let speechClient: SpeechClient;
+let textToSpeechClient: TextToSpeechClient;
+
+if (config.ai.gcpCredentials) {
+  const apiKey = config.ai.apiKey;
+  geminiClient = new GoogleGenerativeAI(apiKey);
+  speechClient = new SpeechClient({ credentials: config.ai.gcpCredentials });
+  textToSpeechClient = new TextToSpeechClient({ credentials: config.ai.gcpCredentials });
+} else {
+  geminiClient = new GoogleGenerativeAI(config.ai.apiKey);
+  speechClient = new SpeechClient({ keyFilename: './gcp-credentials.json' });
+  textToSpeechClient = new TextToSpeechClient({ keyFilename: './gcp-credentials.json' });
+}
+
+export async function generateLessonForUser(_userId: string) { // eslint-disable-line @typescript-eslint/no-unused-vars
+  const model = geminiClient.getGenerativeModel({
+    model: "gemini-pro",
+    generationConfig: {
+      temperature: 0.7,
+      maxOutputTokens: 2048
+    }
+  });
+
+  const prompt = `Generate a language lesson...`; // Detailed prompt per design doc
+  const result = await model.generateContent(prompt);
+  const response = await result.response;
+
+  return JSON.parse(response.text());
+}
+
+export async function transcribeAudio(audioBuffer: Buffer): Promise<string> {
+  const [response] = await speechClient.recognize({
+    audio: { content: audioBuffer.toString('base64') },
+    config: {
+      encoding: 'WEBM_OPUS',
+      sampleRateHertz: 48000,
+      languageCode: 'en-US'
+    }
+  });
+  if (!response?.results?.length) {
+    return '';
+  }
+  
+  return response.results
+    .flatMap(result =>
+      result.alternatives?.map(alt => alt.transcript) ?? []
+    )
+    .filter((t): t is string => !!t)
+    .join('\n');
+}
+
+export async function synthesizeSpeech(text: string): Promise<Buffer> {
+  const [response] = await textToSpeechClient.synthesizeSpeech({
+    input: { text },
+    voice: {
+      languageCode: 'en-US',
+      name: 'en-US-Standard-C'
+    },
+    audioConfig: {
+      audioEncoding: 'MP3'
+    }
+  });
+  if (!response.audioContent) {
+    throw new Error('No audio content received from text-to-speech service');
+  }
+  return Buffer.from(response.audioContent as string, 'base64');
+}
+
+export async function analyzeAudioForDiagnostics() {
+  console.log('AI Service: Analyzing audio');
+  return { fluencyScore: 85, pronunciationAccuracy: 90 };
+}
+</file>
+
 <file path="todos/master_development_plan.md">
 # Master Development Plan
 
@@ -8732,71 +9014,6 @@ export async function PUT(request: Request) {
     - Alert response procedures
     - Dashboard usage guide
   - Verification: Documentation file exists with all sections
-</file>
-
-<file path="lib/auth.ts">
-/// <reference types="../typings/next-auth" />
-import { NextAuthOptions, Session, JWT } from 'next-auth';
-import { SupabaseAdapter } from '@auth/supabase-adapter';
-import { createClient } from '@supabase/supabase-js';
-
-if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
-  throw new Error('Supabase configuration missing - check your environment variables');
-}
-const supabaseUrl = process.env.SUPABASE_URL || '';
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
-import { supabase as mockSupabase } from '../tests/__mocks__/supabaseClient';
-const supabase = process.env.NODE_ENV === 'test'
-  ? mockSupabase
-  : createClient(supabaseUrl, supabaseAnonKey);
-
-export const authOptions: NextAuthOptions = {
-  providers: [
-    SupabaseAdapter({
-      supabase,
-    }),
-  ],
-  callbacks: {
-    async session({ session, token }: { session: Session; token: JWT }): Promise<Session> {
-      if (token.sub) {
-        session.user.id = token.sub;
-      }
-      return session;
-    },
-    async jwt({ token, user }) {
-      if (user) {
-        token.sub = user.id;
-      }
-      return token;
-    },
-  },
-};
-
-export async function signUp(email: string, password: string) {
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-  });
-
-  if (error) {
-    return { success: false, error: error.message };
-  }
-  
-  return { success: true, user: data.user };
-}
-
-export async function signIn(email: string, password: string) {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-
-  if (error) {
-    return { success: false, error: error.message };
-  }
-  
-  return { success: true, user: data.user };
-}
 </file>
 
 <file path="tsconfig.json">
@@ -8968,6 +9185,73 @@ export async function GET() {
    - Have profile auto-created on sign-up
 </file>
 
+<file path="lib/auth.ts">
+/// <reference types="../typings/next-auth" />
+import { NextAuthOptions, Session, JWT } from 'next-auth';
+import { SupabaseAdapter } from '@auth/supabase-adapter';
+import { createClient } from '@supabase/supabase-js';
+
+import { config } from './config';
+
+if (!config.supabase.url || !config.supabase.anonKey) {
+  throw new Error('Supabase configuration missing - check your environment variables');
+}
+const supabaseUrl = config.supabase.url;
+const supabaseAnonKey = config.supabase.anonKey;
+import { supabase as mockSupabase } from '../tests/__mocks__/supabaseClient';
+const supabase = process.env.NODE_ENV === 'test'
+  ? mockSupabase
+  : createClient(supabaseUrl, supabaseAnonKey);
+
+export const authOptions: NextAuthOptions = {
+  providers: [
+    SupabaseAdapter({
+      supabase,
+    }),
+  ],
+  callbacks: {
+    async session({ session, token }: { session: Session; token: JWT }): Promise<Session> {
+      if (token.sub) {
+        session.user.id = token.sub;
+      }
+      return session;
+    },
+    async jwt({ token, user }) {
+      if (user) {
+        token.sub = user.id;
+      }
+      return token;
+    },
+  },
+};
+
+export async function signUp(email: string, password: string) {
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+  });
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+  
+  return { success: true, user: data.user };
+}
+
+export async function signIn(email: string, password: string) {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+  
+  return { success: true, user: data.user };
+}
+</file>
+
 <file path="app/api/lessons/start/route.ts">
 import { NextResponse, NextRequest } from 'next/server'
 import { getUserSession } from '@/lib/supabase/server'
@@ -9006,19 +9290,6 @@ export async function POST(req: NextRequest) {
     return errorHandler(error as Error, req);
   }
 }
-</file>
-
-<file path="NEEDS_ASSISTANCE.md">
-## Cache Validation Failure
-
-**Plan File:** FIX_PLAN.md  
-**Task:** Validate cache functionality  
-**Error:**  
-```
-UrlError: Upstash Redis client was passed an invalid URL. You should pass a URL starting with https. Received: "your_redis_url_here".
-```
-**Attempted Solution:**  
-Added placeholder Redis configuration in `.env.test` but need valid credentials for testing.
 </file>
 
 <file path="documentation/2_development_plan/dev_todo_phase_7.md">
@@ -9183,12 +9454,14 @@ If the failing task is from a `FIX_PLAN.md` file, this indicates a deep strategi
     "@types/stripe": "^8.0.417",
     "@upstash/redis": "^1.35.0",
     "next-auth": "^4.24.11",
+    "nodemailer": "^6.10.1",
     "pino": "^9.7.0",
     "pino-pretty": "^13.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "recharts": "^2.15.3",
-    "stripe": "^18.2.1"
+    "stripe": "^18.2.1",
+    "zod": "^3.25.64"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -9196,6 +9469,8 @@ If the failing task is from a `FIX_PLAN.md` file, this indicates a deep strategi
     "@types/jest": "^29.5.14",
     "@types/next-auth": "^3.15.0",
     "@types/node": "^20.19.0",
+    "@types/nodemailer": "^6.4.17",
+    "@types/oauth": "^0.9.6",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19",
     "@vercel/ncc": "^0.38.3",
@@ -9212,26 +9487,6 @@ If the failing task is from a `FIX_PLAN.md` file, this indicates a deep strategi
     "typescript": "^5"
   }
 }
-</file>
-
-<file path="FIX_PLAN.md">
-## FIX PLAN: Resolving Redis TypeScript Compilation Errors
-
-- [x] **Task 1: Diagnose TypeScript compilation errors**
-    - **LLM Prompt:** "Run `tsc --project tsconfig.bundle.json` and provide full error output"
-    - **Verification:** Complete TypeScript error log is captured
-
-- [x] **Task 2: Fix Redis type definitions**
-    - **LLM Prompt:** "Update `lib/cache.ts` with proper TypeScript generics and Redis client typing"
-    - **Verification:** Code compiles without type errors
-
-- [ ] **Task 3: Validate cache functionality**
-    - **LLM Prompt:** "Add runtime validation tests for Redis cache operations"
-    - **Verification:** Tests pass for all cache operations
-
-- [ ] **Task 4: Clean up and reset for autonomous handoff**
-    - **LLM Prompt:** "Delete the file `NEEDS_ARCHITECTURAL_REVIEW.md` from the root directory."
-    - **Verification:** The file `NEEDS_ARCHITECTURAL_REVIEW.md` no longer exists
 </file>
 
 </files>
