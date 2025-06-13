@@ -16,7 +16,7 @@
   - **Verification:** Auth tests pass with mocked Supabase client
 
 ### 4. Database Health Checks
-- [ ] **Task 4: Add connection verification**
+- [x] **Task 4: Add connection verification**
   - **LLM Prompt:** "Create `lib/db.ts` with connection health check logic"
   - **Verification:** App provides clear errors if database is unreachable
 
