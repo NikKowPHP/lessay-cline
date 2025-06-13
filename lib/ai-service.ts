@@ -1,26 +1,19 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { SpeechClient } from '@google-cloud/speech';
 import { TextToSpeechClient } from '@google-cloud/text-to-speech';
+import { config } from './config';
 
 let geminiClient: GoogleGenerativeAI;
 let speechClient: SpeechClient;
 let textToSpeechClient: TextToSpeechClient;
 
-if (process.env.GCP_CREDENTIALS_JSON) {
-  const credentials = JSON.parse(process.env.GCP_CREDENTIALS_JSON);
-  const apiKey = process.env.AI_API_KEY;
-  if (!apiKey) {
-    throw new Error('AI_API_KEY environment variable is required');
-  }
-  geminiClient = new GoogleGenerativeAI(apiKey as string);
-  speechClient = new SpeechClient({ credentials });
-  textToSpeechClient = new TextToSpeechClient({ credentials });
+if (config.ai.gcpCredentials) {
+  const apiKey = config.ai.apiKey;
+  geminiClient = new GoogleGenerativeAI(apiKey);
+  speechClient = new SpeechClient({ credentials: config.ai.gcpCredentials });
+  textToSpeechClient = new TextToSpeechClient({ credentials: config.ai.gcpCredentials });
 } else {
-  const apiKey = process.env.AI_API_KEY;
-  if (!apiKey) {
-    throw new Error('AI_API_KEY environment variable is required');
-  }
-  geminiClient = new GoogleGenerativeAI(apiKey as string);
+  geminiClient = new GoogleGenerativeAI(config.ai.apiKey);
   speechClient = new SpeechClient({ keyFilename: './gcp-credentials.json' });
   textToSpeechClient = new TextToSpeechClient({ keyFilename: './gcp-credentials.json' });
 }

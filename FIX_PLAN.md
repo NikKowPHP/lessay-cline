@@ -1,30 +1,26 @@
-## Comprehensive Fix Plan: TypeScript and Redis Architecture
+## Comprehensive Fix Plan: Environment Configuration and Testing
 
-### 1. Resolve TypeScript Compilation Errors
-- [x] **Task 1: Fix Prisma Client Types**
-  - Update Prisma schema and regenerate client
-  - Fix type mismatches in API routes
-- [x] **Task 2: Address NextAuth Module Issues**
-  - Install missing `@types/oauth` package
-  - Add proper type declarations for NextAuth modules
-- [x] **Task 3: Fix AI Service Type Guards**
-  - Add null checks and proper type assertions
-  - Update buffer handling in `lib/ai-service.ts`
+### 1. Unified Configuration Management
+- [x] **Task 1: Create config manager**
+  - **LLM Prompt:** "Create `lib/config.ts` using Zod to validate environment variables for all environments"
+  - **Verification:** Config is imported and used consistently across the app
 
-### 2. Redis Architecture Overhaul
-- [ ] **Task 4: Implement Environment-Specific Configuration**
-  - Create `config/redis.ts` with dev/test/prod setups
-  - Use mock Redis client for test environment
-- [ ] **Task 5: Update Cache Test Suite**
-  - Mock Redis operations in `tests/__mocks__/redis.ts`
-  - Update `tests/cache.test.ts` to use mocks
+### 2. Test Environment Isolation
+- [ ] **Task 2: Update test setup**
+  - **LLM Prompt:** "Modify `tests/setupEnv.ts` to load test-specific config and verify Supabase URL"
+  - **Verification:** Tests run without needing production credentials
 
-### 3. Validation and Testing
-- [ ] **Task 6: Run Full Test Suite**
-  - Execute `npm test` to verify all fixes
-  - Ensure zero TypeScript errors with `tsc --noEmit`
+### 3. Enhanced Mocking
+- [ ] **Task 3: Improve Supabase mocks**
+  - **LLM Prompt:** "Update `tests/__mocks__/supabaseClient.ts` with complete mock implementations"
+  - **Verification:** Auth tests pass with mocked Supabase client
 
-### 4. Cleanup and Handoff
-- [ ] **Task 7: Clean up signal files**
-  - **LLM Prompt:** "Delete both `NEEDS_ARCHITECTURAL_REVIEW.md` and `NEEDS_ASSISTANCE.md`"
-  - **Verification:** Both files are removed from the root directory
+### 4. Database Health Checks
+- [ ] **Task 4: Add connection verification**
+  - **LLM Prompt:** "Create `lib/db.ts` with connection health check logic"
+  - **Verification:** App provides clear errors if database is unreachable
+
+### 5. Cleanup and Handoff
+- [ ] **Task 5: Remove signal files**
+  - **LLM Prompt:** "Delete `NEEDS_ARCHITECTURAL_REVIEW.md` and `NEEDS_ASSISTANCE.md`"
+  - **Verification:** Both files are removed from root directory
