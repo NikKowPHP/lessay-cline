@@ -32,6 +32,7 @@ model Lesson {
   completedAt DateTime?
   analysis    VoiceAnalysis[]
   progress    Progress[]
+  @@index([userId, difficulty])
 }
 
 model Exercise {
@@ -64,6 +65,7 @@ model Progress {
   score       Float?
   startedAt   DateTime @default(now())
   completedAt DateTime?
+  @@index([userId, completedAt])
 }
 
 model SRSEntry {

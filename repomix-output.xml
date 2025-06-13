@@ -48,8 +48,6 @@ The content is organized as follows:
     rules.md
   rules-developer/
     rules.md
-  rules-documentation/
-    rules.md
   rules-emergency/
     rules.md
   rules-orchestrator-senior/
@@ -179,6 +177,7 @@ lib/
   lessons.ts
   logger.ts
   prisma.ts
+  redis.ts
 prisma/
   migrations/
     20250611185434_add_lesson_and_progress_models/
@@ -212,6 +211,7 @@ globals.css
 jest.config.ts
 jest.setup.ts
 layout.tsx
+NEEDS_ASSISTANCE.md
 next.config.ts
 package.json
 page.tsx
@@ -224,203 +224,6 @@ tsconfig.json
 
 <files>
 This section contains the contents of the repository's files.
-
-<file path="todos/dev_todo_phase_7.md">
-# Developer To-Do List: Phase 7 - Performance Optimization
-
-**Objective:** Implement comprehensive performance improvements across the application stack.
-
-## Tasks
-
-### 1. Implement Redis Caching Layer
-- [ ] **Install Redis dependencies**
-  - **Command:** `npm install redis @types/redis`
-  - **Verification:** `package.json` includes `redis` in dependencies
-
-- [ ] **Create Redis client utility (`/lib/redis.ts`)**
-  - **Code:**
-    ```typescript
-    import { createClient } from 'redis'
-    import { config } from './config'
-
-    const redisClient = createClient({
-      url: config.redis.url
-    })
-
-    redisClient.on('error', (err) => console.error('Redis error:', err))
-
-    export async function connectRedis() {
-      if (!redisClient.isOpen) {
-        await redisClient.connect()
-      }
-      return redisClient
-    }
-
-    export async function cacheGet(key: string) {
-      const client = await connectRedis()
-      return client.get(key)
-    }
-
-    export async function cacheSet(key: string, value: string, ttl?: number) {
-      const client = await connectRedis()
-      if (ttl) {
-        return client.setEx(key, ttl, value)
-      }
-      return client.set(key, value)
-    }
-    ```
-  - **Verification:** File exists with exported functions
-
-### 2. Optimize Database Queries
-- [ ] **Add indexes to Prisma schema (`/prisma/schema.prisma`)**
-  - **Modifications:**
-    ```prisma
-    model Lesson {
-      @@index([userId, difficulty])
-    }
-    model Progress {
-      @@index([userId, completedAt])
-    }
-    ```
-  - **Command:** `npx prisma migrate dev --name add_performance_indexes`
-  - **Verification:** New migration file created
-
-- [ ] **Implement query logging**
-  - **Modify `/lib/prisma.ts`:**
-    ```typescript
-    const prisma = new PrismaClient({
-      log: [
-        { level: 'warn', emit: 'event' },
-        { level: 'error', emit: 'event' },
-        { level: 'query', emit: 'event' }
-      ]
-    })
-
-    prisma.$on('query', (e) => {
-      logger.debug({
-        query: e.query,
-        duration: e.duration,
-        params: e.params
-      }, 'Database query executed')
-    })
-    ```
-  - **Verification:** Queries appear in logs with timing
-
-### 3. Optimize API Endpoints
-- [ ] **Cache lesson data in `/app/api/lessons/start/route.ts`**
-  - **Modifications:**
-    ```typescript
-    const cacheKey = `lesson-start:${session.user.id}`
-    const cached = await cacheGet(cacheKey)
-    if (cached) {
-      return NextResponse.json(JSON.parse(cached))
-    }
-    // ... existing code ...
-    await cacheSet(cacheKey, JSON.stringify(progress), 300) // 5 minute cache
-    ```
-  - **Verification:** Subsequent requests return cached data
-
-- [ ] **Batch dashboard requests in `/components/DashboardView.tsx`**
-  - **Modify useEffect:**
-    ```typescript
-    const response = await fetch('/api/stats/dashboard')
-    const { fluency, srs } = await response.json()
-    ```
-  - **Create new endpoint `/app/api/stats/dashboard/route.ts`**
-  - **Verification:** Single API call fetches all dashboard data
-
-### 4. Implement Performance Monitoring
-- [ ] **Add Prometheus metrics endpoint (`/app/api/metrics/route.ts`)**
-  - **Install:** `npm install prom-client`
-  - **Code:**
-    ```typescript
-    import { register, collectDefaultMetrics } from 'prom-client'
-
-    collectDefaultMetrics()
-
-    export async function GET() {
-      const metrics = await register.metrics()
-      return new Response(metrics, {
-        headers: { 'Content-Type': register.contentType }
-      })
-    }
-    ```
-  - **Verification:** `/api/metrics` returns metrics data
-
-### 5. Optimize Build Process
-- [ ] **Implement module precompilation**
-  - **Command:** `npm install @vercel/ncc`
-  - **Add script to `package.json`:**
-    ```json
-    "scripts": {
-      "bundle": "NCC_CONFIG_TS_CONFIG=tsconfig.bundle.json ncc build app/api/lessons/start/route.ts -o dist"
-    }
-    ```
-  - **Verification:** `dist/` directory created with bundled code
-
-### 6. Cleanup and Final Verification
-- [ ] **Run performance benchmarks**
-  - **Command:** `npm run test:performance`
-  - **Verification:** Benchmark results show improved metrics
-
-- [ ] **Update documentation (`/documentation/performance.md`)**
-  - **Add:** Caching strategy, index details, monitoring setup
-  - **Verification:** Documentation file exists with all sections
-
-- [ ] **Clean up and reset for autonomous handoff**
-  - **LLM Prompt:** "Update todos/master_development_plan.md to mark Phase 7 as complete"
-  - **Verification:** Phase 7 marked [x] in master plan
-</file>
-
-<file path=".roo/rules-planner-architect/rules.md">
-## 1. IDENTITY & PERSONA
-
-You are the **Planner_Architect AI**, the master designer and strategist. You operate in two distinct modes: **Blueprint Mode** (generating high-level SDLC documentation) and **Development Planning Mode** (creating code-aware, atomic tasks for the developer). Your purpose is to translate abstract requirements into a flawless, executable plan.
-
-## 2. THE DUAL-MODE OPERATIONAL LOOP
-
-Upon activation, you must first determine your operational mode by checking the state of the repository.
-
-### 2.1. MODE 1: BLUEPRINT CREATION
-
-**Trigger:** This mode is active if `documentation/master_plan.md` exists and contains incomplete tasks `[ ]`.
-
-1.  **Identify Task:** Open `documentation/master_plan.md` and find the first incomplete task.
-2.  **Consult Vision:** Read `app_description.md` to understand the core requirements.
-3.  **Generate Document:** Create the full, detailed content for the documentation file specified in the task (e.g., `documentation/business_requirements.md`). You must generate complete content, leaving no placeholders.
-4.  **Update Master Plan:** Mark the task as complete `[x]` in `documentation/master_plan.md`.
-5.  **Loop or Conclude:**
-    *   If more incomplete tasks exist, repeat the loop.
-    *   If all tasks in `documentation/master_plan.md` are complete, create the signal file `BLUEPRINT_COMPLETE.md` and switch mode to `<mode>planner-orchestrator</mode>`.
-
-### 2.2. MODE 2: CODE-AWARE DEVELOPMENT PLANNING
-
-**Trigger:** This mode is active if `todos/master_development_plan.md` exists and contains incomplete tasks `[ ]`.
-
-1.  **Identify Phase:** Open `todos/master_development_plan.md` and find the first incomplete phase (`[ ]`). Let's say it's "Phase 2: User Authentication".
-2.  **Analyze Current Reality (Codebase Mapping):**
-    *   **Execute Command:** Run `repomix` to generate the `repomix-output.xml` file. This is your ground truth of what currently exists.
-    *   **Ingest Snapshot:** Read and fully comprehend the `repomix-output.xml` file.
-3.  **Generate Atomic Plan:**
-    *   **Cross-Reference:** Compare the goal of the current phase ("User Authentication") with the existing codebase reality from `repomix-output.xml` and the project documentation.
-    *   **Create Detailed To-Do:** Create a new file, `todos/dev_todo_phase_2.md`. This file must contain a series of atomic, unambiguous, generative prompts for the Developer AI.
-    *   **BE CODE-AWARE:** Your prompts must reflect the current state.
-        *   *Bad Prompt:* "Create a login page."
-        *   *Good Prompt:* "**Modify `src/app/login/page.tsx`**: Import the `useFormState` hook from React. Add state management for email and password fields. Modify the form's `onSubmit` handler to call a new server action named `loginUser`."
-4.  **Update Master Development Plan:** After successfully generating the detailed `dev_todo_phase_2.md` file, update `todos/master_development_plan.md` by marking the current phase as complete (`[x]`).
-5.  **Handoff for Execution:** Announce "Detailed plan for Phase 2 created. Switching to orchestrator to begin implementation." and switch mode to `<mode>planner-orchestrator</mode>`.
-
-## 3. HIERARCHY OF TRUTH
-
-1.  **`app_description.md`**: The ultimate vision.
-2.  **`repomix-output.xml`**: The undeniable truth of what code has been written.
-3.  **Existing Documentation**: The formal requirements you have already written.
-
-## 4. CRITICAL DIRECTIVES
-*   **ZERO AMBIGUITY:** Your plans for the Developer AI must be so clear that a simple 4B model can execute them without questions.
-*   **GENERATIVE PROMPTS:** Phrase all tasks as direct instructions for an LLM (e.g., "Generate a file...", "Modify the file to include...").
-*   **STATEFUL PROGRESSION:** Your primary job is to work through master plan files, updating them as you complete each major item.
-</file>
 
 <file path=".roo/rules-planner-orchestrator/rules.md">
 ## 1. IDENTITY & PERSONA
@@ -1432,6 +1235,72 @@ Here are the separate, simplified to-do files for each phase. Each task is desig
     - **Verification:** The file `/.github/workflows/ci.yml` exists and contains the string `npm run lint`.
 </file>
 
+<file path="documentation/templates/compliance_framework_template.md">
+# COMPLIANCE FRAMEWORK TEMPLATE
+<!-- Document Version: 1.1 -->
+<!-- Last Updated: 2025-06-10 -->
+
+[Existing sections...]
+
+## 3. Payment Compliance
+### 3.1 PCI DSS Requirements
+- **SAQ A** compliance level
+- No card data storage
+- Quarterly vulnerability scans
+
+### 3.2 GDPR Financial Data
+- Legal basis: Contractual necessity
+- Right to erasure limitations
+- Breach notification timeline: 72 hours
+
+### 3.3 Audit Controls
+```mermaid
+graph TD
+    A[Payment Event] --> B[Log Entry]
+    B --> C[Encrypted Storage]
+    C --> D[Quarterly Review]
+```
+
+## 4. Certification Status
+- PCI DSS: Annual assessment
+- GDPR: Continuous compliance
+- SOC 2: Planned for 2026
+</file>
+
+<file path="documentation/templates/data_governance_template.md">
+# DATA GOVERNANCE FRAMEWORK TEMPLATE
+<!-- Document Version: 1.1 -->
+<!-- Last Updated: 2025-06-10 -->
+
+[Existing sections...]
+
+## 4. Payment Data Handling
+### 4.1 Data Types
+| Classification | Examples | Handling Requirements |
+|----------------|----------|-----------------------|
+| Sensitive | Stripe customer IDs | Encrypted storage |
+| Restricted | Payment tokens | Never stored locally |
+
+### 4.2 Security Controls
+- **Encryption**: AES-256 for payment metadata
+- **Access**: Role-based, limited to billing team
+- **Audit**: All access logged and monitored
+
+### 4.3 Tokenization Flow
+```mermaid
+sequenceDiagram
+    Client->>Stripe: Tokenize card
+    Stripe-->>Client: Payment token
+    Client->>Backend: Use token for payment
+    Backend->>Stripe: Charge via token
+```
+
+## 5. Data Retention
+### 5.1 Payment Metadata
+- Retention period: 7 years (tax compliance)
+- Deletion method: Cryptographic shredding
+</file>
+
 <file path="documentation/app_description.md">
 ## **Lessay: Software Documentation Overview**
 
@@ -1562,41 +1431,6 @@ export const getUserSession = async () => {
 }
 </file>
 
-<file path="lib/config.ts">
-import { z } from 'zod';
-
-const envSchema = z.object({
-  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-  SUPABASE_URL: z.string().url(),
-  SUPABASE_ANON_KEY: z.string().min(20),
-  AI_API_KEY: z.string().min(20),
-  GCP_CREDENTIALS_JSON: z.string().optional(),
-  DATABASE_URL: z.string().url().optional(),
-});
-
-const env = envSchema.safeParse(process.env);
-
-if (!env.success) {
-  console.error('❌ Invalid environment variables:', env.error.format());
-  throw new Error('Invalid environment variables');
-}
-
-export const config = {
-  env: env.data.NODE_ENV,
-  supabase: {
-    url: env.data.SUPABASE_URL,
-    anonKey: env.data.SUPABASE_ANON_KEY,
-  },
-  ai: {
-    apiKey: env.data.AI_API_KEY,
-    gcpCredentials: env.data.GCP_CREDENTIALS_JSON 
-      ? JSON.parse(env.data.GCP_CREDENTIALS_JSON)
-      : undefined,
-  },
-  databaseUrl: env.data.DATABASE_URL,
-};
-</file>
-
 <file path="lib/db.ts">
 import { PrismaClient } from '@prisma/client';
 import { config } from './config';
@@ -1647,6 +1481,37 @@ const logger = pino({
 });
 
 export default logger;
+</file>
+
+<file path="lib/redis.ts">
+import { createClient } from 'redis'
+import { config } from './config'
+
+const redisClient = createClient({
+  url: config.redis.url
+})
+
+redisClient.on('error', (err) => console.error('Redis error:', err))
+
+export async function connectRedis() {
+  if (!redisClient.isOpen) {
+    await redisClient.connect()
+  }
+  return redisClient
+}
+
+export async function cacheGet(key: string) {
+  const client = await connectRedis()
+  return client.get(key)
+}
+
+export async function cacheSet(key: string, value: string, ttl?: number) {
+  const client = await connectRedis()
+  if (ttl) {
+    return client.setEx(key, ttl, value)
+  }
+  return client.set(key, value)
+}
 </file>
 
 <file path="prisma/migrations/20250611185434_add_lesson_and_progress_models/migration.sql">
@@ -2475,74 +2340,72 @@ jobs:
       - run: npm run lint
 </file>
 
-<file path=".roo/rules-architect-senior/rules.md">
-### **Custom Instructions for 🧠 Architect AI (Code-Aware Planning & Intervention v5.0)**
+<file path=".roo/rules-planner-architect/rules.md">
+You are the **Planner_Architect AI**, the master designer and strategist. You operate in two distinct modes: **Blueprint Mode** (generating high-level SDLC documentation) and **Development Planning Mode** (creating code-aware, atomic tasks for the developer). Your purpose is to translate abstract requirements into a flawless, executable plan.
 
-## 1. IDENTITY & PERSONA
+## 2. THE DUAL-MODE OPERATIONAL LOOP
 
-You are the **Architect AI**, designated as **🧠 Architect**. You are the master strategist and planner. You operate in two distinct modes: **PLANNING & VERIFICATION** (for generating the development roadmap) and **STRATEGIC INTERVENTION** (for fixing deep-seated failures that tactical fixes could not resolve). Your purpose is to provide a flawless, context-aware, and fully executable plan for the Developer AI, and to correct the plan when it's fundamentally flawed.
+Upon activation, you must first determine your operational mode by checking the state of the repository.
 
-## 2. THE AUTONOMOUS OPERATIONAL LOOP
+### 2.1. MODE 1: BLUEPRINT CREATION & VERIFICATION
 
-Upon activation, you must determine your operational mode based on the presence of key signal files. Your primary trigger for intervention is the existence of `NEEDS_ARCHITECTURAL_REVIEW.md`. In its absence, you perform standard planning.
+**Trigger:** This mode is active if `documentation/master_plan.md` exists and contains incomplete tasks `[ ]`. It operates in two sequential phases.
 
----
+#### Phase 1: Document Generation
+1.  **Initialize Manifest (First Run Only):** If `documentation/file_manifest.md` does not exist, create it with the heading `# Project File Manifest`.
+2.  **Identify Task:** Open `documentation/master_plan.md` and find the first incomplete task.
+3.  **Consult Vision:** Read `app_description.md` to understand the core requirements.
+4.  **Generate Document:** Create the full, detailed content for the documentation file specified in the task (e.g., `documentation/business_requirements.md`). You must generate complete content, leaving no placeholders.
+5.  **Update Manifest:** Append the full path of the newly created document to `documentation/file_manifest.md`.
+6.  **Update Master Plan:** Mark the task as complete `[x]` in `documentation/master_plan.md`.
+7.  **Loop:** If more incomplete tasks exist in `documentation/master_plan.md`, repeat from step 2.
 
-### **2.1. STRATEGIC INTERVENTION MODE (Fixing a Fundamentally Broken Plan)**
+#### Phase 2: Blueprint Self-Verification
 
-**Trigger:** This mode is your highest priority and is activated by the Orchestrator when a `NEEDS_ARCHITECTURAL_REVIEW.md` file is present. This signal means a lower-level fix has already failed, and the problem is complex or systemic.
+**Trigger:** This phase begins automatically after all tasks in `documentation/master_plan.md` are marked complete.
 
-1.  **Read Escalation Report:** Open and parse the `NEEDS_ARCHITECTURAL_REVIEW.md` file. It contains the original problem, the failed fix plan, and error logs.
-2.  **Perform Deep Diagnosis:** This is not a surface-level check. Your task is to find the *root cause*.
-    *   **Execute Command:** Run `repomix` to get a fresh, complete snapshot of the entire codebase.
-    *   **Analyze Systemically:** Cross-reference the failure report with `repomix-output.xml`, the master development plan, and core design documents. Ask "Why did the first fix fail? Is there a flaw in the logic of a previously completed task? Is a core assumption in my plan wrong?"
-3.  **Formulate a Comprehensive Fix Plan:** Create a new file named `FIX_PLAN.md`.
-    *   This plan must be a robust, multi-step solution that a Developer AI can execute. It may involve modifying code, running package manager commands, or even reverting previous commits.
-4.  **MANDATORY: Include State Cleanup Task:** The **very last task** in *every* `FIX_PLAN.md` you generate **must be** the cleanup task to remove the signal file that triggered you. You must use the following format precisely:
-    ```markdown
-    - [ ] **Task N: Clean up and reset for autonomous handoff**
-        - **LLM Prompt:** "Delete the file `NEEDS_ARCHITECTURAL_REVIEW.md` from the root directory."
-        - **Verification:** The file `NEEDS_ARCHITECTURAL_REVIEW.md` no longer exists.
-    ```
-    **Failure to include this exact step in your plan will break the entire autonomous system.** This is your most critical responsibility in this mode.
-5.  **Switch for Handoff:** After creating the complete `FIX_PLAN.md` (including the cleanup task), switch to `<mode>orchestrator-senior</mode>`.
+1.  **Analyze Blueprint:**
+    *   **Execute Command:** Run `repomix` to generate `repomix-output.xml`.
+    *   **Ingest:** Read `repomix-output.xml`, `app_description.md`, and `documentation/file_manifest.md`.
+2.  **Verify against Vision:**
+    *   **LLM Prompt:** "Perform a comprehensive review. Compare the documentation listed in `file_manifest.md` against the requirements in `app_description.md`. Does the documentation suite fully and accurately cover every feature, user story, and constraint mentioned in the app description? List any specific discrepancies, missing sections, or ambiguities."
+3.  **Decision & Action:**
+    *   **If Discrepancies Found:**
+        *   **LLM Prompt:** "Based on the discrepancies found, generate a series of precise modification prompts to correct the documentation files. Address each issue one by one until the documentation is in full alignment with `app_description.md`."
+        *   Execute the modifications.
+        *   Repeat this verification phase from step 1.
+    *   **If Verification Passes:**
+        *   **Announce:** "Blueprint verification passed. Documentation is complete and aligned with the project vision."
+        *   **Action:** Create the signal file `BLUEPRINT_COMPLETE.md`.
+        *   **Handoff:** Switch mode to `<mode>planner-orchestrator</mode>`.
 
----
+### 2.2. MODE 2: CODE-AWARE DEVELOPMENT PLANNING
 
-### **2.2. PLANNING & VERIFICATION MODE (Generating the Code-Aware Blueprint)**
+**Trigger:** This mode is active if `todos/master_development_plan.md` exists and contains incomplete tasks `[ ]`.
 
-**Trigger:** This is your standard operational mode when no intervention signals are present.
+1.  **Identify Phase:** Open `todos/master_development_plan.md` and find the first incomplete phase (`[ ]`). Let's say it's "Phase 2: User Authentication".
+2.  **Analyze Current Reality (Codebase Mapping):**
+    *   **Execute Command:** Run `repomix` to generate the `repomix-output.xml` file. This is your ground truth of what currently exists.
+    *   **Ingest Snapshot:** Read and fully comprehend the `repomix-output.xml` file.
+3.  **Generate Atomic Plan:**
+    *   **Cross-Reference:** Compare the goal of the current phase ("User Authentication") with the existing codebase reality from `repomix-output.xml` and the project documentation.
+    *   **Create Detailed To-Do:** Create a new file, `todos/dev_todo_phase_2.md`. This file must contain a series of atomic, unambiguous, generative prompts for the Developer AI.
+    *   **BE CODE-AWARE:** Your prompts must reflect the current state.
+        *   *Bad Prompt:* "Create a login page."
+        *   *Good Prompt:* "**Modify `src/app/login/page.tsx`**: Import the `useFormState` hook from React. Add state management for email and password fields. Modify the form's `onSubmit` handler to call a new server action named `loginUser`."
+4.  **Update Master Development Plan:** After successfully generating the detailed `dev_todo_phase_2.md` file, update `todos/master_development_plan.md` by marking the current phase as complete (`[x]`).
+5.  **Handoff for Execution:** Announce "Detailed plan for Phase 2 created. Switching to orchestrator to begin implementation." and switch mode to `<mode>planner-orchestrator</mode>`.
 
-1.  **Step 1: Codebase Analysis.**
-    *   **Execute Command:** Run `repomix`.
-    *   **Ingest Snapshot:** Read and parse `repomix-output.xml`. This is your ground truth.
+## 3. HIERARCHY OF TRUTH
 
-2.  **Step 2: Identify Current Master Task.**
-    *   Open and read `todos/master_development_plan.md`.
-    *   Identify the first incomplete task (`[ ]`). This is your **Active Master Task**.
+1.  **`app_description.md`**: The ultimate vision.
+2.  **`repomix-output.xml`**: The undeniable truth of what code has been written.
+3.  **Existing Documentation**: The formal requirements you have already written.
 
-3.  **Step 3: Generate Context-Aware To-Do List.**
-    *   **Analyze Goal vs. Reality:** Compare the Active Master Task with your understanding of the codebase from `repomix-output.xml`.
-    *   **Semantic Discovery:**
-        - **Execute Command:** `python vector_tool.py query "Your natural language question about the code"`
-        - **Ingest Context:** Parse the JSON output from the command to understand which files and functions are relevant to your task.
-    *   **Generate Detailed Plan:** Create the full content for the to-do list file specified in the master task (e.g., `todos/dev_todo_phase_3.md`). The prompts must be atomic, generative, and code-aware.
-
-4.  **Step 4: Update Master Plan.**
-    *   After generating the detailed to-do list, update `todos/master_development_plan.md` by marking the Active Master Task as complete (`[x]`).
-
-5.  **Step 5: Loop or Conclude.**
-    *   If there are more incomplete tasks in the master plan, the loop will repeat.
-    *   If all tasks are complete, create `ARCHITECT_PLANNING_COMPLETE.md` and switch to `<mode>orchestrator-senior</mode>`.
-
-## 3. CRITICAL DIRECTIVES
-
-*   **YOUR PLANS ARE THE LAW:** The Developer AI is not intelligent; it is an obedient executor. Any action you want performed, including file cleanup, **must** be an explicit task in the plan you generate.
-*   **ZERO AMBIGUITY:** Your instructions must be literal and precise.
-*   **HIERARCHY OF TRUTH:**
-    1.  `NEEDS_ARCHITECTURAL_REVIEW.md` (Your top priority when it exists).
-    2.  `todos/master_development_plan.md` (The sequence of work).
-    3.  `repomix-output.xml` (The ground truth of what code exists).
+## 4. CRITICAL DIRECTIVES
+*   **ZERO AMBIGUITY:** Your plans for the Developer AI must be so clear that a simple 4B model can execute them without questions.
+*   **GENERATIVE PROMPTS:** Phrase all tasks as direct instructions for an LLM (e.g., "Generate a file...", "Modify the file to include...").
+*   **STATEFUL PROGRESSION:** Your primary job is to work through master plan files, updating them as you complete each major item.
 </file>
 
 <file path=".roo/custom_modes.yaml">
@@ -3399,70 +3262,680 @@ export default function Welcome() {
 - Include error codes in API responses
 </file>
 
-<file path="documentation/templates/compliance_framework_template.md">
-# COMPLIANCE FRAMEWORK TEMPLATE
+<file path="documentation/templates/api_spec_template.md">
+# API SPECIFICATION TEMPLATE
 <!-- Document Version: 1.1 -->
-<!-- Last Updated: 2025-06-10 -->
+<!-- Last Updated: 2025-06-11 -->
 
-[Existing sections...]
-
-## 3. Payment Compliance
-### 3.1 PCI DSS Requirements
-- **SAQ A** compliance level
-- No card data storage
-- Quarterly vulnerability scans
-
-### 3.2 GDPR Financial Data
-- Legal basis: Contractual necessity
-- Right to erasure limitations
-- Breach notification timeline: 72 hours
-
-### 3.3 Audit Controls
-```mermaid
-graph TD
-    A[Payment Event] --> B[Log Entry]
-    B --> C[Encrypted Storage]
-    C --> D[Quarterly Review]
+## 1. User Management Endpoints
+### 1.1 Get User Profile
+#### GET /api/users/profile
+##### Response
+```json
+{
+  "id": "user_123",
+  "email": "user@example.com",
+  "targetLanguage": "es",
+  "nativeLanguage": "en",
+  "subscriptionTier": "premium",
+  "createdAt": "2025-06-01T10:00:00Z"
+}
 ```
 
-## 4. Certification Status
-- PCI DSS: Annual assessment
-- GDPR: Continuous compliance
-- SOC 2: Planned for 2026
+### 1.2 Update Profile
+#### PUT /api/users/profile
+##### Request
+```json
+{
+  "targetLanguage": "fr",
+  "notificationPreferences": {
+    "reminders": true,
+    "progressReports": false
+  }
+}
+```
+
+### 1.3 Set Language Preference
+#### POST /api/users/language-preference
+##### Request
+```json
+{
+  "targetLanguage": "de",
+  "nativeLanguage": "en"
+}
+```
+
+## 2. Learning Loop Endpoints
+### 2.1 Start Lesson
+#### POST /api/lessons/start
+##### Response
+```json
+{
+  "lessonId": "lesson_123",
+  "exercises": [
+    {
+      "id": "ex_1",
+      "type": "vocabulary",
+      "prompt": "Translate 'apple'",
+      "audioPromptUrl": "/audio/apple_prompt.mp3"
+    }
+  ],
+  "srsDueItems": ["apple", "banana"]
+}
+```
+
+### 2.2 Submit Answer
+#### POST /api/lessons/{id}/submit-answer
+##### Request
+```json
+{
+  "exerciseId": "ex_1",
+  "textResponse": "la manzana",
+  "audioBlobUrl": "/audio/user_response_123.mp3"
+}
+```
+
+##### Response
+```json
+{
+  "correct": true,
+  "feedback": "Perfect!",
+  "pronunciationScore": 0.95,
+  "nextExercise": "ex_2"
+}
+```
+
+## 3. Progress Dashboard Endpoints
+### 3.1 Get Fluency Metrics
+#### GET /api/stats/fluency
+##### Response
+```json
+{
+  "speakingPace": {
+    "current": 120,
+    "trend": "improving"
+  },
+  "pronunciationAccuracy": 0.85,
+  "hesitationFrequency": 2.1
+}
+```
+
+### 3.2 Get SRS Overview
+#### GET /api/stats/srs-overview
+##### Response
+```json
+{
+  "totalItems": 150,
+  "dueForReview": 12,
+  "strengthDistribution": {
+    "weak": 5,
+    "medium": 30,
+    "strong": 115
+  }
+}
+```
+
+
+## 5. Payment Endpoints
+### 5.1 Subscription Management
+#### POST /api/payments/create-subscription
+##### Request
+```json
+{
+  "tier": "premium",
+  "paymentMethodId": "pm_123456"
+}
+```
+
+##### Response
+```json
+{
+  "status": "active",
+  "currentPeriodEnd": "2025-07-10"
+}
+```
+
+### 5.2 Webhook
+#### POST /api/stripe/webhook
+##### Event Types
+- payment_intent.succeeded
+- invoice.payment_failed
+- customer.subscription.updated
+
+### 5.3 Get Subscription
+#### GET /api/payments/subscription
+##### Response
+```json
+{
+  "tier": "pro",
+  "status": "active",
+  "nextPaymentDate": "2025-07-10"
+}
+```
+
+## 6. Error Handling
+### 6.1 Payment Errors
+| Code | Error Type | Description |
+|------|------------|-------------|
+| 400  | invalid_language | Unsupported language code |
+| 401  | unauthorized | Missing/invalid auth token |
+| 402  | payment_required | Payment failed |
+| 404  | lesson_not_found | Invalid lesson ID |
+| 409  | subscription_conflict | Plan change in progress |
+| 422  | invalid_audio | Unprocessable audio format |
+| 429  | rate_limited | Too many requests |
+| 500  | internal_error | Server-side failure |
 </file>
 
-<file path="documentation/templates/data_governance_template.md">
-# DATA GOVERNANCE FRAMEWORK TEMPLATE
-<!-- Document Version: 1.1 -->
+<file path="documentation/templates/monetization_strategy.md">
+# MONETIZATION STRATEGY
+<!-- Document Version: 1.0 -->
 <!-- Last Updated: 2025-06-10 -->
 
-[Existing sections...]
+## 1. Pricing Model
+### 1.1 Subscription Tiers
+| Tier | Price | Features |
+|------|-------|----------|
+| Free | $0 | Basic lessons, Limited voice practice, Basic SRS tracking |
+| Premium | $9.99/month | All lessons, Full voice features, Progress dashboard, Advanced SRS analytics |
+| Pro | $19.99/month | Premium features + Certification, Priority support, Unlimited voice analysis |
 
-## 4. Payment Data Handling
-### 4.1 Data Types
-| Classification | Examples | Handling Requirements |
-|----------------|----------|-----------------------|
-| Sensitive | Stripe customer IDs | Encrypted storage |
-| Restricted | Payment tokens | Never stored locally |
+### 1.2 In-App Purchases
+- Specialized lesson packs: $4.99-$14.99
+- Certification badges: $9.99
+- Detailed voice analysis reports: $0.99/report (complementary to standard analysis)
 
-### 4.2 Security Controls
-- **Encryption**: AES-256 for payment metadata
-- **Access**: Role-based, limited to billing team
-- **Audit**: All access logged and monitored
-
-### 4.3 Tokenization Flow
+## 2. Stripe Integration
+### 2.1 Architecture
 ```mermaid
 sequenceDiagram
-    Client->>Stripe: Tokenize card
-    Stripe-->>Client: Payment token
-    Client->>Backend: Use token for payment
-    Backend->>Stripe: Charge via token
+    Frontend->>Next.js API: Initiate payment
+    Next.js API->>Stripe: Create payment intent
+    Stripe-->>Next.js API: Client secret
+    Next.js API-->>Frontend: Payment details
+    Frontend->>Stripe: Complete payment (client-side)
+    Stripe->>Webhook: Payment success/failure
+    Webhook->>Database: Update subscription status
 ```
 
-## 5. Data Retention
-### 5.1 Payment Metadata
-- Retention period: 7 years (tax compliance)
-- Deletion method: Cryptographic shredding
+### 2.2 Key Components
+- **Stripe Account**: Connected mode for platform payments
+- **Webhook Handler**: /api/stripe/webhook
+- **Subscription Manager**: CRON job for recurring billing
+
+## 3. Revenue Reporting
+### 3.1 Metrics Tracked
+- MRR (Monthly Recurring Revenue)
+- Churn rate
+- LTV (Customer Lifetime Value)
+- ARPU (Average Revenue Per User)
+
+### 3.2 Analytics Integration
+- Stripe Dashboard
+- Internal reporting system
+- Tax compliance reporting
+
+## 4. Security & Compliance
+- PCI DSS Level 1 compliant
+- Tokenized payment processing
+- GDPR-compliant data handling
+</file>
+
+<file path="documentation/templates/performance_baseline_template.md">
+# PERFORMANCE BASELINE TEMPLATE
+<!-- Document Version: 1.0 -->
+<!-- Last Updated: 2025-06-11 -->
+
+## 1. Testing Methodology
+### 1.1 Load Testing
+- Tools:
+  - k6 (load testing)
+  - Locust (stress testing)
+  - Prometheus (metrics collection)
+  - Grafana (visualization)
+- Scenarios:
+  - 500 concurrent lessons
+  - 1000 dashboard requests
+  - Peak hour traffic simulation
+
+### 1.2 Stress Testing
+- Breaking points:
+  - API: ~1500 req/s
+  - Database: ~500 concurrent connections
+  - Voice Processing: ~300 concurrent streams
+- Recovery procedures:
+  - Auto-scaling triggers at 70% CPU
+  - Queue fallback for voice processing
+  - Database read replicas during peaks
+
+## 2. Performance Metrics
+### 2.1 Key Indicators
+| Metric | Target | Measurement |
+|--------|--------|-------------|
+| API Response (p95) | <300ms | Prometheus |
+| STT Latency (p99) | <500ms | Cloud Monitoring |
+| Concurrent Lessons | 500 | k6 |
+| Dashboard Load | 1000 req/min | Grafana |
+| Error Rate | <1% | Datadog |
+| Voice Processing | <5s turnaround | Internal metrics |
+
+### 2.2 Benchmark Results
+### 2.2 Example Benchmarks
+```mermaid
+gantt
+    title Performance Test Results
+    dateFormat X
+    axisFormat %s
+    section API
+    300ms Target : 0, 300
+    Actual p95 : 0, 285
+    section STT
+    500ms Target : 0, 500
+    Actual p99 : 0, 480
+    section Lessons
+    500 Concurrent Target : 0, 500
+    Actual Achieved : 0, 510
+```
+
+## 3. Scalability
+### 3.1 Horizontal Scaling
+- Nodes:
+  - Baseline: 3
+  - Max tested: 10
+- Performance gain:
+  - Linear scaling to 5 nodes
+  - Diminishing returns after 8 nodes
+
+### 3.2 Vertical Scaling
+- Resource increases:
+  - CPU: 2 → 4 cores
+  - Memory: 4GB → 8GB
+- Impact:
+  - 40% faster response times
+  - 2x throughput capacity
+</file>
+
+<file path="documentation/templates/technical_design_template.md">
+# TECHNICAL DESIGN DOCUMENT
+<!-- Document Version: 1.2 -->
+<!-- Last Updated: 2025-06-10 -->
+
+## 1. Architecture Overview
+### 1.1 System Context
+```mermaid
+graph TD
+    A[Next.js Frontend] -->|API Routes| B[Next.js Backend]
+    B --> C[Prisma ORM]
+    B --> D[Supabase Auth]
+    B --> E[Supabase Storage]
+    B --> F[AIService]
+    C --> G[Supabase PostgreSQL]
+    F --> H[LLM Agent]
+    F --> I[STT Service]
+    F --> J[TTS Service]
+    
+    %% Real-time voice path
+    A -->|WebSocket| K[Browser STT]
+    K -->|Real-time text| B
+    B -->|Analysis| F
+    
+    %% Diagnostic audio path
+    A -->|Upload| E[Supabase Storage]
+    E -->|Audio blob| F
+    F -->|Store results| G
+```
+
+### 1.2 Key Features
+- **Language Learning Core**:
+  - Adaptive lesson generation
+  - Progress tracking
+  - Voice interaction handling
+- **AI Integration**:
+  - Autonomous development agent
+  - Content personalization
+  - Error correction
+
+## 2. Component Design
+### 2.1 Service Layer
+- **AuthService**:
+  - JWT verification
+  - Session management
+  - Mock auth implementation (`MOCK_AUTH=true`)
+  
+- **DataService**:
+  ```mermaid
+  flowchart LR
+      A[API Route] --> B[DataService]
+      B --> C[Prisma Client]
+      C --> D[(PostgreSQL)]
+      B --> E[Cache Layer]
+  ```
+  - Manages:
+    - User profiles
+    - Learning content
+    - Progress data
+
+- **AIService**:
+  ```mermaid
+  flowchart LR
+      A[API Request] --> B{AIService}
+      B --> C[Lesson Generation]
+      B --> D[Voice Analysis]
+      C --> E["Prompt:
+      'Generate a lesson for {user} focusing on
+      {weaknesses} using {SRS} schedule'"]
+      D --> F["Analysis:
+      - Pronunciation scoring
+      - Hesitation detection
+      - Fluency metrics"]
+      E --> G[LLM Response]
+      F --> H[Diagnostic Report]
+  ```
+  
+  **Example Lesson Generation Payload**:
+  ```json
+  {
+    "userId": "uuid",
+    "targetLanguage": "es",
+    "focusAreas": ["past_tense", "travel_vocab"],
+    "srsDueItems": ["comer", "viajar"],
+    "difficultyLevel": 3
+  }
+  ```
+  
+  **Voice Analysis Parameters**:
+  ```prisma
+  model VoiceAnalysis {
+    id        String @id @default(uuid())
+    userId    String
+    lessonId  String
+    metrics   Json // {pace: 120, accuracy: 0.85, ...}
+    audioUrl  String
+    createdAt DateTime @default(now())
+  }
+  ```
+
+## 3. Data Flow
+### 3.1 Adaptive Learning Loop
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant F as Frontend
+    participant B as Backend
+    participant AI as AIService
+    participant DB as Database
+    
+    U->>F: Start Lesson
+    F->>B: POST /api/lessons/start
+    B->>AI: Request lesson (with SRS due items)
+    AI->>DB: Query user progress
+    DB-->>AI: Return progress data
+    AI-->>B: Generated lesson content
+    B-->>F: Lesson data
+    F->>U: Present exercise
+    U->>F: Speak response
+    F->>B: Stream audio to API
+    B->>AI: Real-time STT analysis
+    AI-->>B: Immediate feedback
+    B-->>F: Corrections
+    F->>U: Show results
+    U->>F: Complete lesson
+    F->>B: POST /api/lessons/{id}/complete
+    B->>AI: Full session analysis
+    AI->>DB: Update SRS scores
+    AI-->>B: Next lesson plan
+    B-->>F: Schedule recommendation
+```
+
+### 3.2 Subscription Webhook Flow
+```mermaid
+sequenceDiagram
+    participant S as Stripe
+    participant B as Backend
+    participant DB as Database
+    
+    S->>B: POST /api/stripe/webhook
+    B->>B: Verify signature
+    alt payment_succeeded
+        B->>DB: Update subscription status
+    else payment_failed
+        B->>DB: Flag account
+    end
+    B-->>S: 200 OK
+```
+
+## 4. Interface Specifications
+### 4.1 AI Endpoints
+| Method | Path | Description |
+|--------|------|-------------|
+| POST   | /api/ai/generate-lesson | Create personalized lesson |
+| POST   | /api/ai/analyze-response | Evaluate user input |
+
+## 5. Database Design
+### 5.1 Complete Schema
+```prisma
+model User {
+  id           String @id @default(uuid())
+  email        String @unique
+  password     String
+  targetLang   String
+  nativeLang   String
+  progress     UserProgress[]
+  srsEntries   SRSEntry[]
+  lessons      Lesson[]
+  createdAt    DateTime @default(now())
+}
+
+model Lesson {
+  id          String @id @default(uuid())
+  userId      String
+  user        User @relation(fields: [userId], references: [id])
+  exercises   Exercise[]
+  completedAt DateTime?
+  analysis    VoiceAnalysis[]
+}
+
+model Exercise {
+  id          String @id @default(uuid())
+  type        String // 'vocabulary', 'grammar', etc.
+  content     Json
+  difficulty  Int
+  language    String
+  tags        String[]
+  lesson      Lesson @relation(fields: [lessonId], references: [id])
+  lessonId    String
+}
+
+model UserProgress {
+  id          String @id @default(uuid())
+  userId      String
+  user        User @relation(fields: [userId], references: [id])
+  metric      String // 'vocabulary', 'grammar', etc.
+  score       Float
+  lastUpdated DateTime @default(now())
+}
+
+model SRSEntry {
+  id             String @id @default(uuid())
+  userId         String
+  user           User @relation(fields: [userId], references: [id])
+  item           String // word or grammar concept
+  recallStrength Float @default(1.0)
+  nextReview     DateTime @default(now())
+  language       String
+  @@index([userId, nextReview])
+}
+
+model VoiceAnalysis {
+  id        String @id @default(uuid())
+  userId    String
+  user      User @relation(fields: [userId], references: [id])
+  lessonId  String
+  lesson    Lesson @relation(fields: [lessonId], references: [id])
+  metrics   Json // {pace: 120, accuracy: 0.85, ...}
+  audioUrl  String
+  createdAt DateTime @default(now())
+}
+```
+
+## 6. Non-Functional Considerations
+### 6.1 AI Performance
+- Model inference optimization
+- Async task processing
+- Rate limiting
+
+### 6.2 Language Processing
+- Multilingual support
+- Voice data handling
+- Real-time feedback
+</file>
+
+<file path="documentation/templates/test_plan_template.md">
+# TEST PLAN TEMPLATE
+<!-- Document Version: 1.1 -->
+<!-- Last Updated: 2025-06-11 -->
+
+## 1. Core Learning Loop Tests
+### 1.1 Adaptive Lesson Generation
+| Test Case | Steps | Expected Result |
+|-----------|-------|-----------------|
+| SRS-Driven Content | 1. User has 5 due items<br>2. Start new lesson | - Lesson contains 3-5 due items<br>- Mixed with new material |
+| Difficulty Adjustment | 1. Fail 3 exercises<br>2. Next lesson | - Difficulty reduced by 1 level<br>- More review content |
+
+### 1.2 Real-Time Feedback
+| Test Case | Steps | Expected Result |
+|-----------|-------|-----------------|
+| Correct Pronunciation | 1. Submit perfect audio<br>2. Get feedback | - Score ≥0.95<br>- Positive reinforcement |
+| Grammar Error | 1. Submit incorrect tense<br>2. Get feedback | - Specific error highlighted<br>- Correction shown |
+
+### 1.3 Post-Session Analysis
+| Test Case | Steps | Expected Result |
+|-----------|-------|-----------------|
+| Audio Processing | 1. Complete lesson<br>2. Wait 5m | - Diagnostic report generated<br>- SRS scores updated |
+| Weakness Detection | 1. Make consistent errors<br>2. Review analysis | - Weakness pattern identified<br>- Next lesson focuses on area |
+
+## 2. Vocal Analysis Tests
+### 2.1 Pronunciation Accuracy
+| Test Case | Steps | Expected Result |
+|-----------|-------|-----------------|
+| Native Speaker | 1. Submit native audio<br>2. Check score | - Score ≥0.98<br>- No errors flagged |
+| Common Mistake | 1. Submit "th" as "d"<br>2. Check feedback | - Error detected<br>- Specific correction |
+
+### 2.2 Fluency Metrics
+| Test Case | Steps | Expected Result |
+|-----------|-------|-----------------|
+| Hesitation | 1. Submit audio with pauses<br>2. Check metrics | - Hesitation count correct<br>- Pace calculated |
+| Filler Words | 1. Use "um" repeatedly<br>2. Check report | - Filler word count accurate<br>- Trend shown |
+
+## 3. User Dashboard Tests
+### 3.1 Progress Visualization
+| Test Case | Steps | Expected Result |
+|-----------|-------|-----------------|
+| SRS Overview | 1. Complete 10 lessons<br>2. Check dashboard | - Due items count correct<br>- Strength distribution accurate |
+| Error Patterns | 1. Make consistent errors<br>2. Check dashboard | - Top errors highlighted<br>- Frequency correct |
+
+### 3.2 Metric Accuracy
+| Test Case | Steps | Expected Result |
+|-----------|-------|-----------------|
+| Fluency Trends | 1. Improve over week<br>2. Check graph | - Upward trend visible<br>- Data points correct |
+| Vocabulary Growth | 1. Learn new words<br>2. Check stats | - Count matches lessons<br>- Retention rate shown |
+
+
+## 5. Payment Flow Tests
+### 5.1 Subscription Scenarios
+| Test Case | Steps | Expected Result |
+|-----------|-------|-----------------|
+| New Premium Subscription | 1. Select Premium plan<br>2. Enter valid card<br>3. Submit | - Status: active<br>- Features unlocked |
+| Payment Failure | 1. Use declined card<br>2. Attempt purchase | - Error message shown<br>- No access change |
+| Plan Upgrade | 1. From Free to Pro<br>2. Confirm prorated charge | - Immediate upgrade<br>- Correct charge |
+
+### 5.2 Webhook Tests
+- Payment success → DB updated
+- Payment failed → Retry logic
+- Subscription canceled → Access revoked
+
+## 6. Security Tests
+### 6.1 Payment Data
+- Card details never stored
+- Tokenization verified
+- PCI compliance checks
+</file>
+
+<file path="documentation/templates/user_documentation_template.md">
+# USER DOCUMENTATION TEMPLATE
+<!-- Document Version: 1.1 -->
+<!-- Last Updated: 2025-06-11 -->
+
+## 1. Getting Started
+### 1.1 Language Selection
+```mermaid
+flowchart TD
+    A[Open App] --> B{First Time?}
+    B -->|Yes| C[Take Placement Test]
+    B -->|No| D[Continue Learning]
+    C --> E[Get Personalized Lessons]
+    D --> F[View Progress Dashboard]
+```
+
+### 1.2 Your First Lesson
+1. Open the app daily
+2. Complete suggested exercises
+3. Speak clearly when prompted
+4. Review feedback immediately
+5. Track progress over time
+
+## 2. Learning Features
+### 2.1 Progress Dashboard
+- **Vocabulary Mastery**: Heatmap of known words
+- **Fluency Metrics**: Speaking pace & hesitation trends
+- **Error Patterns**: Common mistakes highlighted
+- **Activity Log**: History of completed lessons
+
+### 2.2 Spaced Repetition (SRS)
+```mermaid
+pie title Your Knowledge Retention
+    "Strong" : 65
+    "Maturing" : 25
+    "Weak" : 10
+```
+
+### 2.3 Fluency Analysis
+- Pronunciation accuracy scores
+- Speaking pace measurements
+- Hesitation and filler word tracking
+- Comparative analysis over time
+
+
+## 4. Subscription Management
+### 4.1 Choosing a Plan
+```mermaid
+flowchart LR
+    A[Free Tier] -->|Upgrade| B[Premium]
+    A -->|Upgrade| C[Pro]
+    B -->|Downgrade| A
+    B -->|Upgrade| C
+    C -->|Downgrade| B
+```
+
+### 4.2 Payment Process
+1. Navigate to Settings > Subscription
+2. Select desired plan
+3. Enter payment details
+4. Confirm purchase
+
+### 4.3 Managing Your Subscription
+- **Update Payment Method**: Settings > Billing
+- **Change Plan**: Instant effect with prorated charges
+- **Cancel**: Ends at billing period end
+
+### 4.4 Troubleshooting
+| Issue | Solution |
+|-------|----------|
+| Voice not recognized | Check microphone permissions |
+| Incorrect feedback | Use "Report Error" button |
+| Lesson too hard/easy | Adjust difficulty in settings |
+| Progress not saving | Check internet connection |
+| Payment issues | Update card or contact support |
 </file>
 
 <file path="documentation/dev_todo_phase_1.md">
@@ -5204,6 +5677,45 @@ export const cache = {
 }
 </file>
 
+<file path="lib/config.ts">
+import { z } from 'zod';
+
+const envSchema = z.object({
+  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+  SUPABASE_URL: z.string().url(),
+  SUPABASE_ANON_KEY: z.string().min(20),
+  AI_API_KEY: z.string().min(20),
+  GCP_CREDENTIALS_JSON: z.string().optional(),
+  DATABASE_URL: z.string().url().optional(),
+  REDIS_URL: z.string().url(),
+});
+
+const env = envSchema.safeParse(process.env);
+
+if (!env.success) {
+  console.error('❌ Invalid environment variables:', env.error.format());
+  throw new Error('Invalid environment variables');
+}
+
+export const config = {
+  env: env.data.NODE_ENV,
+  supabase: {
+    url: env.data.SUPABASE_URL,
+    anonKey: env.data.SUPABASE_ANON_KEY,
+  },
+  ai: {
+    apiKey: env.data.AI_API_KEY,
+    gcpCredentials: env.data.GCP_CREDENTIALS_JSON
+      ? JSON.parse(env.data.GCP_CREDENTIALS_JSON)
+      : undefined,
+  },
+  databaseUrl: env.data.DATABASE_URL,
+  redis: {
+    url: env.data.REDIS_URL,
+  },
+};
+</file>
+
 <file path="lib/errorHandler.ts">
 import { NextResponse, NextRequest } from 'next/server'
 
@@ -5434,6 +5946,153 @@ if (!config.supabase.url) {
 if (!config.supabase.url.includes('test')) {
   throw new Error('Tests must use test Supabase URL');
 }
+</file>
+
+<file path="todos/dev_todo_phase_7.md">
+# Developer To-Do List: Phase 7 - Performance Optimization
+
+**Objective:** Implement comprehensive performance improvements across the application stack.
+
+## Tasks
+
+### 1. Implement Redis Caching Layer
+- [x] **Install Redis dependencies**
+  - **Command:** `npm install redis @types/redis`
+  - **Verification:** `package.json` includes `redis` in dependencies
+
+- [x] **Create Redis client utility (`/lib/redis.ts`)**
+  - **Code:**
+    ```typescript
+    import { createClient } from 'redis'
+    import { config } from './config'
+
+    const redisClient = createClient({
+      url: config.redis.url
+    })
+
+    redisClient.on('error', (err) => console.error('Redis error:', err))
+
+    export async function connectRedis() {
+      if (!redisClient.isOpen) {
+        await redisClient.connect()
+      }
+      return redisClient
+    }
+
+    export async function cacheGet(key: string) {
+      const client = await connectRedis()
+      return client.get(key)
+    }
+
+    export async function cacheSet(key: string, value: string, ttl?: number) {
+      const client = await connectRedis()
+      if (ttl) {
+        return client.setEx(key, ttl, value)
+      }
+      return client.set(key, value)
+    }
+    ```
+  - **Verification:** File exists with exported functions
+
+### 2. Optimize Database Queries
+- [ ] **Add indexes to Prisma schema (`/prisma/schema.prisma`)**
+  - **Modifications:**
+    ```prisma
+    model Lesson {
+      @@index([userId, difficulty])
+    }
+    model Progress {
+      @@index([userId, completedAt])
+    }
+    ```
+  - **Command:** `npx prisma migrate dev --name add_performance_indexes`
+  - **Verification:** New migration file created
+
+- [ ] **Implement query logging**
+  - **Modify `/lib/prisma.ts`:**
+    ```typescript
+    const prisma = new PrismaClient({
+      log: [
+        { level: 'warn', emit: 'event' },
+        { level: 'error', emit: 'event' },
+        { level: 'query', emit: 'event' }
+      ]
+    })
+
+    prisma.$on('query', (e) => {
+      logger.debug({
+        query: e.query,
+        duration: e.duration,
+        params: e.params
+      }, 'Database query executed')
+    })
+    ```
+  - **Verification:** Queries appear in logs with timing
+
+### 3. Optimize API Endpoints
+- [ ] **Cache lesson data in `/app/api/lessons/start/route.ts`**
+  - **Modifications:**
+    ```typescript
+    const cacheKey = `lesson-start:${session.user.id}`
+    const cached = await cacheGet(cacheKey)
+    if (cached) {
+      return NextResponse.json(JSON.parse(cached))
+    }
+    // ... existing code ...
+    await cacheSet(cacheKey, JSON.stringify(progress), 300) // 5 minute cache
+    ```
+  - **Verification:** Subsequent requests return cached data
+
+- [ ] **Batch dashboard requests in `/components/DashboardView.tsx`**
+  - **Modify useEffect:**
+    ```typescript
+    const response = await fetch('/api/stats/dashboard')
+    const { fluency, srs } = await response.json()
+    ```
+  - **Create new endpoint `/app/api/stats/dashboard/route.ts`**
+  - **Verification:** Single API call fetches all dashboard data
+
+### 4. Implement Performance Monitoring
+- [ ] **Add Prometheus metrics endpoint (`/app/api/metrics/route.ts`)**
+  - **Install:** `npm install prom-client`
+  - **Code:**
+    ```typescript
+    import { register, collectDefaultMetrics } from 'prom-client'
+
+    collectDefaultMetrics()
+
+    export async function GET() {
+      const metrics = await register.metrics()
+      return new Response(metrics, {
+        headers: { 'Content-Type': register.contentType }
+      })
+    }
+    ```
+  - **Verification:** `/api/metrics` returns metrics data
+
+### 5. Optimize Build Process
+- [ ] **Implement module precompilation**
+  - **Command:** `npm install @vercel/ncc`
+  - **Add script to `package.json`:**
+    ```json
+    "scripts": {
+      "bundle": "NCC_CONFIG_TS_CONFIG=tsconfig.bundle.json ncc build app/api/lessons/start/route.ts -o dist"
+    }
+    ```
+  - **Verification:** `dist/` directory created with bundled code
+
+### 6. Cleanup and Final Verification
+- [ ] **Run performance benchmarks**
+  - **Command:** `npm run test:performance`
+  - **Verification:** Benchmark results show improved metrics
+
+- [ ] **Update documentation (`/documentation/performance.md`)**
+  - **Add:** Caching strategy, index details, monitoring setup
+  - **Verification:** Documentation file exists with all sections
+
+- [ ] **Clean up and reset for autonomous handoff**
+  - **LLM Prompt:** "Update todos/master_development_plan.md to mark Phase 7 as complete"
+  - **Verification:** Phase 7 marked [x] in master plan
 </file>
 
 <file path="Dockerfile">
@@ -5730,166 +6389,101 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 </file>
 
-<file path=".roo/rules-documentation/rules.md">
-# Custom Instructions for Project Lessay: 🧠 Documentation AI (Dual-Mode v1.0)
+<file path=".roo/rules-architect-senior/rules.md">
+You are the **Architect AI**, designated as **🧠 Architect**. You are the master strategist and planner. You operate in two distinct modes: **PLANNING & VERIFICATION** (for generating the development roadmap) and **STRATEGIC INTERVENTION** (for fixing deep-seated failures that tactical fixes could not resolve). Your purpose is to provide a flawless, context-aware, and fully executable plan for the Developer AI, and to correct the plan when it's fundamentally flawed.
 
-## 1. IDENTITY & PERSONA
+## 2. THE AUTONOMOUS OPERATIONAL LOOP
 
-You are the **Architect AI for Project Lessay**, designated as **🧠 Architect**. Your intelligence is the foundation of the application's blueprint. You operate in two distinct modes: **PLANNING** and **INTERVENTION**. Your primary purpose is to create, complete, and maintain a perfect, unambiguous, and executable Software Development Life Cycle (SDLC) documentation suite for the Lessay application.
+Upon activation, you must determine your operational mode by checking for signal files in the following order of priority:
 
-## 2. THE CORE MISSION
+1.  `NEEDS_FINAL_VERIFICATION.md` (triggers Final Verification Mode)
+2.  `NEEDS_ARCHITECTURAL_REVIEW.md` (triggers Strategic Intervention Mode)
+3.  Default (triggers Planning & Verification Mode)
 
-Your mission is to ensure the project blueprint—the full SDLC documentation—is complete, consistent, and perfectly executable by the Developer AI agent. You will either be creating new documentation from a to-do list (`PLANNING` mode) or fixing flawed plans and documentation that caused a development failure (`INTERVENTION` mode).
+---
 
-## 3. THE AUTONOMOUS OPERATIONAL LOOP (DUAL-MODE)
+### **2.1. FINAL VERIFICATION MODE (Project QA)**
 
-Upon initiation, your first action is to determine your operational mode.
+**Trigger:** This is your highest priority mode, activated when `NEEDS_FINAL_VERIFICATION.md` is present. Your task is to perform the final quality assurance check on the entire project.
 
-1.  **Check for Distress Signal:** Look for the existence of a `NEEDS_ASSISTANCE.md` file in the project's root directory.
-2.  **Select Mode:**
-    *   If `NEEDS_ASSISTANCE.md` **exists**, enter **INTERVENTION MODE** (Rule 3.1).
-    *   If `NEEDS_ASSISTANCE.md` **does not exist**, enter **PLANNING MODE** (Rule 3.2).
+1.  **Acknowledge & Cleanup:**
+    *   **Announce:** "Initiating final project verification against app description and documentation."
+    *   **Action:** Delete the `NEEDS_FINAL_VERIFICATION.md` signal file.
+2.  **Perform Holistic Analysis:**
+    *   **Execute Command:** Run `repomix` to get a complete snapshot of the final codebase and all documentation.
+    *   **Ingest All Truths:** Read and fully comprehend `repomix-output.xml`, `app_description.md`, and all files in the `/documentation` directory.
+    *   **LLM Prompt:** "Perform a final, holistic project audit. Compare the codebase and the documentation against the original `app_description.md`. Answer the following questions:
+        1. Does the implemented code fulfill every requirement and feature outlined in `app_description.md`?
+        2. Is the documentation in the `/documentation` directory an accurate, up-to-date representation of the final codebase?
+        3. Are there any discrepancies between the app description, the documentation, and the code?
+        Provide a clear verdict: `PASSED` or `FAILED`. If `FAILED`, provide a detailed list of all discrepancies."
+3.  **Verdict and Action:**
+    *   **If Verdict is `PASSED`:**
+        *   **Announce:** "Final verification PASSED. The project is complete and correct."
+        *   **Action:** Create the final signal file `PROJECT_VERIFIED_AND_COMPLETE.md`.
+        *   **Handoff:** Switch mode to `<mode>orchestrator-senior</mode>` for final termination.
+    *   **If Verdict is `FAILED`:**
+        *   **Announce:** "Final verification FAILED. Generating a fix plan to address discrepancies."
+        *   **Action:** Create a new `FIX_PLAN.md` that contains precise, atomic tasks for the Developer AI to correct the discrepancies in either the code or the documentation.
+        *   **Handoff:** Switch mode to `<mode>orchestrator-senior</mode>`.
 
-### 3.1. INTERVENTION MODE (Fixing a Broken Plan)
+---
 
-1.  **Read Distress Signal:** Open and parse `NEEDS_ASSISTANCE.md` to understand the Developer AI's report.
-2.  **Diagnose the Problem:** Analyze the report to determine the failure type:
-    *   **Type A: Atomic Task Failure.** The Developer AI could not complete a single, granular step. The cause is likely a typo in a command, an incorrect file path in the plan, or a malformed API payload definition.
-    *   **Type B: Integration Failure.** The Developer AI completed all steps in a phase, but the integrated result failed testing (e.g., unit, integration, or E2E tests). The cause is likely a subtle bug, a missing dependency, a logical error in the data flow, or a misinterpretation of a requirement.
+### **2.2. STRATEGIC INTERVENTION MODE (Fixing a Fundamentally Broken Plan)**
 
-3.  **Formulate a Fix Plan:** Create a new file named `FIX_PLAN.md`. The content will be a precise, actionable plan tailored to the failure type.
+**Trigger:** This mode is activated by the Orchestrator when a `NEEDS_ARCHITECTURAL_REVIEW.md` file is present. This signal means a lower-level fix has already failed, and the problem is complex or systemic.
 
-    *   **For Type A Failure (e.g., Incorrect Environment Variable):**
-        ```markdown
-        # INTERVENTION FIX PLAN (ATOMIC)
+1.  **Read Escalation Report:** Open and parse the `NEEDS_ARCHITECTURAL_REVIEW.md` file. It contains the original problem, the failed fix plan, and error logs.
+2.  **Perform Deep Diagnosis:** This is not a surface-level check. Your task is to find the *root cause*.
+    *   **Execute Command:** Run `repomix` to get a fresh, complete snapshot of the entire codebase.
+    *   **Analyze Systemically:** Cross-reference the failure report with `repomix-output.xml`, the master development plan, and core design documents. Ask "Why did the first fix fail? Is there a flaw in the logic of a previously completed task? Is a core assumption in my plan wrong?"
+3.  **Formulate a Comprehensive Fix Plan:** Create a new file named `FIX_PLAN.md`.
+    *   This plan must be a robust, multi-step solution that a Developer AI can execute. It may involve modifying code, running package manager commands, or even reverting previous commits.
+4.  **MANDATORY: Include State Cleanup Task:** The **very last task** in *every* `FIX_PLAN.md` you generate **must be** the cleanup task to remove the signal file that triggered you. You must use the following format precisely:
+    ```markdown
+    - [ ] **Task N: Clean up and reset for autonomous handoff**
+        - **LLM Prompt:** "Delete the file `NEEDS_ARCHITECTURAL_REVIEW.md` from the root directory."
+        - **Verification:** The file `NEEDS_ARCHITECTURAL_REVIEW.md` no longer exists.
+    ```
+    **Failure to include this exact step in your plan will break the entire autonomous system.** This is your most critical responsibility in this mode.
+5.  **Switch for Handoff:** After creating the complete `FIX_PLAN.md` (including the cleanup task), switch to `<mode>orchestrator-senior</mode>`.
 
-        **Problem:** The Developer AI failed to run the application because the `DATABASE_URL` was defined incorrectly in the documentation.
+---
 
-        - [ ] **Task 1: Correct the Environment Variable**
-            - **(File):** `documentation/templates/deployment_playbook_template.md`
-            - **(LLM Action):** "In section 3.1, find the line for `DATABASE_URL` and replace its value `postgres://user:pass@db:5432/lessay` with the correct Supabase format `postgres://postgres:[YOUR-PASSWORD]@db.xxxxxxxx.supabase.co:5432/postgres`."
-            - **(Verification):** "The file now contains the corrected `DATABASE_URL` format."
-        ```
+### **2.3. PLANNING & VERIFICATION MODE (Generating the Code-Aware Blueprint)**
 
-    *   **For Type B Failure (e.g., Core Logic Bug):**
-        ```markdown
-        # INTERVENTION FIX PLAN (INTEGRATION)
+**Trigger:** This is your standard operational mode when no higher-priority signals are present.
 
-        **Problem:** Integration tests show that user audio is being transcribed for real-time feedback, but the raw audio blob for post-session analysis is not being saved.
+1.  **Step 1: Codebase Analysis.**
+    *   **Execute Command:** Run `repomix`.
+    *   **Ingest Snapshot:** Read and parse `repomix-output.xml`. This is your ground truth.
 
-        - [ ] **Task 1: Add Diagnostic Logging to API Endpoint**
-            - **(File):** `app/api/lessons/[id]/submit-answer/route.ts` (or relevant API route file)
-            - **(LLM Action):** "Inside the POST request handler, add `console.log()` statements to display the raw request body and check for the presence and size of the audio data blob before it is passed to the `AIService`."
-            - **(Verification):** "The `console.log` statements are present in the specified file."
-        
-        - [ ] **Task 2: Re-run Failing Test**
-            - **(LLM Action):** "Execute the command to run the specific integration test for submitting a lesson answer. Capture the full console output, including the new logs."
-            - **(Verification):** "The command completes, and the output is saved."
-        
-        - [ ] **Task 3: Report Findings**
-            - **(LLM Action):** "Create a new file `DIAGNOSTIC_REPORT.md` containing the full output from the previous step. This will be used to create the final fix."
-            - **(Verification):** "The `DIAGNOSTIC_REPORT.md` file is created and contains the test logs."
-        ```
-4.  **Prepare for Retry:** As the final step in *every* `FIX_PLAN.md`, include a task to delete the `NEEDS_ASSISTANCE.md` file. This resets the state for the next run.
-5.  **Halt for Review:** After creating `FIX_PLAN.md`, switch to `<mode>orchestrator-senior</mode>`. An orchestrator operator will review and approve the plan before the Developer AI is re-invoked.
+2.  **Step 2: Identify Current Master Task.**
+    *   Open and read `todos/master_development_plan.md`.
+    *   Identify the first incomplete task (`[ ]`). This is your **Active Master Task**.
 
-### 3.2. PLANNING MODE (Creating the Blueprint)
+3.  **Step 3: Generate Context-Aware To-Do List.**
+    *   **Analyze Goal vs. Reality:** Compare the Active Master Task with your understanding of the codebase from `repomix-output.xml`.
+    *   **Semantic Discovery:**
+        - **Execute Command:** `python vector_tool.py query "Your natural language question about the code"`
+        - **Ingest Context:** Parse the JSON output from the command to understand which files and functions are relevant to your task.
+    *   **Generate Detailed Plan:** Create the full content for the to-do list file specified in the master task (e.g., `todos/dev_todo_phase_3.md`). The prompts must be atomic, generative, and code-aware.
 
-1.  **Identify Current Task:** Open and read `documentation/architect_todo.md`. Identify the first task that is not marked as complete.
-2.  **Access Relevant File:** Open the documentation file specified in the to-do list item (e.g., `documentation/templates/brd_template.md`).
-3.  **Execute Task:** Using your knowledge of the Lessay project and the Hierarchy of Truth (Rule 5), generate the required content to complete the task. This involves filling placeholders, writing detailed requirements, creating Mermaid diagrams, and defining data schemas.
-4.  **Update To-Do List:** After successfully modifying the target file, update `documentation/architect_todo.md` to mark the task as complete.
-5.  **Loop or Conclude:**
-    *   If there are more incomplete tasks, repeat from step 1.
-    *   If all tasks are complete, create a final file named `BLUEPRINT_COMPLETE.md` in the root directory and halt execution.
+4.  **Step 4: Update Master Plan.**
+    *   After generating the detailed to-do list, update `todos/master_development_plan.md` by marking the Active Master Task as complete (`[x]`).
 
-## 4. THE ZERO-QUESTION MANDATE
+5.  **Step 5: Loop or Conclude.**
+    *   If there are more incomplete tasks in the master plan, the loop will repeat.
+    *   If all tasks are complete, create `ARCHITECT_PLANNING_COMPLETE.md` and switch to `<mode>orchestrator-senior</mode>`.
 
-You operate with zero ambiguity. You are not permitted to ask for clarification. If a requirement is unclear, you must resolve it by consulting the **Hierarchy of Truth** (Rule 5). Your task is to produce a complete plan based on the information provided; if the information is conflicting, you must adhere to the hierarchy.
+## 3. CRITICAL DIRECTIVES
 
-## 5. HIERARCHY OF TRUTH
-
-When documents conflict, you must resolve the inconsistency by adhering to this strict order of precedence. The document higher on the list is the source of truth.
-
-1.  **`documentation/app_description.md` (The Vision):** This is the ultimate source of truth for the product's purpose, features, and core philosophy.
-2.  **`documentation/templates/brd_template.md` (The Business Requirements):** This formalizes the business needs and user-facing requirements.
-3.  **`documentation/templates/frs_template.md` (The Functional Requirements):** This details the specific functions the system must perform.
-4.  **`documentation/templates/technical_design_template.md` (The Blueprint):** This defines the "how" and must align with all documents above it.
-5.  All other documents must align with the four listed above.
-
-## 6. OUTPUT & FORMATTING REQUIREMENTS
-
--   All output must be in **Markdown (`.md`)**.
--   Never leave placeholders (e.g., `[DATE]`, `<description>`, `...`). You must generate the correct and complete content.
--   Use **Mermaid.js** syntax for all diagrams (sequence, flowchart, Gantt).
--   Use **Prisma schema syntax** for all database models.
--   Your writing style must be clear, precise, and unambiguous to leave no room for misinterpretation by the Developer AI.
-
-## 7. INTERACTION MODEL & HALT CONDITIONS
-
--   You will halt execution upon creating `FIX_PLAN.md`.
--   You will halt execution upon creating `BLUEPRINT_COMPLETE.md`.
--   Your primary mode of operation is modifying the documentation files as instructed by the `architect_todo.md`.
--   Deleting `NEEDS_ASSISTANCE.md` is a required step in a fix plan, not an independent action.
-</file>
-
-<file path=".roo/rules-orchestrator-senior/rules.md">
-## 1. IDENTITY & PERSONA
-
-You are the **Orchestrator AI**, designated as **🤖 Orchestrator**. You are the master process manager, central router, and state janitor for the autonomous development system. You are executed for a **single, one-shot decision-making task**: to analyze the repository's current state, clean up any completed work artifacts, and hand off control to the appropriate specialist.
-
-## 2. THE CORE MISSION (One-Shot Execution)
-
-Your mission is to perform a single, definitive analysis of the repository. You will run a state cleanup protocol first, then immediately switch to the correct operational mode based on the resulting clean state.
-
-## 3. THE ORCHESTRATION DECISION TREE
-
-Upon activation, you will check for the existence of the following files in this **strict, descending order of priority**. You must execute the action for the **first matching condition**.
-
-1.  **If `DEVELOPMENT_COMPLETE.md` exists:** (HIGHEST PRIORITY)
-    *   **Analysis:** The Developer has signaled that all planned work is finished. The project is complete.
-    *   **Announcement:** "SUCCESS: Development is complete. Halting all operations."
-    *   **Action:** Terminate all processes.
-
-2.  **If `NEEDS_ARCHITECTURAL_REVIEW.md` exists:**
-    *   **Analysis:** A tactical fix has failed. The core plan requires re-evaluation by the master strategist.
-    *   **Announcement:** "Escalation signal detected. A tactical fix has failed. Switching to Senior Architect for deep analysis and strategic intervention."
-    *   **Action:** Switch mode: `<mode>architect-senior</mode>`.
-
-3.  **If `NEEDS_ASSISTANCE.md` exists:**
-    *   **Analysis:** A standard development or verification task has failed. A first-level response is required.
-    *   **Announcement:** "Distress signal detected. Switching to Emergency mode for tactical diagnosis."
-    *   **Action:** Switch mode: `<mode>emergency</mode>`.
-
-4.  **If `FIX_PLAN.md` exists:**
-    *   **Analysis:** A fix plan exists. I must determine if it is complete or pending execution.
-    *   **Action (Conditional Logic):**
-        *   **Read the `FIX_PLAN.md` file.**
-        *   **If the file contains the string `[ ]`:**
-            *   **Verdict:** The plan has pending tasks.
-            *   **Announcement:** "Pending fix plan detected. Switching to Developer mode for execution."
-            *   **Action:** Switch mode: `<mode>developer</mode>`.
-        *   **If the file does NOT contain the string `[ ]`:**
-            *   **Verdict:** The plan was successfully completed by the developer, but the artifact remains. My role is to clean it up.
-            *   **Announcement:** "Completed fix plan detected. Cleaning up state file and re-evaluating."
-            *   **Action:** Delete the `FIX_PLAN.md` file, and then **restart your own decision process from the top of this list.**
-
-5.  **If `ARCHITECT_PLANNING_COMPLETE.md` exists:**
-    *   **Analysis:** The Architect has finished planning, and development can begin. This is a one-time signal that must be consumed.
-    *   **Announcement:** "Architectural planning is complete. Consuming signal and handing off to Developer."
-    *   **Action:**
-        1.  Delete the `ARCHITECT_PLANNING_COMPLETE.md` file.
-        2.  Switch mode: `<mode>developer</mode>`.
-
-6.  **Default - If none of the above conditions are met:**
-    *   **Analysis:** The repository is in a clean state, with no emergencies or pending fixes. The system should proceed with the next phase of planning.
-    *   **Announcement:** "No critical signals found. Switching to Architect mode for standard planning."
-    *   **Action:** Switch mode: `<mode>architect-senior</mode>`.
-
-## 4. CRITICAL DIRECTIVES
-*   **CLEAN THEN DECIDE:** Your primary responsibility is to ensure a clean state before delegating. A completed `FIX_PLAN.md` or `ARCHITECT_PLANNING_COMPLETE.md` is a temporary artifact that you **must** clean up.
-*   **ONE SHOT, NO LOOPS:** You execute one branch of the decision tree and then immediately hand off control. If you clean up a file, you must re-run the tree to ensure the correct handoff from the new state.
-*   **PRIORITY IS LAW:** You must check for signals in the exact order specified.
+*   **YOUR PLANS ARE THE LAW:** The Developer AI is not intelligent; it is an obedient executor. Any action you want performed, including file cleanup, **must** be an explicit task in the plan you generate.
+*   **ZERO AMBIGUITY:** Your instructions must be literal and precise.
+*   **HIERARCHY OF TRUTH:**
+    1.  `NEEDS_ARCHITECTURAL_REVIEW.md` (Your top priority when it exists).
+    2.  `todos/master_development_plan.md` (The sequence of work).
+    3.  `repomix-output.xml` (The ground truth of what code exists).
 </file>
 
 <file path="components/LessonView.tsx">
@@ -6107,895 +6701,6 @@ Your mission is to ensure the project continuously moves forward. You operate on
 - You do not interact with the user.
 - Your only actions are to announce your decisions and execute the other AI agents.
 - You operate with zero ambiguity based on the presence or absence of key state files.
-</file>
-
-<file path="documentation/templates/monetization_strategy.md">
-# MONETIZATION STRATEGY
-<!-- Document Version: 1.0 -->
-<!-- Last Updated: 2025-06-10 -->
-
-## 1. Pricing Model
-### 1.1 Subscription Tiers
-| Tier | Price | Features |
-|------|-------|----------|
-| Free | $0 | Basic lessons, Limited voice practice, Basic SRS tracking |
-| Premium | $9.99/month | All lessons, Full voice features, Progress dashboard, Advanced SRS analytics |
-| Pro | $19.99/month | Premium features + Certification, Priority support, Unlimited voice analysis |
-
-### 1.2 In-App Purchases
-- Specialized lesson packs: $4.99-$14.99
-- Certification badges: $9.99
-- Detailed voice analysis reports: $0.99/report (complementary to standard analysis)
-
-## 2. Stripe Integration
-### 2.1 Architecture
-```mermaid
-sequenceDiagram
-    Frontend->>Next.js API: Initiate payment
-    Next.js API->>Stripe: Create payment intent
-    Stripe-->>Next.js API: Client secret
-    Next.js API-->>Frontend: Payment details
-    Frontend->>Stripe: Complete payment (client-side)
-    Stripe->>Webhook: Payment success/failure
-    Webhook->>Database: Update subscription status
-```
-
-### 2.2 Key Components
-- **Stripe Account**: Connected mode for platform payments
-- **Webhook Handler**: /api/stripe/webhook
-- **Subscription Manager**: CRON job for recurring billing
-
-## 3. Revenue Reporting
-### 3.1 Metrics Tracked
-- MRR (Monthly Recurring Revenue)
-- Churn rate
-- LTV (Customer Lifetime Value)
-- ARPU (Average Revenue Per User)
-
-### 3.2 Analytics Integration
-- Stripe Dashboard
-- Internal reporting system
-- Tax compliance reporting
-
-## 4. Security & Compliance
-- PCI DSS Level 1 compliant
-- Tokenized payment processing
-- GDPR-compliant data handling
-</file>
-
-<file path="documentation/templates/performance_baseline_template.md">
-# PERFORMANCE BASELINE TEMPLATE
-<!-- Document Version: 1.0 -->
-<!-- Last Updated: 2025-06-11 -->
-
-## 1. Testing Methodology
-### 1.1 Load Testing
-- Tools:
-  - k6 (load testing)
-  - Locust (stress testing)
-  - Prometheus (metrics collection)
-  - Grafana (visualization)
-- Scenarios:
-  - 500 concurrent lessons
-  - 1000 dashboard requests
-  - Peak hour traffic simulation
-
-### 1.2 Stress Testing
-- Breaking points:
-  - API: ~1500 req/s
-  - Database: ~500 concurrent connections
-  - Voice Processing: ~300 concurrent streams
-- Recovery procedures:
-  - Auto-scaling triggers at 70% CPU
-  - Queue fallback for voice processing
-  - Database read replicas during peaks
-
-## 2. Performance Metrics
-### 2.1 Key Indicators
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| API Response (p95) | <300ms | Prometheus |
-| STT Latency (p99) | <500ms | Cloud Monitoring |
-| Concurrent Lessons | 500 | k6 |
-| Dashboard Load | 1000 req/min | Grafana |
-| Error Rate | <1% | Datadog |
-| Voice Processing | <5s turnaround | Internal metrics |
-
-### 2.2 Benchmark Results
-### 2.2 Example Benchmarks
-```mermaid
-gantt
-    title Performance Test Results
-    dateFormat X
-    axisFormat %s
-    section API
-    300ms Target : 0, 300
-    Actual p95 : 0, 285
-    section STT
-    500ms Target : 0, 500
-    Actual p99 : 0, 480
-    section Lessons
-    500 Concurrent Target : 0, 500
-    Actual Achieved : 0, 510
-```
-
-## 3. Scalability
-### 3.1 Horizontal Scaling
-- Nodes:
-  - Baseline: 3
-  - Max tested: 10
-- Performance gain:
-  - Linear scaling to 5 nodes
-  - Diminishing returns after 8 nodes
-
-### 3.2 Vertical Scaling
-- Resource increases:
-  - CPU: 2 → 4 cores
-  - Memory: 4GB → 8GB
-- Impact:
-  - 40% faster response times
-  - 2x throughput capacity
-</file>
-
-<file path="documentation/templates/user_documentation_template.md">
-# USER DOCUMENTATION TEMPLATE
-<!-- Document Version: 1.1 -->
-<!-- Last Updated: 2025-06-11 -->
-
-## 1. Getting Started
-### 1.1 Language Selection
-```mermaid
-flowchart TD
-    A[Open App] --> B{First Time?}
-    B -->|Yes| C[Take Placement Test]
-    B -->|No| D[Continue Learning]
-    C --> E[Get Personalized Lessons]
-    D --> F[View Progress Dashboard]
-```
-
-### 1.2 Your First Lesson
-1. Open the app daily
-2. Complete suggested exercises
-3. Speak clearly when prompted
-4. Review feedback immediately
-5. Track progress over time
-
-## 2. Learning Features
-### 2.1 Progress Dashboard
-- **Vocabulary Mastery**: Heatmap of known words
-- **Fluency Metrics**: Speaking pace & hesitation trends
-- **Error Patterns**: Common mistakes highlighted
-- **Activity Log**: History of completed lessons
-
-### 2.2 Spaced Repetition (SRS)
-```mermaid
-pie title Your Knowledge Retention
-    "Strong" : 65
-    "Maturing" : 25
-    "Weak" : 10
-```
-
-### 2.3 Fluency Analysis
-- Pronunciation accuracy scores
-- Speaking pace measurements
-- Hesitation and filler word tracking
-- Comparative analysis over time
-
-
-## 4. Subscription Management
-### 4.1 Choosing a Plan
-```mermaid
-flowchart LR
-    A[Free Tier] -->|Upgrade| B[Premium]
-    A -->|Upgrade| C[Pro]
-    B -->|Downgrade| A
-    B -->|Upgrade| C
-    C -->|Downgrade| B
-```
-
-### 4.2 Payment Process
-1. Navigate to Settings > Subscription
-2. Select desired plan
-3. Enter payment details
-4. Confirm purchase
-
-### 4.3 Managing Your Subscription
-- **Update Payment Method**: Settings > Billing
-- **Change Plan**: Instant effect with prorated charges
-- **Cancel**: Ends at billing period end
-
-### 4.4 Troubleshooting
-| Issue | Solution |
-|-------|----------|
-| Voice not recognized | Check microphone permissions |
-| Incorrect feedback | Use "Report Error" button |
-| Lesson too hard/easy | Adjust difficulty in settings |
-| Progress not saving | Check internet connection |
-| Payment issues | Update card or contact support |
-</file>
-
-<file path="documentation/documentation_completion_plan.md">
-# Documentation Completion Plan
-
-## 1. Documentation Audit Summary
-- **Total templates**: 16
-- **Complete templates**: 7 
-  (api_spec, compliance_framework, data_governance, deployment_playbook, monetization_strategy, technical_design, test_plan)
-- **Incomplete templates**: 9 
-  (BRD, change management, continuous improvement, FRS, maintenance guide, performance baseline, project charter, risk assessment, user docs)
-- **Missing sections**: 58 across all templates
-
-## 2. Content Creation Strategy
-```mermaid
-graph TD
-    A[Subject Matter Experts] -->|Provide input| B(Technical Writers)
-    B --> C[Documentation Templates]
-    C --> D[Review Cycle]
-    D --> E[Final Approval]
-    E --> F[Published Docs]
-```
-
-### Content Sourcing:
-- **Technical specifications**: Engineering team
-- **Business requirements**: Product owners
-- **Compliance details**: Legal team
-- **User workflows**: UX researchers
-
-## 3. Prioritization Framework
-```mermaid
-gantt
-    title Documentation Completion Timeline
-    dateFormat  YYYY-MM-DD
-    section Phase 0
-    Foundation & Alignment :active, phase0, 2025-06-11, 1d
-    section Phase 1
-    Project Definition     :         phase1, after phase0, 3d
-    section Phase 2
-    Technical Design       :         phase2, after phase1, 4d
-    section Phase 3
-    Operations & Maintenance:        phase3, after phase2, 3d
-    section Phase 4
-    Quality Assurance      :         phase4, after phase3, 2d
-    section Phase 5
-    Governance & Compliance:         phase5, after phase4, 2d
-    section Phase 6
-    User Documentation     :         phase6, after phase5, 1d
-```
-
-## 4. Implementation Plan (Phased Approach)
-
-### Phase 0: Foundation and Alignment (1 day)
-- Ingest and analyze all files from repomix-output.xml
-- Validate vision alignment across all documents
-- Update this master plan with detailed phased tasks
-
-### Phase 1: Project Definition & Requirements (3 days)
-- Complete Project Charter with success criteria and timeline
-- Finalize Business Requirements Document (BRD)
-- Develop detailed Functional Requirements Specification (FRS)
-
-### Phase 2: Architecture & Technical Design (4 days)
-- Expand Technical Design Document with data flows and schemas
-- Develop comprehensive API Specification
-- Define database models using Prisma schema syntax
-
-### Phase 3: Implementation, Operations & Maintenance (3 days)
-- Enhance Deployment Playbook with environment configs
-- Complete Maintenance Guide with alert thresholds
-- Document diagnostic tools and recovery processes
-
-### Phase 4: Quality Assurance & Performance (2 days)
-- Expand Test Plan with core feature test cases
-- Define performance baselines and load testing scenarios
-
-### Phase 5: Governance, Risk, and Compliance (2 days)
-- Complete Risk Assessment for AI/voice-specific risks
-- Develop Change Management and Continuous Improvement plans
-
-### Phase 6: User-Facing Documentation (1 day)
-- Create complete User Documentation with troubleshooting guides
-
-## 5. Quality Assurance
-- Automated checks for:
-  - Placeholder text detection
-  - Broken links
-  - Compliance markers
-- Manual checks for:
-  - Technical accuracy
-  - Consistency across documents
-  - Readability scores
-
-## 6. Completion Metrics
-- **Success criteria**:
-  - All 18 documentation templates completed
-  - 100% alignment with app_description.md vision
-  - Complete technical specifications for AI/voice features
-  - Detailed test cases for all core functionality
-  - Comprehensive risk mitigation strategies documented
-- **Tracking**:
-  - Daily progress against phased milestones
-  - Automated checks for documentation integrity
-  - Final validation by development team lead
-</file>
-
-<file path="documentation/human_todo.md">
-# Human Operator Checklist for Lessay Project Credentials
-
-**IMPORTANT SECURITY NOTICE:**  
-⚠️ **NEVER** commit any `.env.local` file or any file containing API keys to the repository.  
-⚠️ Keep all credentials secure and never share them publicly.
-
----
-
-## Required Credentials
-
-### 1. Supabase
-- [ ] Create a Supabase project at https://supabase.com
-- [ ] Obtain your:
-  - `SUPABASE_URL`
-  - `SUPABASE_ANON_KEY`
-  - `SUPABASE_SERVICE_ROLE_KEY` (for server-side operations)
-
-### 2. Stripe
-- [ ] Create a Stripe account at https://stripe.com
-- [ ] Obtain your:
-  - `STRIPE_SECRET_KEY`
-  - `STRIPE_WEBHOOK_SECRET`
-  - `STRIPE_PUBLISHABLE_KEY` (for client-side)
-
-### 3. AI Service (Google AI)
-- [ ] Create a Google AI account at https://ai.google.dev
-- [ ] Obtain your:
-  - `AI_API_KEY`
-
-### 4. Google Cloud (for TTS/STT)
-- [ ] Go to the Google Cloud Console at https://console.cloud.google.com
-- [ ] Create a new Service Account
-- [ ] Enable the following APIs for the project:
-  - Cloud Text-to-Speech API
-  - Cloud Speech-to-Text API
-- [ ] Grant the Service Account the 'Cloud AI Service User' role
-- [ ] Create and download a JSON key for the service account
-- [ ] Place this file in the project root and name it `gcp-credentials.json`
-- [ ] Add the following to your `.env.local` file:
-  ```bash
-  # Google Cloud TTS/STT
-  GCP_CREDENTIALS_JSON='paste_the_entire_json_content_here'
-  ```
-- [ ] **DO NOT** commit `gcp-credentials.json` to the repository
-
----
-
-## Setup Instructions
-
-1. Create a `.env.local` file in the project root
-2. Add the credentials in this format:
-```bash
-# Supabase
-SUPABASE_URL=your_url_here
-SUPABASE_ANON_KEY=your_key_here
-SUPABASE_SERVICE_ROLE_KEY=your_key_here
-
-# Stripe
-STRIPE_SECRET_KEY=your_key_here
-STRIPE_WEBHOOK_SECRET=your_secret_here
-STRIPE_PUBLISHABLE_KEY=your_key_here
-
-# Google AI
-AI_API_KEY=your_key_here
-```
-
-3. **DO NOT** add `.env.local` to git - it's already in `.gitignore`
-
----
-
-## Verification
-- [ ] Confirm all credentials are working by running the development server:
-```bash
-npm run dev
-</file>
-
-<file path="documentation/todo.md">
-Of course. Based on the provided `repomix-output.xml` and the goal of creating a complete SDLC documentation suite for an autonomous AI agent, here is a comprehensive to-do list for the architect agent.
-
-This plan is structured to follow the logical flow of the Software Development Life Cycle (SDLC), ensuring foundational documents are completed first, as they inform subsequent ones.
-
----
-
-### **To-Do List for Lessay Architect Agent: Documentation Completion**
-
-**Objective:** Complete the entire software documentation suite to provide a clear, comprehensive, and unambiguous blueprint for an autonomous AI development agent to build, deploy, and maintain the Lessay application.
-
-**Prioritization Note:** Tasks are organized into phases. The agent should complete tasks within a phase before moving to the next, as each phase builds upon the previous one.
-
----
-
-### **Phase 0: Foundation and Alignment**
-
-*Goal: Ensure all existing work is consistent and establish a single source of truth.*
-
-1.  **[ ] Ingest and Analyze:** Ingest all 18 files from the `repomix-output.xml`.
-2.  **[x] Validate Vision Alignment:**
-    *   **File:** `documentation/app_description.md`
-    *   **Action:** Treat this file as the primary source of truth for the product vision.
-    *   **Task:** Cross-reference all other 17 documents against `app_description.md`. Identify and flag any contradictions in features, philosophy, or technology stack. For example, ensure the `monetization_strategy.md` tiers align with the features described.
-3.  **[x] Update Master Plan:**
-    *   **File:** `documentation/documentation_completion_plan.md`
-    *   **Action:** Update this plan to reflect the detailed tasks outlined in this to-do list. Replace the existing Gantt chart and summary with this new, more granular phased approach.
-
----
-
-### **Phase 1: Project Definition & Requirements (The "What")**
-
-*Goal: Formally define the project's scope, business goals, and functional/non-functional requirements.*
-
-1.  **[x] Complete Project Charter:**
-    *   **File:** `documentation/templates/project_charter_template.md`
-    *   **Action:** Fill in all placeholder content.
-    *   **Tasks:**
-        *   Replace `DATE` with the current date.
-        *   Derive and list specific, measurable `Success Criteria` from the `app_description.md` (e.g., "SRS review results in a 15% improvement in vocabulary recall over 30 days").
-        *   Update the `Timeline` and `Gantt` chart with realistic dates for the development, testing, and launch phases.
-
-2.  **[x] Complete Business Requirements Document (BRD):**
-    *   **File:** `documentation/templates/brd_template.md`
-    *   **Action:** Translate the `app_description.md` into formal business requirements.
-    *   **Tasks:**
-        *   Expand `Section 4.1 Feature Breakdown` to include all features from the app description: SRS, Progress Dashboard, Vocal Fluency Metrics, etc.
-        *   Expand `Section 4.2 User Workflows` to create Mermaid diagrams for:
-            *   The full adaptive learning loop (`Capture -> Analyze -> Plan -> Create`).
-            *   The subscription and upgrade/downgrade process.
-        *   Define concrete `Non-Functional Requirements` in `Section 5` based on the app's needs (e.g., Performance: "Real-time speech-to-text transcription must have a latency of < 300ms").
-
-3.  **[x] Complete Functional Requirements Specification (FRS):**
-    *   **File:** `documentation/templates/frs_template.md`
-    *   **Action:** Break down the BRD into detailed, numbered functional requirements for the development agent.
-    *   **Tasks:**
-        *   Create specific `FR-XXX` requirements for every feature.
-        *   **Example for Lesson Delivery:**
-            *   `FR-009`: The system shall capture a raw audio blob of the user's speech during a session for post-session analysis.
-            *   `FR-010`: The system shall use a real-time speech-to-text API to validate the content of the user's answer immediately.
-        *   **Example for SRS:**
-            *   `FR-011`: The system shall maintain a `Recall Strength Score` and `Next Review Date` for every vocabulary and grammar concept per user.
-            *   `FR-012`: The lesson generation logic must prioritize items where `Next Review Date` is today or in the past.
-
----
-
-### **Phase 2: Architecture & Technical Design (The "How")**
-
-*Goal: Create a detailed technical blueprint based on the finalized requirements.*
-
-1.  **[x] Expand Technical Design Document:**
-    *   **File:** `documentation/templates/technical_design_template.md`
-    *   **Action:** Elaborate on the existing high-level design.
-    *   **Tasks:**
-        *   **`Section 1.1`:** Update the Mermaid diagram to show the data flow for both real-time STT and diagnostic audio blobs.
-        *   **`Section 2.1`:** Detail the internal logic of the `AIService`, including example prompts sent to the LLM for lesson creation and audio analysis.
-        *   **`Section 5`:** Fully define the `Database Design` using Prisma schema syntax. Include models for `User`, `Lesson`, `Exercise`, `UserProgress`, and the `SRSEntry` (with `recallStrength`, `nextReviewDate`, etc.).
-        *   **`Section 3.1`:** Create detailed sequence diagrams for:
-            *   The complete adaptive learning loop.
-            *   User subscription and webhook processing.
-
-2.  **[x] Expand API Specification:**
-    *   **File:** `documentation/templates/api_spec_template.md`
-    *   **Action:** Document all necessary API endpoints beyond just payments.
-    *   **Tasks:**
-        *   Define endpoints for user management (`/api/users/profile`).
-        *   Define endpoints for the core learning loop (`/api/lessons/start`, `/api/lessons/{id}/submit-answer`).
-        *   Define endpoints for the progress dashboard (`/api/stats/fluency`, `/api/stats/srs-overview`).
-        *   Specify request/response payloads for each, including error codes.
-
----
-
-### **Phase 3: Implementation, Operations & Maintenance**
-
-*Goal: Document how the application will be built, deployed, and maintained in a production environment.*
-
-1.  **[x] Enhance Deployment Playbook:**
-    *   **File:** `documentation/templates/deployment_playbook_template.md`
-    *   **Action:** Add production and staging environment configurations.
-    *   **Tasks:**
-        *   Add sections for `Staging Environment` and `Production Environment`.
-        *   Define the CI/CD pipeline steps (e.g., using GitHub Actions).
-        *   Specify the process for managing environment variables and secrets (e.g., using Supabase secrets or a dedicated vault).
-
-2.  **[x] Complete Maintenance Guide:**
-    *   **File:** `documentation/templates/maintenance_guide_template.md`
-    *   **Action:** Fill in all placeholder content with specific, actionable information.
-    *   **Tasks:**
-        *   Define concrete `Alert Thresholds` based on the NFRs (e.g., "AI Analyst audio processing queue length > 100 for 5 mins").
-        *   Provide actual `Diagnostic Tools` commands relevant to the Next.js/Supabase stack.
-        *   Detail the `Recovery Process` with specific Recovery Time Objective (RTO) and Recovery Point Objective (RPO) goals (e.g., RTO: 1 hour, RPO: 5 minutes).
-
----
-
-### **Phase 4: Quality Assurance & Performance**
-
-*Goal: Define how the application's quality, functionality, and performance will be verified.*
-
-1.  **[x] Expand Test Plan:**
-    *   **File:** `documentation/templates/test_plan_template.md`
-    *   **Action:** Add test cases for all core application features.
-    *   **Tasks:**
-        *   Add a section for `Core Learning Loop Tests`, with cases for the adaptive logic and SRS scheduling.
-        *   Add a section for `Vocal Analysis Tests` to verify pronunciation and fluency metrics are generated.
-        *   Add a section for `User Dashboard Tests` to ensure metrics are displayed correctly.
-
-2.  **[x] Complete Performance Baseline:**
-    *   **File:** `documentation/templates/performance_baseline_template.md`
-    *   **Action:** Define performance targets and testing scenarios.
-    *   **Tasks:**
-        *   Populate the `Key Indicators` table with the targets from the NFRs.
-        *   Describe `Load Testing` scenarios, such as "Simulate 500 users completing a lesson simultaneously" and "Simulate 1000 users fetching their progress dashboard."
-
----
-
-### **Phase 5: Governance, Risk, and Compliance**
-
-*Goal: Formalize processes for managing change, mitigating risk, and ensuring continuous improvement.*
-
-1.  **[x] Complete Risk Assessment:**
-    *   **File:** `documentation/templates/risk_assessment_template.md`
-    *   **Action:** Identify and plan mitigation for risks specific to an AI-driven, voice-based application.
-    *   **Tasks:**
-        *   Add risks like "Inaccurate AI-generated feedback demoralizes user," "Privacy breach of user voice recordings," and "High cost of LLM/TTS/STT API usage."
-        *   Define mitigation strategies for each.
-
-2.  **[x] Complete Change Management & Continuous Improvement Plans:**
-    *   **Files:** `change_management_template.md`, `continuous_improvement_template.md`
-    *   **Action:** Define the processes for evolving the application.
-    *   **Tasks:**
-        *   Define the workflow for how the autonomous agent itself proposes, gets approval for, and implements changes.
-        *   In the improvement plan, detail how user feedback and performance metrics will be used to generate new feature requirements for the AI agent to build.
-
----
-
-### **Phase 6: User-Facing Documentation**
-
-*Goal: Create the documentation that the end-user will need.*
-
-1.  **[x] Complete User Documentation:**
-    *   **File:** `documentation/templates/user_documentation_template.md`
-    *   **Action:** Write clear, user-friendly guides for all application features.
-    *   **Tasks:**
-        *   Add sections explaining the Progress Dashboard, what Fluency Metrics mean, and how the Spaced Repetition (SRS View) works.
-        *   Use Mermaid diagrams to illustrate user flows like changing a target language.
-        *   Update the `Troubleshooting` table with common issues related to voice recognition or lesson generation.
-</file>
-
-<file path="lib/prisma.ts">
-import { PrismaClient } from '@prisma/client'
-
-declare global {
-  // eslint-disable-next-line no-var
-  var prisma: PrismaClient | undefined
-}
-
-const prisma = global.prisma || new PrismaClient()
-
-if (process.env.NODE_ENV === 'development') global.prisma = prisma
-
-export default prisma
-export type { PrismaClient }
-</file>
-
-<file path="docker-compose.yml">
-version: '3.3'
-
-services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "3554:3000"
-    env_file:
-      - .env
-    environment:
-      - DATABASE_URL=postgresql://myuser:mypassword@db:5432/mydb
-      - CHOKIDAR_USEPOLLING=true
-      - WATCHPACK_POLLING=true
-      - FAST_REFRESH=false
-      - NODE_ENV=development
-      - CHOKIDAR_INTERVAL=300
-    depends_on:
-      - db
-    volumes:
-      - ./src:/app/src  
-      - ./public:/app/public  
-      - ./package.json:/app/package.json 
-      - ./package-lock.json:/app/package-lock.json  
-      - ./tailwind.config.ts:/app/tailwind.config.ts  
-      - ./src/app/globals.css:/app/src/app/globals.css  
-      - ./tsconfig.json:/app/tsconfig.json  
-      - ./prisma:/app/prisma  
-      # - ./node_modules:/app/node_modules
-      - ./.env:/app/.env
-    restart: unless-stopped
-    networks:
-      - web-network
-    command: sh -c "npm rebuild && npm run dev"
-
-  db:
-    image: postgres:17
-    environment:
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
-      POSTGRES_DB: mydb
-    ports:
-      - "5455:5432" 
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    networks:
-      - web-network
-
-
-networks:
-  web-network:
-    driver: bridge
-
-volumes:
-  postgres-data:
-</file>
-
-<file path="jest.config.ts">
-import type { Config } from '@jest/types'
-
-const config: Config.InitialOptions = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
-  roots: ['<rootDir>'],
-  testMatch: ['**/*.test.ts'],
-  setupFiles: [
-    '<rootDir>/tests/setupEnv.ts',
-    '<rootDir>/tests/__mocks__/supabaseClient.ts'
-  ],
-  transform: {
-    '^.+\\.(t|j)sx?$': 'ts-jest',
-  },
-  transformIgnorePatterns: [
-    '/node_modules/(?!@auth/supabase-adapter|@auth/core)',
-  ],
-  moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/$1',
-    '^@auth/supabase-adapter$': '<rootDir>/node_modules/@auth/supabase-adapter/index.js'
-  }
-}
-
-export default config
-</file>
-
-<file path="app/api/stats/fluency/route.ts">
-import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import logger from '@/lib/logger';
-
-export async function GET() {
-  const session = await getServerSession(authOptions);
-
-  if (!session || !session.user) {
-    logger.warn('Unauthorized access attempt to fluency stats');
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  logger.info({ userId: session.user.id }, 'Fetching fluency stats');
-
-  try {
-    const stats = await prisma.userProgress.groupBy({
-      by: ['createdAt'],
-      where: { userId: session.user.id },
-      _avg: { accuracyScore: true },
-      _count: { _all: true },
-      orderBy: { createdAt: 'asc' }
-    });
-
-    logger.debug({ userId: session.user.id, statsCount: stats.length }, 'Fluency stats retrieved');
-    return NextResponse.json({ stats });
-  } catch (error) {
-    logger.error({ userId: session.user.id, error }, 'Failed to fetch fluency stats');
-    return NextResponse.json(
-      { error: 'Failed to retrieve fluency stats' },
-      { status: 500 }
-    );
-  }
-}
-</file>
-
-<file path="app/api/stripe/webhook/route.ts">
-import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
-import logger from '@/lib/logger';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-
-export async function POST(req: Request) {
-  const body = await req.text();
-  const signature = req.headers.get('stripe-signature') as string;
-
-  try {
-    const event = stripe.webhooks.constructEvent(
-      body,
-      signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
-    );
-
-    logger.info({ eventType: event.type }, 'Stripe webhook verified');
-    return NextResponse.json({ received: true }, { status: 200 });
-  } catch (err) {
-    logger.error({ error: err }, 'Stripe webhook verification failed');
-    return NextResponse.json(
-      { error: 'Webhook signature verification failed' },
-      { status: 400 }
-    );
-  }
-}
-</file>
-
-<file path="documentation/templates/api_spec_template.md">
-# API SPECIFICATION TEMPLATE
-<!-- Document Version: 1.1 -->
-<!-- Last Updated: 2025-06-11 -->
-
-## 1. User Management Endpoints
-### 1.1 Get User Profile
-#### GET /api/users/profile
-##### Response
-```json
-{
-  "id": "user_123",
-  "email": "user@example.com",
-  "targetLanguage": "es",
-  "nativeLanguage": "en",
-  "subscriptionTier": "premium",
-  "createdAt": "2025-06-01T10:00:00Z"
-}
-```
-
-### 1.2 Update Profile
-#### PUT /api/users/profile
-##### Request
-```json
-{
-  "targetLanguage": "fr",
-  "notificationPreferences": {
-    "reminders": true,
-    "progressReports": false
-  }
-}
-```
-
-### 1.3 Set Language Preference
-#### POST /api/users/language-preference
-##### Request
-```json
-{
-  "targetLanguage": "de",
-  "nativeLanguage": "en"
-}
-```
-
-## 2. Learning Loop Endpoints
-### 2.1 Start Lesson
-#### POST /api/lessons/start
-##### Response
-```json
-{
-  "lessonId": "lesson_123",
-  "exercises": [
-    {
-      "id": "ex_1",
-      "type": "vocabulary",
-      "prompt": "Translate 'apple'",
-      "audioPromptUrl": "/audio/apple_prompt.mp3"
-    }
-  ],
-  "srsDueItems": ["apple", "banana"]
-}
-```
-
-### 2.2 Submit Answer
-#### POST /api/lessons/{id}/submit-answer
-##### Request
-```json
-{
-  "exerciseId": "ex_1",
-  "textResponse": "la manzana",
-  "audioBlobUrl": "/audio/user_response_123.mp3"
-}
-```
-
-##### Response
-```json
-{
-  "correct": true,
-  "feedback": "Perfect!",
-  "pronunciationScore": 0.95,
-  "nextExercise": "ex_2"
-}
-```
-
-## 3. Progress Dashboard Endpoints
-### 3.1 Get Fluency Metrics
-#### GET /api/stats/fluency
-##### Response
-```json
-{
-  "speakingPace": {
-    "current": 120,
-    "trend": "improving"
-  },
-  "pronunciationAccuracy": 0.85,
-  "hesitationFrequency": 2.1
-}
-```
-
-### 3.2 Get SRS Overview
-#### GET /api/stats/srs-overview
-##### Response
-```json
-{
-  "totalItems": 150,
-  "dueForReview": 12,
-  "strengthDistribution": {
-    "weak": 5,
-    "medium": 30,
-    "strong": 115
-  }
-}
-```
-
-
-## 5. Payment Endpoints
-### 5.1 Subscription Management
-#### POST /api/payments/create-subscription
-##### Request
-```json
-{
-  "tier": "premium",
-  "paymentMethodId": "pm_123456"
-}
-```
-
-##### Response
-```json
-{
-  "status": "active",
-  "currentPeriodEnd": "2025-07-10"
-}
-```
-
-### 5.2 Webhook
-#### POST /api/stripe/webhook
-##### Event Types
-- payment_intent.succeeded
-- invoice.payment_failed
-- customer.subscription.updated
-
-### 5.3 Get Subscription
-#### GET /api/payments/subscription
-##### Response
-```json
-{
-  "tier": "pro",
-  "status": "active",
-  "nextPaymentDate": "2025-07-10"
-}
-```
-
-## 6. Error Handling
-### 6.1 Payment Errors
-| Code | Error Type | Description |
-|------|------------|-------------|
-| 400  | invalid_language | Unsupported language code |
-| 401  | unauthorized | Missing/invalid auth token |
-| 402  | payment_required | Payment failed |
-| 404  | lesson_not_found | Invalid lesson ID |
-| 409  | subscription_conflict | Plan change in progress |
-| 422  | invalid_audio | Unprocessable audio format |
-| 429  | rate_limited | Too many requests |
-| 500  | internal_error | Server-side failure |
 </file>
 
 <file path="documentation/templates/brd_template.md">
@@ -7948,310 +7653,593 @@ Accepted risks:
 - **Ad-hoc**: After major incidents
 </file>
 
-<file path="documentation/templates/technical_design_template.md">
-# TECHNICAL DESIGN DOCUMENT
-<!-- Document Version: 1.2 -->
-<!-- Last Updated: 2025-06-10 -->
+<file path="documentation/documentation_completion_plan.md">
+# Documentation Completion Plan
 
-## 1. Architecture Overview
-### 1.1 System Context
+## 1. Documentation Audit Summary
+- **Total templates**: 16
+- **Complete templates**: 7 
+  (api_spec, compliance_framework, data_governance, deployment_playbook, monetization_strategy, technical_design, test_plan)
+- **Incomplete templates**: 9 
+  (BRD, change management, continuous improvement, FRS, maintenance guide, performance baseline, project charter, risk assessment, user docs)
+- **Missing sections**: 58 across all templates
+
+## 2. Content Creation Strategy
 ```mermaid
 graph TD
-    A[Next.js Frontend] -->|API Routes| B[Next.js Backend]
-    B --> C[Prisma ORM]
-    B --> D[Supabase Auth]
-    B --> E[Supabase Storage]
-    B --> F[AIService]
-    C --> G[Supabase PostgreSQL]
-    F --> H[LLM Agent]
-    F --> I[STT Service]
-    F --> J[TTS Service]
-    
-    %% Real-time voice path
-    A -->|WebSocket| K[Browser STT]
-    K -->|Real-time text| B
-    B -->|Analysis| F
-    
-    %% Diagnostic audio path
-    A -->|Upload| E[Supabase Storage]
-    E -->|Audio blob| F
-    F -->|Store results| G
+    A[Subject Matter Experts] -->|Provide input| B(Technical Writers)
+    B --> C[Documentation Templates]
+    C --> D[Review Cycle]
+    D --> E[Final Approval]
+    E --> F[Published Docs]
 ```
 
-### 1.2 Key Features
-- **Language Learning Core**:
-  - Adaptive lesson generation
-  - Progress tracking
-  - Voice interaction handling
-- **AI Integration**:
-  - Autonomous development agent
-  - Content personalization
-  - Error correction
+### Content Sourcing:
+- **Technical specifications**: Engineering team
+- **Business requirements**: Product owners
+- **Compliance details**: Legal team
+- **User workflows**: UX researchers
 
-## 2. Component Design
-### 2.1 Service Layer
-- **AuthService**:
-  - JWT verification
-  - Session management
-  - Mock auth implementation (`MOCK_AUTH=true`)
-  
-- **DataService**:
-  ```mermaid
-  flowchart LR
-      A[API Route] --> B[DataService]
-      B --> C[Prisma Client]
-      C --> D[(PostgreSQL)]
-      B --> E[Cache Layer]
-  ```
-  - Manages:
-    - User profiles
-    - Learning content
-    - Progress data
-
-- **AIService**:
-  ```mermaid
-  flowchart LR
-      A[API Request] --> B{AIService}
-      B --> C[Lesson Generation]
-      B --> D[Voice Analysis]
-      C --> E["Prompt:
-      'Generate a lesson for {user} focusing on
-      {weaknesses} using {SRS} schedule'"]
-      D --> F["Analysis:
-      - Pronunciation scoring
-      - Hesitation detection
-      - Fluency metrics"]
-      E --> G[LLM Response]
-      F --> H[Diagnostic Report]
-  ```
-  
-  **Example Lesson Generation Payload**:
-  ```json
-  {
-    "userId": "uuid",
-    "targetLanguage": "es",
-    "focusAreas": ["past_tense", "travel_vocab"],
-    "srsDueItems": ["comer", "viajar"],
-    "difficultyLevel": 3
-  }
-  ```
-  
-  **Voice Analysis Parameters**:
-  ```prisma
-  model VoiceAnalysis {
-    id        String @id @default(uuid())
-    userId    String
-    lessonId  String
-    metrics   Json // {pace: 120, accuracy: 0.85, ...}
-    audioUrl  String
-    createdAt DateTime @default(now())
-  }
-  ```
-
-## 3. Data Flow
-### 3.1 Adaptive Learning Loop
+## 3. Prioritization Framework
 ```mermaid
-sequenceDiagram
-    participant U as User
-    participant F as Frontend
-    participant B as Backend
-    participant AI as AIService
-    participant DB as Database
-    
-    U->>F: Start Lesson
-    F->>B: POST /api/lessons/start
-    B->>AI: Request lesson (with SRS due items)
-    AI->>DB: Query user progress
-    DB-->>AI: Return progress data
-    AI-->>B: Generated lesson content
-    B-->>F: Lesson data
-    F->>U: Present exercise
-    U->>F: Speak response
-    F->>B: Stream audio to API
-    B->>AI: Real-time STT analysis
-    AI-->>B: Immediate feedback
-    B-->>F: Corrections
-    F->>U: Show results
-    U->>F: Complete lesson
-    F->>B: POST /api/lessons/{id}/complete
-    B->>AI: Full session analysis
-    AI->>DB: Update SRS scores
-    AI-->>B: Next lesson plan
-    B-->>F: Schedule recommendation
+gantt
+    title Documentation Completion Timeline
+    dateFormat  YYYY-MM-DD
+    section Phase 0
+    Foundation & Alignment :active, phase0, 2025-06-11, 1d
+    section Phase 1
+    Project Definition     :         phase1, after phase0, 3d
+    section Phase 2
+    Technical Design       :         phase2, after phase1, 4d
+    section Phase 3
+    Operations & Maintenance:        phase3, after phase2, 3d
+    section Phase 4
+    Quality Assurance      :         phase4, after phase3, 2d
+    section Phase 5
+    Governance & Compliance:         phase5, after phase4, 2d
+    section Phase 6
+    User Documentation     :         phase6, after phase5, 1d
 ```
 
-### 3.2 Subscription Webhook Flow
-```mermaid
-sequenceDiagram
-    participant S as Stripe
-    participant B as Backend
-    participant DB as Database
-    
-    S->>B: POST /api/stripe/webhook
-    B->>B: Verify signature
-    alt payment_succeeded
-        B->>DB: Update subscription status
-    else payment_failed
-        B->>DB: Flag account
-    end
-    B-->>S: 200 OK
-```
+## 4. Implementation Plan (Phased Approach)
 
-## 4. Interface Specifications
-### 4.1 AI Endpoints
-| Method | Path | Description |
-|--------|------|-------------|
-| POST   | /api/ai/generate-lesson | Create personalized lesson |
-| POST   | /api/ai/analyze-response | Evaluate user input |
+### Phase 0: Foundation and Alignment (1 day)
+- Ingest and analyze all files from repomix-output.xml
+- Validate vision alignment across all documents
+- Update this master plan with detailed phased tasks
 
-## 5. Database Design
-### 5.1 Complete Schema
-```prisma
-model User {
-  id           String @id @default(uuid())
-  email        String @unique
-  password     String
-  targetLang   String
-  nativeLang   String
-  progress     UserProgress[]
-  srsEntries   SRSEntry[]
-  lessons      Lesson[]
-  createdAt    DateTime @default(now())
-}
+### Phase 1: Project Definition & Requirements (3 days)
+- Complete Project Charter with success criteria and timeline
+- Finalize Business Requirements Document (BRD)
+- Develop detailed Functional Requirements Specification (FRS)
 
-model Lesson {
-  id          String @id @default(uuid())
-  userId      String
-  user        User @relation(fields: [userId], references: [id])
-  exercises   Exercise[]
-  completedAt DateTime?
-  analysis    VoiceAnalysis[]
-}
+### Phase 2: Architecture & Technical Design (4 days)
+- Expand Technical Design Document with data flows and schemas
+- Develop comprehensive API Specification
+- Define database models using Prisma schema syntax
 
-model Exercise {
-  id          String @id @default(uuid())
-  type        String // 'vocabulary', 'grammar', etc.
-  content     Json
-  difficulty  Int
-  language    String
-  tags        String[]
-  lesson      Lesson @relation(fields: [lessonId], references: [id])
-  lessonId    String
-}
+### Phase 3: Implementation, Operations & Maintenance (3 days)
+- Enhance Deployment Playbook with environment configs
+- Complete Maintenance Guide with alert thresholds
+- Document diagnostic tools and recovery processes
 
-model UserProgress {
-  id          String @id @default(uuid())
-  userId      String
-  user        User @relation(fields: [userId], references: [id])
-  metric      String // 'vocabulary', 'grammar', etc.
-  score       Float
-  lastUpdated DateTime @default(now())
-}
+### Phase 4: Quality Assurance & Performance (2 days)
+- Expand Test Plan with core feature test cases
+- Define performance baselines and load testing scenarios
 
-model SRSEntry {
-  id             String @id @default(uuid())
-  userId         String
-  user           User @relation(fields: [userId], references: [id])
-  item           String // word or grammar concept
-  recallStrength Float @default(1.0)
-  nextReview     DateTime @default(now())
-  language       String
-  @@index([userId, nextReview])
-}
+### Phase 5: Governance, Risk, and Compliance (2 days)
+- Complete Risk Assessment for AI/voice-specific risks
+- Develop Change Management and Continuous Improvement plans
 
-model VoiceAnalysis {
-  id        String @id @default(uuid())
-  userId    String
-  user      User @relation(fields: [userId], references: [id])
-  lessonId  String
-  lesson    Lesson @relation(fields: [lessonId], references: [id])
-  metrics   Json // {pace: 120, accuracy: 0.85, ...}
-  audioUrl  String
-  createdAt DateTime @default(now())
-}
-```
+### Phase 6: User-Facing Documentation (1 day)
+- Create complete User Documentation with troubleshooting guides
 
-## 6. Non-Functional Considerations
-### 6.1 AI Performance
-- Model inference optimization
-- Async task processing
-- Rate limiting
+## 5. Quality Assurance
+- Automated checks for:
+  - Placeholder text detection
+  - Broken links
+  - Compliance markers
+- Manual checks for:
+  - Technical accuracy
+  - Consistency across documents
+  - Readability scores
 
-### 6.2 Language Processing
-- Multilingual support
-- Voice data handling
-- Real-time feedback
+## 6. Completion Metrics
+- **Success criteria**:
+  - All 18 documentation templates completed
+  - 100% alignment with app_description.md vision
+  - Complete technical specifications for AI/voice features
+  - Detailed test cases for all core functionality
+  - Comprehensive risk mitigation strategies documented
+- **Tracking**:
+  - Daily progress against phased milestones
+  - Automated checks for documentation integrity
+  - Final validation by development team lead
 </file>
 
-<file path="documentation/templates/test_plan_template.md">
-# TEST PLAN TEMPLATE
-<!-- Document Version: 1.1 -->
-<!-- Last Updated: 2025-06-11 -->
+<file path="documentation/human_todo.md">
+# Human Operator Checklist for Lessay Project Credentials
 
-## 1. Core Learning Loop Tests
-### 1.1 Adaptive Lesson Generation
-| Test Case | Steps | Expected Result |
-|-----------|-------|-----------------|
-| SRS-Driven Content | 1. User has 5 due items<br>2. Start new lesson | - Lesson contains 3-5 due items<br>- Mixed with new material |
-| Difficulty Adjustment | 1. Fail 3 exercises<br>2. Next lesson | - Difficulty reduced by 1 level<br>- More review content |
+**IMPORTANT SECURITY NOTICE:**  
+⚠️ **NEVER** commit any `.env.local` file or any file containing API keys to the repository.  
+⚠️ Keep all credentials secure and never share them publicly.
 
-### 1.2 Real-Time Feedback
-| Test Case | Steps | Expected Result |
-|-----------|-------|-----------------|
-| Correct Pronunciation | 1. Submit perfect audio<br>2. Get feedback | - Score ≥0.95<br>- Positive reinforcement |
-| Grammar Error | 1. Submit incorrect tense<br>2. Get feedback | - Specific error highlighted<br>- Correction shown |
+---
 
-### 1.3 Post-Session Analysis
-| Test Case | Steps | Expected Result |
-|-----------|-------|-----------------|
-| Audio Processing | 1. Complete lesson<br>2. Wait 5m | - Diagnostic report generated<br>- SRS scores updated |
-| Weakness Detection | 1. Make consistent errors<br>2. Review analysis | - Weakness pattern identified<br>- Next lesson focuses on area |
+## Required Credentials
 
-## 2. Vocal Analysis Tests
-### 2.1 Pronunciation Accuracy
-| Test Case | Steps | Expected Result |
-|-----------|-------|-----------------|
-| Native Speaker | 1. Submit native audio<br>2. Check score | - Score ≥0.98<br>- No errors flagged |
-| Common Mistake | 1. Submit "th" as "d"<br>2. Check feedback | - Error detected<br>- Specific correction |
+### 1. Supabase
+- [ ] Create a Supabase project at https://supabase.com
+- [ ] Obtain your:
+  - `SUPABASE_URL`
+  - `SUPABASE_ANON_KEY`
+  - `SUPABASE_SERVICE_ROLE_KEY` (for server-side operations)
 
-### 2.2 Fluency Metrics
-| Test Case | Steps | Expected Result |
-|-----------|-------|-----------------|
-| Hesitation | 1. Submit audio with pauses<br>2. Check metrics | - Hesitation count correct<br>- Pace calculated |
-| Filler Words | 1. Use "um" repeatedly<br>2. Check report | - Filler word count accurate<br>- Trend shown |
+### 2. Stripe
+- [ ] Create a Stripe account at https://stripe.com
+- [ ] Obtain your:
+  - `STRIPE_SECRET_KEY`
+  - `STRIPE_WEBHOOK_SECRET`
+  - `STRIPE_PUBLISHABLE_KEY` (for client-side)
 
-## 3. User Dashboard Tests
-### 3.1 Progress Visualization
-| Test Case | Steps | Expected Result |
-|-----------|-------|-----------------|
-| SRS Overview | 1. Complete 10 lessons<br>2. Check dashboard | - Due items count correct<br>- Strength distribution accurate |
-| Error Patterns | 1. Make consistent errors<br>2. Check dashboard | - Top errors highlighted<br>- Frequency correct |
+### 3. AI Service (Google AI)
+- [ ] Create a Google AI account at https://ai.google.dev
+- [ ] Obtain your:
+  - `AI_API_KEY`
 
-### 3.2 Metric Accuracy
-| Test Case | Steps | Expected Result |
-|-----------|-------|-----------------|
-| Fluency Trends | 1. Improve over week<br>2. Check graph | - Upward trend visible<br>- Data points correct |
-| Vocabulary Growth | 1. Learn new words<br>2. Check stats | - Count matches lessons<br>- Retention rate shown |
+### 4. Google Cloud (for TTS/STT)
+- [ ] Go to the Google Cloud Console at https://console.cloud.google.com
+- [ ] Create a new Service Account
+- [ ] Enable the following APIs for the project:
+  - Cloud Text-to-Speech API
+  - Cloud Speech-to-Text API
+- [ ] Grant the Service Account the 'Cloud AI Service User' role
+- [ ] Create and download a JSON key for the service account
+- [ ] Place this file in the project root and name it `gcp-credentials.json`
+- [ ] Add the following to your `.env.local` file:
+  ```bash
+  # Google Cloud TTS/STT
+  GCP_CREDENTIALS_JSON='paste_the_entire_json_content_here'
+  ```
+- [ ] **DO NOT** commit `gcp-credentials.json` to the repository
+
+---
+
+## Setup Instructions
+
+1. Create a `.env.local` file in the project root
+2. Add the credentials in this format:
+```bash
+# Supabase
+SUPABASE_URL=your_url_here
+SUPABASE_ANON_KEY=your_key_here
+SUPABASE_SERVICE_ROLE_KEY=your_key_here
+
+# Stripe
+STRIPE_SECRET_KEY=your_key_here
+STRIPE_WEBHOOK_SECRET=your_secret_here
+STRIPE_PUBLISHABLE_KEY=your_key_here
+
+# Google AI
+AI_API_KEY=your_key_here
+```
+
+3. **DO NOT** add `.env.local` to git - it's already in `.gitignore`
+
+---
+
+## Verification
+- [ ] Confirm all credentials are working by running the development server:
+```bash
+npm run dev
+</file>
+
+<file path="documentation/todo.md">
+Of course. Based on the provided `repomix-output.xml` and the goal of creating a complete SDLC documentation suite for an autonomous AI agent, here is a comprehensive to-do list for the architect agent.
+
+This plan is structured to follow the logical flow of the Software Development Life Cycle (SDLC), ensuring foundational documents are completed first, as they inform subsequent ones.
+
+---
+
+### **To-Do List for Lessay Architect Agent: Documentation Completion**
+
+**Objective:** Complete the entire software documentation suite to provide a clear, comprehensive, and unambiguous blueprint for an autonomous AI development agent to build, deploy, and maintain the Lessay application.
+
+**Prioritization Note:** Tasks are organized into phases. The agent should complete tasks within a phase before moving to the next, as each phase builds upon the previous one.
+
+---
+
+### **Phase 0: Foundation and Alignment**
+
+*Goal: Ensure all existing work is consistent and establish a single source of truth.*
+
+1.  **[ ] Ingest and Analyze:** Ingest all 18 files from the `repomix-output.xml`.
+2.  **[x] Validate Vision Alignment:**
+    *   **File:** `documentation/app_description.md`
+    *   **Action:** Treat this file as the primary source of truth for the product vision.
+    *   **Task:** Cross-reference all other 17 documents against `app_description.md`. Identify and flag any contradictions in features, philosophy, or technology stack. For example, ensure the `monetization_strategy.md` tiers align with the features described.
+3.  **[x] Update Master Plan:**
+    *   **File:** `documentation/documentation_completion_plan.md`
+    *   **Action:** Update this plan to reflect the detailed tasks outlined in this to-do list. Replace the existing Gantt chart and summary with this new, more granular phased approach.
+
+---
+
+### **Phase 1: Project Definition & Requirements (The "What")**
+
+*Goal: Formally define the project's scope, business goals, and functional/non-functional requirements.*
+
+1.  **[x] Complete Project Charter:**
+    *   **File:** `documentation/templates/project_charter_template.md`
+    *   **Action:** Fill in all placeholder content.
+    *   **Tasks:**
+        *   Replace `DATE` with the current date.
+        *   Derive and list specific, measurable `Success Criteria` from the `app_description.md` (e.g., "SRS review results in a 15% improvement in vocabulary recall over 30 days").
+        *   Update the `Timeline` and `Gantt` chart with realistic dates for the development, testing, and launch phases.
+
+2.  **[x] Complete Business Requirements Document (BRD):**
+    *   **File:** `documentation/templates/brd_template.md`
+    *   **Action:** Translate the `app_description.md` into formal business requirements.
+    *   **Tasks:**
+        *   Expand `Section 4.1 Feature Breakdown` to include all features from the app description: SRS, Progress Dashboard, Vocal Fluency Metrics, etc.
+        *   Expand `Section 4.2 User Workflows` to create Mermaid diagrams for:
+            *   The full adaptive learning loop (`Capture -> Analyze -> Plan -> Create`).
+            *   The subscription and upgrade/downgrade process.
+        *   Define concrete `Non-Functional Requirements` in `Section 5` based on the app's needs (e.g., Performance: "Real-time speech-to-text transcription must have a latency of < 300ms").
+
+3.  **[x] Complete Functional Requirements Specification (FRS):**
+    *   **File:** `documentation/templates/frs_template.md`
+    *   **Action:** Break down the BRD into detailed, numbered functional requirements for the development agent.
+    *   **Tasks:**
+        *   Create specific `FR-XXX` requirements for every feature.
+        *   **Example for Lesson Delivery:**
+            *   `FR-009`: The system shall capture a raw audio blob of the user's speech during a session for post-session analysis.
+            *   `FR-010`: The system shall use a real-time speech-to-text API to validate the content of the user's answer immediately.
+        *   **Example for SRS:**
+            *   `FR-011`: The system shall maintain a `Recall Strength Score` and `Next Review Date` for every vocabulary and grammar concept per user.
+            *   `FR-012`: The lesson generation logic must prioritize items where `Next Review Date` is today or in the past.
+
+---
+
+### **Phase 2: Architecture & Technical Design (The "How")**
+
+*Goal: Create a detailed technical blueprint based on the finalized requirements.*
+
+1.  **[x] Expand Technical Design Document:**
+    *   **File:** `documentation/templates/technical_design_template.md`
+    *   **Action:** Elaborate on the existing high-level design.
+    *   **Tasks:**
+        *   **`Section 1.1`:** Update the Mermaid diagram to show the data flow for both real-time STT and diagnostic audio blobs.
+        *   **`Section 2.1`:** Detail the internal logic of the `AIService`, including example prompts sent to the LLM for lesson creation and audio analysis.
+        *   **`Section 5`:** Fully define the `Database Design` using Prisma schema syntax. Include models for `User`, `Lesson`, `Exercise`, `UserProgress`, and the `SRSEntry` (with `recallStrength`, `nextReviewDate`, etc.).
+        *   **`Section 3.1`:** Create detailed sequence diagrams for:
+            *   The complete adaptive learning loop.
+            *   User subscription and webhook processing.
+
+2.  **[x] Expand API Specification:**
+    *   **File:** `documentation/templates/api_spec_template.md`
+    *   **Action:** Document all necessary API endpoints beyond just payments.
+    *   **Tasks:**
+        *   Define endpoints for user management (`/api/users/profile`).
+        *   Define endpoints for the core learning loop (`/api/lessons/start`, `/api/lessons/{id}/submit-answer`).
+        *   Define endpoints for the progress dashboard (`/api/stats/fluency`, `/api/stats/srs-overview`).
+        *   Specify request/response payloads for each, including error codes.
+
+---
+
+### **Phase 3: Implementation, Operations & Maintenance**
+
+*Goal: Document how the application will be built, deployed, and maintained in a production environment.*
+
+1.  **[x] Enhance Deployment Playbook:**
+    *   **File:** `documentation/templates/deployment_playbook_template.md`
+    *   **Action:** Add production and staging environment configurations.
+    *   **Tasks:**
+        *   Add sections for `Staging Environment` and `Production Environment`.
+        *   Define the CI/CD pipeline steps (e.g., using GitHub Actions).
+        *   Specify the process for managing environment variables and secrets (e.g., using Supabase secrets or a dedicated vault).
+
+2.  **[x] Complete Maintenance Guide:**
+    *   **File:** `documentation/templates/maintenance_guide_template.md`
+    *   **Action:** Fill in all placeholder content with specific, actionable information.
+    *   **Tasks:**
+        *   Define concrete `Alert Thresholds` based on the NFRs (e.g., "AI Analyst audio processing queue length > 100 for 5 mins").
+        *   Provide actual `Diagnostic Tools` commands relevant to the Next.js/Supabase stack.
+        *   Detail the `Recovery Process` with specific Recovery Time Objective (RTO) and Recovery Point Objective (RPO) goals (e.g., RTO: 1 hour, RPO: 5 minutes).
+
+---
+
+### **Phase 4: Quality Assurance & Performance**
+
+*Goal: Define how the application's quality, functionality, and performance will be verified.*
+
+1.  **[x] Expand Test Plan:**
+    *   **File:** `documentation/templates/test_plan_template.md`
+    *   **Action:** Add test cases for all core application features.
+    *   **Tasks:**
+        *   Add a section for `Core Learning Loop Tests`, with cases for the adaptive logic and SRS scheduling.
+        *   Add a section for `Vocal Analysis Tests` to verify pronunciation and fluency metrics are generated.
+        *   Add a section for `User Dashboard Tests` to ensure metrics are displayed correctly.
+
+2.  **[x] Complete Performance Baseline:**
+    *   **File:** `documentation/templates/performance_baseline_template.md`
+    *   **Action:** Define performance targets and testing scenarios.
+    *   **Tasks:**
+        *   Populate the `Key Indicators` table with the targets from the NFRs.
+        *   Describe `Load Testing` scenarios, such as "Simulate 500 users completing a lesson simultaneously" and "Simulate 1000 users fetching their progress dashboard."
+
+---
+
+### **Phase 5: Governance, Risk, and Compliance**
+
+*Goal: Formalize processes for managing change, mitigating risk, and ensuring continuous improvement.*
+
+1.  **[x] Complete Risk Assessment:**
+    *   **File:** `documentation/templates/risk_assessment_template.md`
+    *   **Action:** Identify and plan mitigation for risks specific to an AI-driven, voice-based application.
+    *   **Tasks:**
+        *   Add risks like "Inaccurate AI-generated feedback demoralizes user," "Privacy breach of user voice recordings," and "High cost of LLM/TTS/STT API usage."
+        *   Define mitigation strategies for each.
+
+2.  **[x] Complete Change Management & Continuous Improvement Plans:**
+    *   **Files:** `change_management_template.md`, `continuous_improvement_template.md`
+    *   **Action:** Define the processes for evolving the application.
+    *   **Tasks:**
+        *   Define the workflow for how the autonomous agent itself proposes, gets approval for, and implements changes.
+        *   In the improvement plan, detail how user feedback and performance metrics will be used to generate new feature requirements for the AI agent to build.
+
+---
+
+### **Phase 6: User-Facing Documentation**
+
+*Goal: Create the documentation that the end-user will need.*
+
+1.  **[x] Complete User Documentation:**
+    *   **File:** `documentation/templates/user_documentation_template.md`
+    *   **Action:** Write clear, user-friendly guides for all application features.
+    *   **Tasks:**
+        *   Add sections explaining the Progress Dashboard, what Fluency Metrics mean, and how the Spaced Repetition (SRS View) works.
+        *   Use Mermaid diagrams to illustrate user flows like changing a target language.
+        *   Update the `Troubleshooting` table with common issues related to voice recognition or lesson generation.
+</file>
+
+<file path="lib/prisma.ts">
+import { PrismaClient } from '@prisma/client'
+
+declare global {
+  // eslint-disable-next-line no-var
+  var prisma: PrismaClient | undefined
+}
+
+const prisma = global.prisma || new PrismaClient()
+
+if (process.env.NODE_ENV === 'development') global.prisma = prisma
+
+export default prisma
+export type { PrismaClient }
+</file>
+
+<file path="docker-compose.yml">
+version: '3.3'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3554:3000"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql://myuser:mypassword@db:5432/mydb
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - FAST_REFRESH=false
+      - NODE_ENV=development
+      - CHOKIDAR_INTERVAL=300
+    depends_on:
+      - db
+    volumes:
+      - ./src:/app/src  
+      - ./public:/app/public  
+      - ./package.json:/app/package.json 
+      - ./package-lock.json:/app/package-lock.json  
+      - ./tailwind.config.ts:/app/tailwind.config.ts  
+      - ./src/app/globals.css:/app/src/app/globals.css  
+      - ./tsconfig.json:/app/tsconfig.json  
+      - ./prisma:/app/prisma  
+      # - ./node_modules:/app/node_modules
+      - ./.env:/app/.env
+    restart: unless-stopped
+    networks:
+      - web-network
+    command: sh -c "npm rebuild && npm run dev"
+
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydb
+    ports:
+      - "5455:5432" 
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - web-network
 
 
-## 5. Payment Flow Tests
-### 5.1 Subscription Scenarios
-| Test Case | Steps | Expected Result |
-|-----------|-------|-----------------|
-| New Premium Subscription | 1. Select Premium plan<br>2. Enter valid card<br>3. Submit | - Status: active<br>- Features unlocked |
-| Payment Failure | 1. Use declined card<br>2. Attempt purchase | - Error message shown<br>- No access change |
-| Plan Upgrade | 1. From Free to Pro<br>2. Confirm prorated charge | - Immediate upgrade<br>- Correct charge |
+networks:
+  web-network:
+    driver: bridge
 
-### 5.2 Webhook Tests
-- Payment success → DB updated
-- Payment failed → Retry logic
-- Subscription canceled → Access revoked
+volumes:
+  postgres-data:
+</file>
 
-## 6. Security Tests
-### 6.1 Payment Data
-- Card details never stored
-- Tokenization verified
-- PCI compliance checks
+<file path="jest.config.ts">
+import type { Config } from '@jest/types'
+
+const config: Config.InitialOptions = {
+  preset: 'ts-jest',
+  testEnvironment: 'node',
+  roots: ['<rootDir>'],
+  testMatch: ['**/*.test.ts'],
+  setupFiles: [
+    '<rootDir>/tests/setupEnv.ts',
+    '<rootDir>/tests/__mocks__/supabaseClient.ts'
+  ],
+  transform: {
+    '^.+\\.(t|j)sx?$': 'ts-jest',
+  },
+  transformIgnorePatterns: [
+    '/node_modules/(?!@auth/supabase-adapter|@auth/core)',
+  ],
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/$1',
+    '^@auth/supabase-adapter$': '<rootDir>/node_modules/@auth/supabase-adapter/index.js'
+  }
+}
+
+export default config
+</file>
+
+<file path=".roo/rules-orchestrator-senior/rules.md">
+You are the **Orchestrator AI**, designated as **🤖 Orchestrator**. You are the master process manager, central router, and state janitor for the autonomous development system. You are executed for a **single, one-shot decision-making task**: to analyze the repository's current state, clean up any completed work artifacts, and hand off control to the appropriate specialist.
+
+## 2. THE CORE MISSION (One-Shot Execution)
+
+Your mission is to perform a single, definitive analysis of the repository. You will run a state cleanup protocol first, then immediately switch to the correct operational mode based on the resulting clean state.
+
+## 3. THE ORCHESTRATION DECISION TREE
+
+Upon activation, you will check for the existence of the following files in this **strict, descending order of priority**. You must execute the action for the **first matching condition**.
+
+1.  **If `PROJECT_VERIFIED_AND_COMPLETE.md` exists:** (HIGHEST PRIORITY)
+    *   **Analysis:** The project has been fully developed and verified by the Senior Architect.
+    *   **Announcement:** "SUCCESS: Project is verified and complete. Halting all operations."
+    *   **Action:** Terminate all processes.
+
+2.  **If `DEVELOPMENT_COMPLETE.md` exists:**
+    *   **Analysis:** The Developer has signaled that all planned work is finished. The project requires final verification.
+    *   **Announcement:** "Development phase complete. Preparing for final project verification."
+    *   **Action:**
+        1.  Delete the `DEVELOPMENT_COMPLETE.md` file.
+        2.  Create a new signal file named `NEEDS_FINAL_VERIFICATION.md`.
+        3.  **Restart your own decision process from the top of this list.**
+
+3.  **If `NEEDS_FINAL_VERIFICATION.md` exists:**
+    *   **Analysis:** The project is ready for a final, holistic review.
+    *   **Announcement:** "Handing off to Senior Architect for final codebase and documentation verification."
+    *   **Action:** Switch mode: `<mode>architect-senior</mode>`.
+
+4.  **If `NEEDS_ARCHITECTURAL_REVIEW.md` exists:**
+    *   **Analysis:** A tactical fix has failed. The core plan requires re-evaluation by the master strategist.
+    *   **Announcement:** "Escalation signal detected. A tactical fix has failed. Switching to Senior Architect for deep analysis and strategic intervention."
+    *   **Action:** Switch mode: `<mode>architect-senior</mode>`.
+
+5.  **If `NEEDS_ASSISTANCE.md` exists:**
+    *   **Analysis:** A standard development or verification task has failed. A first-level response is required.
+    *   **Announcement:** "Distress signal detected. Switching to Emergency mode for tactical diagnosis."
+    *   **Action:** Switch mode: `<mode>emergency</mode>`.
+
+6.  **If `FIX_PLAN.md` exists:**
+    *   **Analysis:** A fix plan exists. I must determine if it is complete or pending execution.
+    *   **Action (Conditional Logic):**
+        *   **Read the `FIX_PLAN.md` file.**
+        *   **If the file contains the string `[ ]`:**
+            *   **Verdict:** The plan has pending tasks.
+            *   **Announcement:** "Pending fix plan detected. Switching to Developer mode for execution."
+            *   **Action:** Switch mode: `<mode>developer</mode>`.
+        *   **If the file does NOT contain the string `[ ]`:**
+            *   **Verdict:** The plan was successfully completed by the developer, but the artifact remains. My role is to clean it up.
+            *   **Announcement:** "Completed fix plan detected. Cleaning up state file and re-evaluating."
+            *   **Action:** Delete the `FIX_PLAN.md` file, and then **restart your own decision process from the top of this list.**
+
+7.  **If `ARCHITECT_PLANNING_COMPLETE.md` exists:**
+    *   **Analysis:** The Architect has finished planning, and development can begin. This is a one-time signal that must be consumed.
+    *   **Announcement:** "Architectural planning is complete. Consuming signal and handing off to Developer."
+    *   **Action:**
+        1.  Delete the `ARCHITECT_PLANNING_COMPLETE.md` file.
+        2.  Switch mode: `<mode>developer</mode>`.
+
+8.  **Default - If none of the above conditions are met:**
+    *   **Analysis:** The repository is in a clean state, with no emergencies or pending fixes. The system should proceed with the next phase of planning.
+    *   **Announcement:** "No critical signals found. Switching to Architect mode for standard planning."
+    *   **Action:** Switch mode: `<mode>architect-senior</mode>`.
+
+## 4. CRITICAL DIRECTIVES
+*   **CLEAN THEN DECIDE:** Your primary responsibility is to ensure a clean state before delegating. A completed `FIX_PLAN.md` or `ARCHITECT_PLANNING_COMPLETE.md` is a temporary artifact that you **must** clean up.
+*   **ONE SHOT, NO LOOPS:** You execute one branch of the decision tree and then immediately hand off control. If you clean up a file, you must re-run the tree to ensure the correct handoff from the new state.
+*   **PRIORITY IS LAW:** You must check for signals in the exact order specified.
+</file>
+
+<file path="app/api/stats/fluency/route.ts">
+import { NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import logger from '@/lib/logger';
+
+export async function GET() {
+  const session = await getServerSession(authOptions);
+
+  if (!session || !session.user) {
+    logger.warn('Unauthorized access attempt to fluency stats');
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  logger.info({ userId: session.user.id }, 'Fetching fluency stats');
+
+  try {
+    const stats = await prisma.userProgress.groupBy({
+      by: ['createdAt'],
+      where: { userId: session.user.id },
+      _avg: { accuracyScore: true },
+      _count: { _all: true },
+      orderBy: { createdAt: 'asc' }
+    });
+
+    logger.debug({ userId: session.user.id, statsCount: stats.length }, 'Fluency stats retrieved');
+    return NextResponse.json({ stats });
+  } catch (error) {
+    logger.error({ userId: session.user.id, error }, 'Failed to fetch fluency stats');
+    return NextResponse.json(
+      { error: 'Failed to retrieve fluency stats' },
+      { status: 500 }
+    );
+  }
+}
+</file>
+
+<file path="app/api/stripe/webhook/route.ts">
+import { NextResponse } from 'next/server';
+import Stripe from 'stripe';
+import logger from '@/lib/logger';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+export async function POST(req: Request) {
+  const body = await req.text();
+  const signature = req.headers.get('stripe-signature') as string;
+
+  try {
+    const event = stripe.webhooks.constructEvent(
+      body,
+      signature,
+      process.env.STRIPE_WEBHOOK_SECRET!
+    );
+
+    logger.info({ eventType: event.type }, 'Stripe webhook verified');
+    return NextResponse.json({ received: true }, { status: 200 });
+  } catch (err) {
+    logger.error({ error: err }, 'Stripe webhook verification failed');
+    return NextResponse.json(
+      { error: 'Webhook signature verification failed' },
+      { status: 400 }
+    );
+  }
+}
 </file>
 
 <file path="documentation/dev_todo_phase_2.md">
@@ -8376,6 +8364,7 @@ model Lesson {
   completedAt DateTime?
   analysis    VoiceAnalysis[]
   progress    Progress[]
+  @@index([userId, difficulty])
 }
 
 model Exercise {
@@ -8408,6 +8397,7 @@ model Progress {
   score       Float?
   startedAt   DateTime @default(now())
   completedAt DateTime?
+  @@index([userId, completedAt])
 }
 
 model SRSEntry {
@@ -9338,6 +9328,27 @@ export async function POST(req: NextRequest) {
   - Verification: `node -v` shows v20.x
 </file>
 
+<file path="NEEDS_ASSISTANCE.md">
+## Failing Plan Path
+todos/dev_todo_phase_7.md
+
+## Task Description
+Add indexes to Prisma schema (`/prisma/schema.prisma`)
+- Add `@@index([userId, difficulty])` to Lesson model
+- Add `@@index([userId, completedAt])` to Progress model
+- Run migration: `npx prisma migrate dev --name add_performance_indexes`
+
+## Action Attempted
+1. Tried direct command: `npx prisma migrate dev --name add_performance_indexes` (failed with database connection error)
+2. Tried Docker command: `docker compose exec app npx prisma migrate dev --name add_performance_indexes` (failed with flag error)
+3. Tried corrected Docker command: `docker compose exec app sh -c "npx prisma migrate dev --name add_performance_indexes"` (failed with 'compose is not a docker command' error)
+
+## Verification Error
+Could not execute database migration. Received errors:
+- P1001: Can't reach database server at `db.supabase.co:5432`
+- docker: 'compose' is not a docker command
+</file>
+
 <file path=".roo/rules-developer/rules.md">
 ## 1. IDENTITY & PERSONA
 
@@ -9451,6 +9462,7 @@ If the failing task is from a `FIX_PLAN.md` file, this indicates a deep strategi
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/supabase-js": "^2.50.0",
     "@types/recharts": "^2.0.1",
+    "@types/redis": "^4.0.11",
     "@types/stripe": "^8.0.417",
     "@upstash/redis": "^1.35.0",
     "next-auth": "^4.24.11",
@@ -9460,6 +9472,7 @@ If the failing task is from a `FIX_PLAN.md` file, this indicates a deep strategi
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "recharts": "^2.15.3",
+    "redis": "^5.5.6",
     "stripe": "^18.2.1",
     "zod": "^3.25.64"
   },
