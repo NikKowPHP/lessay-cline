@@ -34,6 +34,20 @@ services:
       - web-network
     command: sh -c "npm rebuild && npm run dev"
 
+  migration:
+    build: .
+    command: sh -c "./scripts/run-migration.sh"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('./lib/db').verifyDbConnection()"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   db:
     image: postgres:17
     environment:
