@@ -3,14 +3,14 @@
 ## Tasks for Developer AI
 
 ### 1. Install Testing Packages
-- [ ] **Add Jest and TypeScript support**
+- [x] **Add Jest and TypeScript support**
   ```bash
   npm install jest ts-jest @types/jest --save-dev
   ```
   Verification: Packages appear in `package.json` devDependencies
 
 ### 2. Configure Jest (`jest.config.ts`)
-- [ ] **Create Jest configuration**
+- [x] **Create Jest configuration**
   ```typescript
   import type { Config } from '@jest/types'
 
