@@ -8,16 +8,24 @@ let textToSpeechClient: TextToSpeechClient;
 
 if (process.env.GCP_CREDENTIALS_JSON) {
   const credentials = JSON.parse(process.env.GCP_CREDENTIALS_JSON);
-  geminiClient = new GoogleGenerativeAI(process.env.AI_API_KEY);
+  const apiKey = process.env.AI_API_KEY;
+  if (!apiKey) {
+    throw new Error('AI_API_KEY environment variable is required');
+  }
+  geminiClient = new GoogleGenerativeAI(apiKey as string);
   speechClient = new SpeechClient({ credentials });
   textToSpeechClient = new TextToSpeechClient({ credentials });
 } else {
-  geminiClient = new GoogleGenerativeAI(process.env.AI_API_KEY);
+  const apiKey = process.env.AI_API_KEY;
+  if (!apiKey) {
+    throw new Error('AI_API_KEY environment variable is required');
+  }
+  geminiClient = new GoogleGenerativeAI(apiKey as string);
   speechClient = new SpeechClient({ keyFilename: './gcp-credentials.json' });
   textToSpeechClient = new TextToSpeechClient({ keyFilename: './gcp-credentials.json' });
 }
 
-export async function generateLessonForUser(userId: string) {
+export async function generateLessonForUser(_userId: string) { // eslint-disable-line @typescript-eslint/no-unused-vars
   const model = geminiClient.getGenerativeModel({
     model: "gemini-pro",
     generationConfig: {
@@ -42,8 +50,15 @@ export async function transcribeAudio(audioBuffer: Buffer): Promise<string> {
       languageCode: 'en-US'
     }
   });
+  if (!response?.results?.length) {
+    return '';
+  }
+  
   return response.results
-    .map(result => result.alternatives[0].transcript)
+    .flatMap(result =>
+      result.alternatives?.map(alt => alt.transcript) ?? []
+    )
+    .filter((t): t is string => !!t)
     .join('\n');
 }
 
@@ -58,7 +73,10 @@ export async function synthesizeSpeech(text: string): Promise<Buffer> {
       audioEncoding: 'MP3'
     }
   });
-  return Buffer.from(response.audioContent, 'base64');
+  if (!response.audioContent) {
+    throw new Error('No audio content received from text-to-speech service');
+  }
+  return Buffer.from(response.audioContent as string, 'base64');
 }
 
 export async function analyzeAudioForDiagnostics() {
