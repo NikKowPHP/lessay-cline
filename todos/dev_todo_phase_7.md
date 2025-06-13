@@ -9,7 +9,7 @@
   - **Command:** `npm install redis @types/redis`
   - **Verification:** `package.json` includes `redis` in dependencies
 
-- [ ] **Create Redis client utility (`/lib/redis.ts`)**
+- [x] **Create Redis client utility (`/lib/redis.ts`)**
   - **Code:**
     ```typescript
     import { createClient } from 'redis'

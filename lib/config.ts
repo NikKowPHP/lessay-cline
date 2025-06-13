@@ -7,6 +7,7 @@ const envSchema = z.object({
   AI_API_KEY: z.string().min(20),
   GCP_CREDENTIALS_JSON: z.string().optional(),
   DATABASE_URL: z.string().url().optional(),
+  REDIS_URL: z.string().url(),
 });
 
 const env = envSchema.safeParse(process.env);
@@ -24,9 +25,12 @@ export const config = {
   },
   ai: {
     apiKey: env.data.AI_API_KEY,
-    gcpCredentials: env.data.GCP_CREDENTIALS_JSON 
+    gcpCredentials: env.data.GCP_CREDENTIALS_JSON
       ? JSON.parse(env.data.GCP_CREDENTIALS_JSON)
       : undefined,
   },
   databaseUrl: env.data.DATABASE_URL,
+  redis: {
+    url: env.data.REDIS_URL,
+  },
 };
