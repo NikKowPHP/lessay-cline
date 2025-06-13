@@ -61,7 +61,7 @@
   Verification: File exists with all test cases
 
 ### 4. Create Lesson Tests (`/tests/lessons.test.ts`)
-- [ ] **Implement lesson flow tests**
+- [x] **Implement lesson flow tests**
   ```typescript
   import { describe, it, expect } from '@jest/globals'
   import { startLesson, submitAnswer } from '@/lib/lessons'
