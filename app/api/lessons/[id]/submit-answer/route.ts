@@ -19,13 +19,25 @@ export async function POST(
     const { answer } = await request.json()
     const lessonId = params.id
 
+    // First find the progress record
+    const existingProgress = await prisma.progress.findFirst({
+      where: {
+        userId: session.user.id,
+        lessonId: lessonId
+      }
+    })
+
+    if (!existingProgress) {
+      return NextResponse.json(
+        { error: 'Progress record not found' },
+        { status: 404 }
+      )
+    }
+
     // Update progress with the submitted answer
     const progress = await prisma.progress.update({
-      where: { 
-        userId_lessonId: {
-          userId: session.user.id,
-          lessonId: lessonId
-        }
+      where: {
+        id: existingProgress.id
       },
       data: {
         completedAt: new Date(),

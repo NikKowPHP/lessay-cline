@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
-    "bundle": "ncc build app/api/lessons/start/route.ts -o dist"
+    "bundle": "NCC_CONFIG_TS_CONFIG=tsconfig.bundle.json ncc build app/api/lessons/start/route.ts -o dist"
   },
   "dependencies": {
     "@auth/supabase-adapter": "^1.9.1",
