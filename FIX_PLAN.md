@@ -11,7 +11,7 @@
   - **Verification:** Tests run without needing production credentials
 
 ### 3. Enhanced Mocking
-- [ ] **Task 3: Improve Supabase mocks**
+- [x] **Task 3: Improve Supabase mocks**
   - **LLM Prompt:** "Update `tests/__mocks__/supabaseClient.ts` with complete mock implementations"
   - **Verification:** Auth tests pass with mocked Supabase client
 
