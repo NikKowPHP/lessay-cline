@@ -54,8 +54,8 @@
       @@index([userId, completedAt])
     }
     ```
-  - **Command:** `npx prisma migrate dev --name add_performance_indexes`
-  - **Verification:** New migration file created
+  - **Command:** `docker-compose up migration`
+  - **Verification:** Check logs for "Running database migrations"
 
 - [ ] **Implement query logging**
   - **Modify `/lib/prisma.ts`:**
