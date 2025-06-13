@@ -1,0 +1,483 @@
+Statistical profiling result from isolate-0x6228c659e4c0-287982-v8.log, (1179 ticks, 1 unaccounted, 0 excluded).
+
+ [Shared libraries]:
+   ticks  total  nonlib   name
+    481   40.8%          /usr/lib/x86_64-linux-gnu/libnode.so.109
+     33    2.8%          /usr/lib/x86_64-linux-gnu/libc.so.6
+      5    0.4%          /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+      2    0.2%          [vdso]
+
+ [JavaScript]:
+   ticks  total  nonlib   name
+      2    0.2%    0.3%  LazyCompile: *normalizeString node:path:66:25
+      1    0.1%    0.2%  LazyCompile: *syncExports node:internal/bootstrap/realm:363:14
+      1    0.1%    0.2%  LazyCompile: *resolve node:path:1091:10
+      1    0.1%    0.2%  LazyCompile: *Module._nodeModulePaths node:internal/modules/cjs/loader:783:37
+      1    0.1%    0.2%  Function: wasm-function[18]
+      1    0.1%    0.2%  Function: ^updateChildren node:internal/modules/cjs/loader:210:24
+      1    0.1%    0.2%  Function: ^trySelfParentPath node:internal/modules/cjs/loader:513:27
+      1    0.1%    0.2%  Function: ^stat node:internal/modules/cjs/loader:178:14
+      1    0.1%    0.2%  Function: ^readPackageScope node:internal/modules/package_json_reader:148:26
+      1    0.1%    0.2%  Function: ^openSync node:fs:587:18
+      1    0.1%    0.2%  Function: ^basename node:path:1305:11
+      1    0.1%    0.2%  Function: ^Module._load node:internal/modules/cjs/loader:940:24
+      1    0.1%    0.2%  Function: ^<anonymous> node:internal/validators:137:40
+
+ [C++]:
+   ticks  total  nonlib   name
+    364   30.9%   55.3%  node::contextify::ContextifyContext::CompileFunction(v8::FunctionCallbackInfo<v8::Value> const&)
+    154   13.1%   23.4%  node::builtins::BuiltinLoader::CompileFunction(v8::FunctionCallbackInfo<v8::Value> const&)
+     39    3.3%    5.9%  __write@@GLIBC_2.2.5
+     25    2.1%    3.8%  node::binding::DLOpen(v8::FunctionCallbackInfo<v8::Value> const&)
+     15    1.3%    2.3%  epoll_pwait@@GLIBC_2.6
+      9    0.8%    1.4%  fputc@@GLIBC_2.2.5
+      5    0.4%    0.8%  node::binding::GetInternalBinding(v8::FunctionCallbackInfo<v8::Value> const&)
+      5    0.4%    0.8%  fwrite@@GLIBC_2.2.5
+      4    0.3%    0.6%  __mprotect@@GLIBC_PRIVATE
+      3    0.3%    0.5%  pthread_cond_signal@@GLIBC_2.3.2
+      2    0.2%    0.3%  __pthread_rwlock_unlock@GLIBC_2.2.5
+      2    0.2%    0.3%  __munmap@@GLIBC_PRIVATE
+      2    0.2%    0.3%  __mmap@@GLIBC_PRIVATE
+      2    0.2%    0.3%  __libc_malloc@@GLIBC_2.2.5
+      1    0.1%    0.2%  std::ostreambuf_iterator<char, std::char_traits<char> > std::num_put<char, std::ostreambuf_iterator<char, std::char_traits<char> > >::_M_insert_int<long>(std::ostreambuf_iterator<char, std::char_traits<char> >, std::ios_base&, char, long) const@@GLIBCXX_3.4
+      1    0.1%    0.2%  std::ostream::sentry::sentry(std::ostream&)@@GLIBCXX_3.4
+      1    0.1%    0.2%  std::ostream::put(char)@@GLIBCXX_3.4
+      1    0.1%    0.2%  std::basic_ostream<char, std::char_traits<char> >& std::__ostream_insert<char, std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*, long)@@GLIBCXX_3.4.9
+      1    0.1%    0.2%  operator delete(void*)@@GLIBCXX_3.4
+      1    0.1%    0.2%  node::url::BindingData::Parse(v8::FunctionCallbackInfo<v8::Value> const&)
+      1    0.1%    0.2%  node::loader::ModuleWrap::Evaluate(v8::FunctionCallbackInfo<v8::Value> const&)
+      1    0.1%    0.2%  node::fs::FileHandle::Close(v8::FunctionCallbackInfo<v8::Value> const&)
+      1    0.1%    0.2%  __pthread_mutex_unlock@GLIBC_2.2.5
+      1    0.1%    0.2%  __lll_lock_wake_private@@GLIBC_PRIVATE
+      1    0.1%    0.2%  __libc_pread@@GLIBC_PRIVATE
+      1    0.1%    0.2%  _IO_file_xsputn@@GLIBC_2.2.5
+
+ [Summary]:
+   ticks  total  nonlib   name
+     14    1.2%    2.1%  JavaScript
+    643   54.5%   97.7%  C++
+     92    7.8%   14.0%  GC
+    521   44.2%          Shared libraries
+      1    0.1%          Unaccounted
+
+ [C++ entry points]:
+   ticks    cpp   total   name
+    364   56.4%   30.9%  node::contextify::ContextifyContext::CompileFunction(v8::FunctionCallbackInfo<v8::Value> const&)
+    154   23.9%   13.1%  node::builtins::BuiltinLoader::CompileFunction(v8::FunctionCallbackInfo<v8::Value> const&)
+     54    8.4%    4.6%  node::loader::ModuleWrap::Evaluate(v8::FunctionCallbackInfo<v8::Value> const&)
+     25    3.9%    2.1%  node::binding::DLOpen(v8::FunctionCallbackInfo<v8::Value> const&)
+     22    3.4%    1.9%  __write@@GLIBC_2.2.5
+      7    1.1%    0.6%  fputc@@GLIBC_2.2.5
+      5    0.8%    0.4%  node::binding::GetInternalBinding(v8::FunctionCallbackInfo<v8::Value> const&)
+      5    0.8%    0.4%  fwrite@@GLIBC_2.2.5
+      1    0.2%    0.1%  std::ostreambuf_iterator<char, std::char_traits<char> > std::num_put<char, std::ostreambuf_iterator<char, std::char_traits<char> > >::_M_insert_int<long>(std::ostreambuf_iterator<char, std::char_traits<char> >, std::ios_base&, char, long) const@@GLIBCXX_3.4
+      1    0.2%    0.1%  std::ostream::put(char)@@GLIBCXX_3.4
+      1    0.2%    0.1%  std::basic_ostream<char, std::char_traits<char> >& std::__ostream_insert<char, std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*, long)@@GLIBCXX_3.4.9
+      1    0.2%    0.1%  node::url::BindingData::Parse(v8::FunctionCallbackInfo<v8::Value> const&)
+      1    0.2%    0.1%  node::fs::FileHandle::Close(v8::FunctionCallbackInfo<v8::Value> const&)
+      1    0.2%    0.1%  __pthread_rwlock_unlock@GLIBC_2.2.5
+      1    0.2%    0.1%  __pthread_mutex_unlock@GLIBC_2.2.5
+      1    0.2%    0.1%  __mprotect@@GLIBC_PRIVATE
+      1    0.2%    0.1%  _IO_file_xsputn@@GLIBC_2.2.5
+
+ [Bottom up (heavy) profile]:
+  Note: percentage shows a share of a particular caller in the total
+  amount of its parent calls.
+  Callers occupying less than 1.0% are not shown.
+
+   ticks parent  name
+    481   40.8%  /usr/lib/x86_64-linux-gnu/libnode.so.109
+    369   76.7%    /usr/lib/x86_64-linux-gnu/libnode.so.109
+     48   13.0%      Function: ^readSync node:fs:701:18
+     48  100.0%        Function: ^tryReadSync node:fs:440:21
+     48  100.0%          Function: ^readFileSync node:fs:461:22
+     43   89.6%            Function: ^Module._extensions..js node:internal/modules/cjs/loader:1369:37
+      4    8.3%            LazyCompile: ~Module._extensions..js node:internal/modules/cjs/loader:1369:37
+      1    2.1%            LazyCompile: ~cjsPreparseModuleExports node:internal/modules/esm/translators:231:34
+     23    6.2%      /usr/lib/x86_64-linux-gnu/libnode.so.109
+      2    8.7%        LazyCompile: ~resolvePackageTargetString node:internal/modules/esm/resolve:429:36
+      2  100.0%          LazyCompile: ~resolvePackageTarget node:internal/modules/esm/resolve:533:30
+      2  100.0%            LazyCompile: ~resolvePackageTarget node:internal/modules/esm/resolve:533:30
+      2    8.7%        Function: ~<anonymous> node:internal/per_context/primordials:1:1
+      1    4.3%        LazyCompile: ~wordsRegexp /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/acorn/acorn.js:1:8815
+      1  100.0%          LazyCompile: ~buildUnicodeData /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/acorn/acorn.js:1:81475
+      1  100.0%            LazyCompile: ~<anonymous> /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/acorn/acorn.js:1:75
+      1    4.3%        LazyCompile: ~toUSVString node:internal/util:76:21
+      1  100.0%          LazyCompile: ~set search node:internal/url:956:13
+      1  100.0%            /usr/lib/x86_64-linux-gnu/libnode.so.109
+      1    4.3%        LazyCompile: ~replaceXRange /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/semver/index.js:1:5766
+      1  100.0%          LazyCompile: ~<anonymous> /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/semver/index.js:1:5711
+      1  100.0%            /usr/lib/x86_64-linux-gnu/libnode.so.109
+      1    4.3%        LazyCompile: ~replaceProcessEnv /home/kasjer/projects/lessay-cline/node_modules/@next/env/dist/index.js:1:8304
+      1  100.0%          LazyCompile: ~loadEnvConfig /home/kasjer/projects/lessay-cline/node_modules/@next/env/dist/index.js:1:9272
+      1  100.0%            LazyCompile: ~loadConfig /home/kasjer/projects/lessay-cline/node_modules/next/dist/server/config.js:920:26
+      1    4.3%        LazyCompile: ~patchIncorrectLockfile /home/kasjer/projects/lessay-cline/node_modules/next/dist/lib/patch-incorrect-lockfile.js:84:38
+      1  100.0%          /usr/lib/x86_64-linux-gnu/libnode.so.109
+      1    4.3%        LazyCompile: ~parseRange /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/semver/index.js:1:2739
+      1  100.0%          LazyCompile: ~<anonymous> /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/semver/index.js:1:2468
+      1  100.0%            /usr/lib/x86_64-linux-gnu/libnode.so.109
+      1    4.3%        LazyCompile: ~parse /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/semver/index.js:1:434
+      1  100.0%          LazyCompile: ~Comparator /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/semver/index.js:1:111
+      1  100.0%            LazyCompile: ~<anonymous> /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/semver/index.js:1:3305
+      1    4.3%        LazyCompile: ~deprecate node:internal/util:155:19
+      1  100.0%          Function: ~<anonymous> node:dgram:1:1
+      1  100.0%            Function: ^compileForInternalLoader node:internal/bootstrap/realm:375:27
+      1    4.3%        LazyCompile: ~copyProps node:internal/per_context/primordials:357:19
+      1  100.0%          LazyCompile: ~makeSafe node:internal/per_context/primordials:371:18
+      1  100.0%            Function: ~<anonymous> node:internal/per_context/primordials:1:1
+      1    4.3%        LazyCompile: ~SafeWeakMap node:internal/per_context/primordials:419:16
+      1  100.0%          Function: ~<anonymous> node:internal/per_context/domexception:1:1
+      1    4.3%        LazyCompile: ~I.createResolver /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:1:196785
+      1  100.0%          LazyCompile: ~90878 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:1:210118
+      1  100.0%            Function: ^__webpack_require__ /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:29:2279956
+      1    4.3%        LazyCompile: ~4099 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/tar/index.js:1:83049
+      1  100.0%          LazyCompile: ~__nccwpck_require__ /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/tar/index.js:1:98022
+      1  100.0%            LazyCompile: ~1944 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/tar/index.js:1:83375
+      1    4.3%        Function: ^resolve node:path:1091:10
+      1  100.0%          Function: ^readPackage node:internal/modules/package_json_reader:139:21
+      1  100.0%            Function: ^readPackageScope node:internal/modules/package_json_reader:148:26
+      1    4.3%        Function: ^read node:internal/modules/package_json_reader:47:14
+      1  100.0%          Function: ^readPackage node:internal/modules/package_json_reader:139:21
+      1  100.0%            Function: ^readPackageScope node:internal/modules/package_json_reader:148:26
+      1    4.3%        Function: ^read /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/json5/index.js:1:1089
+      1  100.0%          Function: ^default /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/json5/index.js:1:1203
+      1  100.0%            Function: ^lex /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/json5/index.js:1:923
+      1    4.3%        Function: ^getOwn node:internal/bootstrap/realm:200:16
+      1  100.0%          Function: ^syncExports node:internal/bootstrap/realm:363:14
+      1  100.0%            LazyCompile: ~<anonymous> node:internal/bootstrap/realm:349:15
+      1    4.3%        Function: ^Module._findPath node:internal/modules/cjs/loader:603:28
+      1  100.0%          LazyCompile: ~Module._resolveFilename node:internal/modules/cjs/loader:1048:35
+      1  100.0%            Function: ^<anonymous> /home/kasjer/projects/lessay-cline/node_modules/next/dist/server/require-hook.js:52:33
+      1    4.3%        Function: ^FastBuffer node:internal/buffer:960:14
+      1  100.0%          Function: ^createUnsafeBuffer node:internal/buffer:1061:28
+      1  100.0%            Function: ^createPool node:buffer:158:20
+      1    4.3%        /usr/lib/x86_64-linux-gnu/libnode.so.109
+      1  100.0%          LazyCompile: ~_searchLast /home/kasjer/projects/lessay-cline/node_modules/@next/env/dist/index.js:1:55
+      1  100.0%            LazyCompile: ~_interpolate /home/kasjer/projects/lessay-cline/node_modules/@next/env/dist/index.js:1:158
+     17    4.6%      Function: ^read node:internal/modules/package_json_reader:47:14
+     17  100.0%        Function: ^readPackage node:internal/modules/package_json_reader:139:21
+      9   52.9%          LazyCompile: ~tryPackage node:internal/modules/cjs/loader:422:20
+      9  100.0%            Function: ^Module._findPath node:internal/modules/cjs/loader:603:28
+      4   23.5%          Function: ^readPackageScope node:internal/modules/package_json_reader:148:26
+      2   50.0%            Function: ^Module._extensions..js node:internal/modules/cjs/loader:1369:37
+      1   25.0%            LazyCompile: ~Module._extensions..js node:internal/modules/cjs/loader:1369:37
+      1   25.0%            Function: ^trySelf node:internal/modules/cjs/loader:532:17
+      2   11.8%          Function: ^tryPackage node:internal/modules/cjs/loader:422:20
+      2  100.0%            Function: ^Module._findPath node:internal/modules/cjs/loader:603:28
+      2   11.8%          Function: ^resolveExports node:internal/modules/cjs/loader:574:24
+      2  100.0%            Function: ^Module._findPath node:internal/modules/cjs/loader:603:28
+     12    3.3%      Function: ^stat node:internal/modules/cjs/loader:178:14
+      9   75.0%        Function: ^Module._findPath node:internal/modules/cjs/loader:603:28
+      9  100.0%          Function: ^Module._resolveFilename node:internal/modules/cjs/loader:1048:35
+      9  100.0%            Function: ^<anonymous> /home/kasjer/projects/lessay-cline/node_modules/next/dist/server/require-hook.js:52:33
+      3   25.0%        Function: ^tryFile node:internal/modules/cjs/loader:465:17
+      3  100.0%          Function: ^tryExtensions node:internal/modules/cjs/loader:480:23
+      3  100.0%            Function: ^Module._findPath node:internal/modules/cjs/loader:603:28
+      9    2.4%      Function: ^slice node:buffer:638:12
+      9  100.0%        Function: ^toString node:buffer:828:46
+      9  100.0%          Function: ^readFileSync node:fs:461:22
+      8   88.9%            Function: ^Module._extensions..js node:internal/modules/cjs/loader:1369:37
+      1   11.1%            LazyCompile: ~Module._extensions..js node:internal/modules/cjs/loader:1369:37
+      9    2.4%      Function: ^__webpack_require__ /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:29:2279956
+      3   33.3%        LazyCompile: ~29327 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:29:66532
+      3  100.0%          Function: ^__webpack_require__ /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:29:2279956
+      3  100.0%            LazyCompile: ~32594 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:29:398589
+      1   11.1%        LazyCompile: ~v.exports /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:29:1944955
+      1  100.0%          LazyCompile: ~exports.init /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/webpack.js:5:25
+      1  100.0%            LazyCompile: ~loadWebpackHook /home/kasjer/projects/lessay-cline/node_modules/next/dist/server/config-utils.js:12:25
+      1   11.1%        LazyCompile: ~96108 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:1:193939
+      1  100.0%          Function: ^__webpack_require__ /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:29:2279956
+      1  100.0%            LazyCompile: ~90878 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:1:210118
+      1   11.1%        LazyCompile: ~33643 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:29:817826
+      1  100.0%          Function: ^__webpack_require__ /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:29:2279956
+      1  100.0%            LazyCompile: ~31698 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:29:1105844
+      1   11.1%        LazyCompile: ~31698 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:29:1105844
+      1  100.0%          LazyCompile: ~__webpack_require__ /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:29:2279956
+      1  100.0%            LazyCompile: ~v.exports /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:29:1944955
+      1   11.1%        LazyCompile: ~31384 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:29:980374
+      1  100.0%          Function: ^__webpack_require__ /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:29:2279956
+      1  100.0%            LazyCompile: ~31698 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:29:1105844
+      1   11.1%        LazyCompile: ~23630 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:29:28892
+      1  100.0%          Function: ^__webpack_require__ /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:29:2279956
+      1  100.0%            LazyCompile: ~34803 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:29:340860
+      7    1.9%      LazyCompile: ~__nccwpck_require__ /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/edge-runtime/index.js:1:524565
+      5   71.4%        LazyCompile: ~239 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/edge-runtime/index.js:1:506447
+      5  100.0%          LazyCompile: ~__nccwpck_require__ /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/edge-runtime/index.js:1:524565
+      5  100.0%            LazyCompile: ~885 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/edge-runtime/index.js:1:513946
+      1   14.3%        LazyCompile: ~997 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/edge-runtime/index.js:1:519444
+      1  100.0%          LazyCompile: ~__nccwpck_require__ /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/edge-runtime/index.js:1:524565
+      1  100.0%            Function: ~<anonymous> /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/edge-runtime/index.js:1:524953
+      1   14.3%        LazyCompile: ~885 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/edge-runtime/index.js:1:513946
+      1  100.0%          LazyCompile: ~__nccwpck_require__ /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/edge-runtime/index.js:1:524565
+      1  100.0%            LazyCompile: ~105 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/edge-runtime/index.js:1:515533
+      5    1.4%      LazyCompile: ~patchIncorrectLockfile /home/kasjer/projects/lessay-cline/node_modules/next/dist/lib/patch-incorrect-lockfile.js:84:38
+      5  100.0%        /usr/lib/x86_64-linux-gnu/libnode.so.109
+      5    1.4%      LazyCompile: ~ChildProcess.spawn node:internal/child_process:348:40
+      5  100.0%        LazyCompile: ~spawn node:child_process:753:15
+      3   60.0%          LazyCompile: ~fork node:child_process:123:14
+      3  100.0%            LazyCompile: ~<anonymous> /home/kasjer/projects/lessay-cline/node_modules/next/dist/cli/next-dev.js:211:28
+      2   40.0%          LazyCompile: ~Telemetry.flushDetached /home/kasjer/projects/lessay-cline/node_modules/next/dist/telemetry/storage.js:158:30
+      2  100.0%            LazyCompile: ~handleSessionStop /home/kasjer/projects/lessay-cline/node_modules/next/dist/cli/next-dev.js:90:27
+      5    1.4%      Function: ^__require /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/@edge-runtime/primitives/load.js:12:49
+      2   40.0%        LazyCompile: ~../../node_modules/.pnpm/undici@6.21.0/node_modules/undici/index.js /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/@edge-runtime/primitives/load.js:18390:72
+      2  100.0%          LazyCompile: ~__require /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/@edge-runtime/primitives/load.js:12:49
+      2  100.0%            LazyCompile: ~src/primitives/fetch.js /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/@edge-runtime/primitives/load.js:18554:28
+      1   20.0%        LazyCompile: ~../../node_modules/.pnpm/undici@6.21.0/node_modules/undici/lib/web/websocket/websocket.js /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/@edge-runtime/primitives/load.js:17410:94
+      1  100.0%          Function: ^__require /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/@edge-runtime/primitives/load.js:12:49
+      1  100.0%            LazyCompile: ~../../node_modules/.pnpm/undici@6.21.0/node_modules/undici/index.js /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/@edge-runtime/primitives/load.js:18390:72
+      1   20.0%        LazyCompile: ~../../node_modules/.pnpm/undici@6.21.0/node_modules/undici/lib/web/fetch/headers.js /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/@edge-runtime/primitives/load.js:11405:88
+      1  100.0%          Function: ^__require /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/@edge-runtime/primitives/load.js:12:49
+      1  100.0%            LazyCompile: ~../../node_modules/.pnpm/undici@6.21.0/node_modules/undici/lib/web/fetch/response.js /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/@edge-runtime/primitives/load.js:11865:89
+      1   20.0%        LazyCompile: ~../../node_modules/.pnpm/undici@6.21.0/node_modules/undici/lib/interceptor/redirect-interceptor.js /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/@edge-runtime/primitives/load.js:7315:103
+      1  100.0%          Function: ^__require /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/@edge-runtime/primitives/load.js:12:49
+      1  100.0%            LazyCompile: ~../../node_modules/.pnpm/undici@6.21.0/node_modules/undici/lib/dispatcher/client.js /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/@edge-runtime/primitives/load.js:7339:88
+      4    1.1%      LazyCompile: ~transform /home/kasjer/projects/lessay-cline/node_modules/next/dist/build/swc/index.js:920:23
+      4  100.0%        LazyCompile: ~transform /home/kasjer/projects/lessay-cline/node_modules/next/dist/build/swc/index.js:1015:25
+      4  100.0%          /usr/lib/x86_64-linux-gnu/libnode.so.109
+      4    1.1%      LazyCompile: ~loadConfig /home/kasjer/projects/lessay-cline/node_modules/next/dist/server/config.js:920:26
+      3   75.0%        /usr/lib/x86_64-linux-gnu/libnode.so.109
+      1   25.0%        LazyCompile: ~nextDev /home/kasjer/projects/lessay-cline/node_modules/next/dist/cli/next-dev.js:149:17
+      1  100.0%          /usr/lib/x86_64-linux-gnu/libnode.so.109
+      4    1.1%      LazyCompile: ~exit node:internal/process/per_thread:180:16
+      4  100.0%        LazyCompile: ~handleSessionStop /home/kasjer/projects/lessay-cline/node_modules/next/dist/cli/next-dev.js:90:27
+      4  100.0%          /usr/lib/x86_64-linux-gnu/libnode.so.109
+      4    1.1%      LazyCompile: ~__require node:internal/deps/undici/undici:3:49
+      1   25.0%        LazyCompile: ~lib/fetch/index.js node:internal/deps/undici/undici:9083:23
+      1  100.0%          LazyCompile: ~__require node:internal/deps/undici/undici:3:49
+      1  100.0%            Function: ~<anonymous> node:internal/deps/undici/undici:1:1
+      1   25.0%        LazyCompile: ~lib/dispatcher-base.js node:internal/deps/undici/undici:5653:27
+      1  100.0%          LazyCompile: ~__require node:internal/deps/undici/undici:3:49
+      1  100.0%            LazyCompile: ~lib/agent.js node:internal/deps/undici/undici:8934:17
+      1   25.0%        LazyCompile: ~lib/client.js node:internal/deps/undici/undici:7134:18
+      1  100.0%          LazyCompile: ~__require node:internal/deps/undici/undici:3:49
+      1  100.0%            LazyCompile: ~lib/pool.js node:internal/deps/undici/undici:8852:16
+      1   25.0%        LazyCompile: ~fastify-busboy/lib/main.js node:internal/deps/undici/undici:3489:31
+      1  100.0%          LazyCompile: ~__require node:internal/deps/undici/undici:3:49
+      1  100.0%            LazyCompile: ~lib/fetch/body.js node:internal/deps/undici/undici:4201:22
+      4    1.1%      LazyCompile: ~__nccwpck_require__ /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/tar/index.js:1:98022
+      2   50.0%        LazyCompile: ~7301 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/tar/index.js:1:50521
+      2  100.0%          LazyCompile: ~__nccwpck_require__ /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/tar/index.js:1:98022
+      2  100.0%            LazyCompile: ~7585 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/tar/index.js:1:35871
+      1   25.0%        LazyCompile: ~5951 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/tar/index.js:1:71329
+      1  100.0%          LazyCompile: ~__nccwpck_require__ /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/tar/index.js:1:98022
+      1  100.0%            LazyCompile: ~9985 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/tar/index.js:1:37386
+      1   25.0%        LazyCompile: ~5222 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/tar/index.js:1:55742
+      1  100.0%          LazyCompile: ~__nccwpck_require__ /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/tar/index.js:1:98022
+      1  100.0%            LazyCompile: ~4975 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/tar/index.js:1:45661
+      4    1.1%      Function: ^__nccwpck_require__ /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/conf/index.js:15:28462
+      2   50.0%        LazyCompile: ~9258 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/conf/index.js:1:18487
+      2  100.0%          Function: ^__nccwpck_require__ /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/conf/index.js:15:28462
+      2  100.0%            LazyCompile: ~6474 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/conf/index.js:1:19
+      2   50.0%        LazyCompile: ~6964 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/conf/index.js:1:63415
+      2  100.0%          Function: ^__nccwpck_require__ /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/conf/index.js:15:28462
+      2  100.0%            LazyCompile: ~9233 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/conf/index.js:1:27024
+
+    364   30.9%  node::contextify::ContextifyContext::CompileFunction(v8::FunctionCallbackInfo<v8::Value> const&)
+    364  100.0%    /usr/lib/x86_64-linux-gnu/libnode.so.109
+    354   97.3%      Function: ^internalCompileFunction node:internal/vm:31:33
+    349   98.6%        Function: ^wrapSafe node:internal/modules/cjs/loader:1247:18
+    349  100.0%          Function: ^Module._compile node:internal/modules/cjs/loader:1310:37
+    333   95.4%            Function: ^Module._extensions..js node:internal/modules/cjs/loader:1369:37
+     16    4.6%            LazyCompile: ~Module._extensions..js node:internal/modules/cjs/loader:1369:37
+      5    1.4%        LazyCompile: ~wrapSafe node:internal/modules/cjs/loader:1247:18
+      5  100.0%          LazyCompile: ~Module._compile node:internal/modules/cjs/loader:1310:37
+      5  100.0%            LazyCompile: ~Module._extensions..js node:internal/modules/cjs/loader:1369:37
+     10    2.7%      LazyCompile: ~internalCompileFunction node:internal/vm:31:33
+     10  100.0%        LazyCompile: ~wrapSafe node:internal/modules/cjs/loader:1247:18
+     10  100.0%          LazyCompile: ~Module._compile node:internal/modules/cjs/loader:1310:37
+     10  100.0%            LazyCompile: ~Module._extensions..js node:internal/modules/cjs/loader:1369:37
+
+    154   13.1%  node::builtins::BuiltinLoader::CompileFunction(v8::FunctionCallbackInfo<v8::Value> const&)
+    154  100.0%    /usr/lib/x86_64-linux-gnu/libnode.so.109
+    143   92.9%      Function: ^compileForInternalLoader node:internal/bootstrap/realm:375:27
+    117   81.8%        Function: ^requireBuiltin node:internal/bootstrap/realm:412:24
+     16   13.7%          LazyCompile: ~lazyUndici node:internal/process/pre_execution:271:22
+     16  100.0%            LazyCompile: ~get node:internal/process/pre_execution:290:10
+      8    6.8%          Function: ~<anonymous> node:internal/bootstrap/switches/is_main_thread:1:1
+      7    6.0%          Function: ~<anonymous> node:crypto:1:1
+      7  100.0%            Function: ^compileForInternalLoader node:internal/bootstrap/realm:375:27
+      5    4.3%          Function: ~<anonymous> node:http:1:1
+      5  100.0%            Function: ^compileForInternalLoader node:internal/bootstrap/realm:375:27
+      5    4.3%          Function: ~<anonymous> node:http2:1:1
+      5  100.0%            Function: ^compileForInternalLoader node:internal/bootstrap/realm:375:27
+      4    3.4%          LazyCompile: ~get node:internal/util:595:17
+      4  100.0%            /usr/lib/x86_64-linux-gnu/libnode.so.109
+      4    3.4%          Function: ~<anonymous> node:internal/webstreams/transformstream:1:1
+      4  100.0%            Function: ^compileForInternalLoader node:internal/bootstrap/realm:375:27
+      4    3.4%          Function: ~<anonymous> node:internal/fs/promises:1:1
+      4  100.0%            Function: ^compileForInternalLoader node:internal/bootstrap/realm:375:27
+      4    3.4%          Function: ~<anonymous> node:internal/child_process:1:1
+      4  100.0%            Function: ^compileForInternalLoader node:internal/bootstrap/realm:375:27
+      3    2.6%          Function: ~<anonymous> node:tls:1:1
+      3  100.0%            Function: ^compileForInternalLoader node:internal/bootstrap/realm:375:27
+      3    2.6%          Function: ~<anonymous> node:internal/streams/duplex:1:1
+      3  100.0%            Function: ^compileForInternalLoader node:internal/bootstrap/realm:375:27
+      2    1.7%          LazyCompile: ~resolveExports node:internal/modules/cjs/loader:574:24
+      2  100.0%            Function: ^Module._findPath node:internal/modules/cjs/loader:603:28
+      2    1.7%          Function: ~<anonymous> node:perf_hooks:1:1
+      2  100.0%            Function: ^compileForInternalLoader node:internal/bootstrap/realm:375:27
+      2    1.7%          Function: ~<anonymous> node:net:1:1
+      2  100.0%            Function: ^compileForInternalLoader node:internal/bootstrap/realm:375:27
+      2    1.7%          Function: ~<anonymous> node:module:1:1
+      2  100.0%            Function: ^compileForInternalLoader node:internal/bootstrap/realm:375:27
+      2    1.7%          Function: ~<anonymous> node:internal/webstreams/readablestream:1:1
+      2  100.0%            Function: ^compileForInternalLoader node:internal/bootstrap/realm:375:27
+      2    1.7%          Function: ~<anonymous> node:internal/modules/esm/utils:1:1
+      2  100.0%            Function: ^compileForInternalLoader node:internal/bootstrap/realm:375:27
+      2    1.7%          Function: ~<anonymous> node:internal/fs/streams:1:1
+      2  100.0%            Function: ^compileForInternalLoader node:internal/bootstrap/realm:375:27
+      2    1.7%          Function: ~<anonymous> node:internal/event_target:1:1
+      2  100.0%            Function: ^compileForInternalLoader node:internal/bootstrap/realm:375:27
+      2    1.7%          Function: ~<anonymous> node:_http_client:1:1
+      2  100.0%            Function: ^compileForInternalLoader node:internal/bootstrap/realm:375:27
+     17   11.9%        LazyCompile: ~requireBuiltin node:internal/bootstrap/realm:412:24
+      5   29.4%          Function: ~<anonymous> node:internal/bootstrap/node:1:1
+      2   11.8%          Function: ~<anonymous> node:internal/source_map/source_map_cache:1:1
+      2  100.0%            Function: ^compileForInternalLoader node:internal/bootstrap/realm:375:27
+      2   11.8%          Function: ~<anonymous> node:internal/process/execution:1:1
+      2  100.0%            Function: ^compileForInternalLoader node:internal/bootstrap/realm:375:27
+      2   11.8%          Function: ~<anonymous> node:buffer:1:1
+      2  100.0%            Function: ^compileForInternalLoader node:internal/bootstrap/realm:375:27
+      1    5.9%          LazyCompile: ~setupProcessObject node:internal/bootstrap/node:385:28
+      1  100.0%            Function: ~<anonymous> node:internal/bootstrap/node:1:1
+      1    5.9%          LazyCompile: ~setupBuffer node:internal/bootstrap/node:426:21
+      1  100.0%            Function: ~<anonymous> node:internal/bootstrap/node:1:1
+      1    5.9%          Function: ~<anonymous> node:internal/url:1:1
+      1  100.0%            Function: ^compileForInternalLoader node:internal/bootstrap/realm:375:27
+      1    5.9%          Function: ~<anonymous> node:internal/timers:1:1
+      1  100.0%            LazyCompile: ~compileForInternalLoader node:internal/bootstrap/realm:375:27
+      1    5.9%          Function: ~<anonymous> node:internal/process/task_queues:1:1
+      1  100.0%            Function: ^compileForInternalLoader node:internal/bootstrap/realm:375:27
+      1    5.9%          Function: ~<anonymous> node:internal/console/global:1:1
+      1  100.0%            Function: ^compileForInternalLoader node:internal/bootstrap/realm:375:27
+      8    5.6%        Function: ^compileForPublicLoader node:internal/bootstrap/realm:320:25
+      8  100.0%          Function: ^loadBuiltinModule node:internal/modules/helpers:94:27
+      8  100.0%            Function: ^Module._load node:internal/modules/cjs/loader:940:24
+     11    7.1%      LazyCompile: ~compileForInternalLoader node:internal/bootstrap/realm:375:27
+     11  100.0%        LazyCompile: ~requireBuiltin node:internal/bootstrap/realm:412:24
+      4   36.4%          LazyCompile: ~setupPrepareStackTrace node:internal/bootstrap/realm:435:32
+      4  100.0%            Function: ~<anonymous> node:internal/bootstrap/realm:1:1
+      4   36.4%          Function: ~<anonymous> node:internal/timers:1:1
+      4  100.0%            LazyCompile: ~compileForInternalLoader node:internal/bootstrap/realm:375:27
+      2   18.2%          Function: ~<anonymous> node:internal/validators:1:1
+      2  100.0%            LazyCompile: ~compileForInternalLoader node:internal/bootstrap/realm:375:27
+      1    9.1%          Function: ~<anonymous> node:internal/bootstrap/node:1:1
+
+     39    3.3%  __write@@GLIBC_2.2.5
+     22   56.4%    /usr/lib/x86_64-linux-gnu/libnode.so.109
+      2    9.1%      LazyCompile: ~prepareExecution node:internal/process/pre_execution:55:26
+      2  100.0%        LazyCompile: ~prepareMainThreadExecution node:internal/process/pre_execution:39:36
+      2  100.0%          Function: ~<anonymous> node:internal/main/run_main_module:1:1
+      2    9.1%      Function: ^__webpack_require__ /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:29:2279956
+      1   50.0%        LazyCompile: ~v.exports /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:29:1944955
+      1  100.0%          LazyCompile: ~exports.init /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/webpack.js:5:25
+      1  100.0%            LazyCompile: ~loadWebpackHook /home/kasjer/projects/lessay-cline/node_modules/next/dist/server/config-utils.js:12:25
+      1   50.0%        LazyCompile: ~44747 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:29:16676
+      1  100.0%          Function: ^__webpack_require__ /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:29:2279956
+      1  100.0%            LazyCompile: ~29327 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:29:66532
+      1    4.5%      LazyCompile: ~stop /home/kasjer/projects/lessay-cline/node_modules/next/dist/trace/trace.js:89:9
+      1  100.0%        LazyCompile: ~handleSessionStop /home/kasjer/projects/lessay-cline/node_modules/next/dist/cli/next-dev.js:90:27
+      1  100.0%          /usr/lib/x86_64-linux-gnu/libnode.so.109
+      1  100.0%            /usr/lib/x86_64-linux-gnu/libnode.so.109
+      1    4.5%      LazyCompile: ~resetQueue /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:1:271598
+      1  100.0%        LazyCompile: ~closeSync /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:1:266996
+      1  100.0%          Function: ^readFileSync node:fs:461:22
+      1  100.0%            LazyCompile: ~loadEnvConfig /home/kasjer/projects/lessay-cline/node_modules/@next/env/dist/index.js:1:9272
+      1    4.5%      LazyCompile: ~readFileHandle node:internal/fs/promises:470:30
+      1  100.0%        /usr/lib/x86_64-linux-gnu/libnode.so.109
+      1    4.5%      LazyCompile: ~get node:crypto:369:8
+      1  100.0%        /usr/lib/x86_64-linux-gnu/libnode.so.109
+      1  100.0%          LazyCompile: *syncExports node:internal/bootstrap/realm:363:14
+      1  100.0%            Function: ^compileForPublicLoader node:internal/bootstrap/realm:320:25
+      1    4.5%      LazyCompile: ~create /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/zod/index.js:1:52572
+      1  100.0%        LazyCompile: ~<anonymous> /home/kasjer/projects/lessay-cline/node_modules/next/dist/server/config-schema.js:150:34
+      1  100.0%          LazyCompile: ~_parse /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/zod/index.js:1:57746
+      1  100.0%            LazyCompile: ~_parseSync /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/zod/index.js:1:15665
+      1    4.5%      LazyCompile: ~_parse /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/zod/index.js:1:41997
+      1  100.0%        LazyCompile: ~_parse /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/zod/index.js:1:57746
+      1  100.0%          LazyCompile: ~_parseSync /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/zod/index.js:1:15665
+      1  100.0%            LazyCompile: ~safeParse /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/zod/index.js:1:15933
+      1    4.5%      LazyCompile: ~__require node:internal/deps/undici/undici:3:49
+      1  100.0%        LazyCompile: ~lib/core/util.js node:internal/deps/undici/undici:293:21
+      1  100.0%          LazyCompile: ~__require node:internal/deps/undici/undici:3:49
+      1  100.0%            LazyCompile: ~lib/fetch/headers.js node:internal/deps/undici/undici:1793:25
+      1    4.5%      LazyCompile: ~__nccwpck_require__ /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/source-map08/source-map.js:2953:39
+      1  100.0%        Function: ~<anonymous> /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/source-map08/source-map.js:2987:2
+      1  100.0%          Function: ~<anonymous> /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/source-map08/source-map.js:1:11
+      1  100.0%            Function: ~<anonymous> /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/source-map08/source-map.js:1:1
+      1    4.5%      LazyCompile: ~__nccwpck_require__ /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/conf/index.js:15:28462
+      1  100.0%        LazyCompile: ~5940 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/conf/index.js:13:3737
+      1  100.0%          LazyCompile: ~__nccwpck_require__ /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/conf/index.js:15:28462
+      1  100.0%            LazyCompile: ~9041 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/conf/index.js:1:105089
+      1    4.5%      LazyCompile: ~__nccwpck_require__ /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/commander/index.js:1:36923
+      1  100.0%        Function: ~<anonymous> /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/commander/index.js:1:37191
+      1  100.0%          Function: ~<anonymous> /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/commander/index.js:1:2
+      1  100.0%            Function: ~<anonymous> /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/commander/index.js:1:1
+      1    4.5%      LazyCompile: ~Resolver /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:1:189892
+      1  100.0%        LazyCompile: ~I.createResolver /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:1:196785
+      1  100.0%          LazyCompile: ~90878 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:1:210118
+      1  100.0%            Function: ^__webpack_require__ /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/webpack/bundle5.js:29:2279956
+      1    4.5%      LazyCompile: ~#updateContext node:internal/url:714:17
+      1  100.0%        LazyCompile: ~URL node:internal/url:660:14
+      1  100.0%          LazyCompile: ~resolvePackageTargetString node:internal/modules/esm/resolve:429:36
+      1  100.0%            LazyCompile: ~resolvePackageTarget node:internal/modules/esm/resolve:533:30
+      1    4.5%      Function: ~<anonymous> /home/kasjer/projects/lessay-cline/node_modules/next/dist/shared/lib/router/utils/prepare-destination.js:1:1
+      1  100.0%        Function: ^Module._compile node:internal/modules/cjs/loader:1310:37
+      1  100.0%          Function: ^Module._extensions..js node:internal/modules/cjs/loader:1369:37
+      1  100.0%            Function: ^Module.load node:internal/modules/cjs/loader:1184:33
+      1    4.5%      Function: ~<anonymous> /home/kasjer/projects/lessay-cline/node_modules/next/dist/server/revalidation-utils.js:1:1
+      1  100.0%        Function: ^Module._compile node:internal/modules/cjs/loader:1310:37
+      1  100.0%          Function: ^Module._extensions..js node:internal/modules/cjs/loader:1369:37
+      1  100.0%            Function: ^Module.load node:internal/modules/cjs/loader:1184:33
+      1    4.5%      Function: ~<anonymous> /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/@edge-runtime/cookies/index.js:1:1
+      1  100.0%        Function: ^Module._compile node:internal/modules/cjs/loader:1310:37
+      1  100.0%          Function: ^Module._extensions..js node:internal/modules/cjs/loader:1369:37
+      1  100.0%            Function: ^Module.load node:internal/modules/cjs/loader:1184:33
+      1    4.5%      Function: ~<anonymous> /home/kasjer/projects/lessay-cline/node_modules/next/dist/cli/next-test.js:1:1
+      1  100.0%        LazyCompile: ~Module._compile node:internal/modules/cjs/loader:1310:37
+      1  100.0%          LazyCompile: ~Module._extensions..js node:internal/modules/cjs/loader:1369:37
+      1  100.0%            LazyCompile: ~Module.load node:internal/modules/cjs/loader:1184:33
+      1    4.5%      Function: ~<anonymous> /home/kasjer/projects/lessay-cline/node_modules/next/dist/build/segment-config/app/app-segment-config.js:1:1
+      1  100.0%        Function: ^Module._compile node:internal/modules/cjs/loader:1310:37
+      1  100.0%          Function: ^Module._extensions..js node:internal/modules/cjs/loader:1369:37
+      1  100.0%            Function: ^Module.load node:internal/modules/cjs/loader:1184:33
+      1    4.5%      Function: ^__require /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/@edge-runtime/primitives/load.js:12:49
+      1  100.0%        LazyCompile: ~../../node_modules/.pnpm/undici@6.21.0/node_modules/undici/lib/web/fetch/body.js /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/@edge-runtime/primitives/load.js:5243:85
+      1  100.0%          Function: ^__require /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/@edge-runtime/primitives/load.js:12:49
+      1  100.0%            LazyCompile: ~../../node_modules/.pnpm/undici@6.21.0/node_modules/undici/lib/web/fetch/response.js /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/@edge-runtime/primitives/load.js:11865:89
+
+     33    2.8%  /usr/lib/x86_64-linux-gnu/libc.so.6
+      6   18.2%    /usr/lib/x86_64-linux-gnu/libnode.so.109
+      2   33.3%      /usr/lib/x86_64-linux-gnu/libnode.so.109
+      1   50.0%        LazyCompile: ~resolvePackageTargetString node:internal/modules/esm/resolve:429:36
+      1  100.0%          LazyCompile: ~resolvePackageTarget node:internal/modules/esm/resolve:533:30
+      1  100.0%            LazyCompile: ~resolvePackageTarget node:internal/modules/esm/resolve:533:30
+      1   50.0%        LazyCompile: ~lib/fetch/constants.js node:internal/deps/undici/undici:672:27
+      1  100.0%          LazyCompile: ~__require node:internal/deps/undici/undici:3:49
+      1  100.0%            LazyCompile: ~lib/fetch/util.js node:internal/deps/undici/undici:893:22
+      1   16.7%      LazyCompile: ~__nccwpck_require__ /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/tar/index.js:1:98022
+      1  100.0%        LazyCompile: ~7750 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/tar/index.js:1:27867
+      1  100.0%          LazyCompile: ~__nccwpck_require__ /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/tar/index.js:1:98022
+      1  100.0%            LazyCompile: ~7301 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/tar/index.js:1:50521
+      1   16.7%      LazyCompile: ~__nccwpck_require__ /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/edge-runtime/index.js:1:524565
+      1  100.0%        LazyCompile: ~239 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/edge-runtime/index.js:1:506447
+      1  100.0%          LazyCompile: ~__nccwpck_require__ /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/edge-runtime/index.js:1:524565
+      1  100.0%            LazyCompile: ~885 /home/kasjer/projects/lessay-cline/node_modules/next/dist/compiled/edge-runtime/index.js:1:513946
+      1   16.7%      LazyCompile: *normalizeString node:path:66:25
+      1  100.0%        Function: ^resolve node:path:1091:10
+      1  100.0%          Function: ^Module._findPath node:internal/modules/cjs/loader:603:28
+      1  100.0%            Function: ^Module._resolveFilename node:internal/modules/cjs/loader:1048:35
+      1   16.7%      Function: ~<anonymous> /home/kasjer/projects/lessay-cline/node_modules/next/dist/lib/download-swc.js:1:1
+      1  100.0%        Function: ^Module._compile node:internal/modules/cjs/loader:1310:37
+      1  100.0%          Function: ^Module._extensions..js node:internal/modules/cjs/loader:1369:37
+      1  100.0%            Function: ^Module.load node:internal/modules/cjs/loader:1184:33
+
+     25    2.1%  node::binding::DLOpen(v8::FunctionCallbackInfo<v8::Value> const&)
+     25  100.0%    /usr/lib/x86_64-linux-gnu/libnode.so.109
+     25  100.0%      LazyCompile: ~Module._extensions..node node:internal/modules/cjs/loader:1444:39
+     25  100.0%        Function: ^Module.load node:internal/modules/cjs/loader:1184:33
+     25  100.0%          Function: ^Module._load node:internal/modules/cjs/loader:940:24
+     25  100.0%            Function: ^Module.require node:internal/modules/cjs/loader:1217:36
+
+     15    1.3%  epoll_pwait@@GLIBC_2.6
+
