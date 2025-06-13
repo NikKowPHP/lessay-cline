@@ -21,6 +21,6 @@
   - **Verification:** App provides clear errors if database is unreachable
 
 ### 5. Cleanup and Handoff
-- [ ] **Task 5: Remove signal files**
+- [x] **Task 5: Remove signal files**
   - **LLM Prompt:** "Delete `NEEDS_ARCHITECTURAL_REVIEW.md` and `NEEDS_ASSISTANCE.md`"
   - **Verification:** Both files are removed from root directory
