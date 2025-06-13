@@ -1,21 +1,26 @@
-# Emergency Fix Plan: Diagnose Docker Compose Migration Failure
+# Strategic Fix: Migration Service Configuration
 
-## 1. Verify Working Directory
-- **Task**: Check the current working directory
-  - **LLM Prompt**: "Execute `pwd` command and verify the output is `/home/kasjer/projects/lessay-cline` [x]"
-  - **Verification**: The `pwd` command returns the correct working directory
+## 1. Make Migration Service Persistent
+- **Task**: Modify the migration service command to keep the container running
+  - **LLM Prompt**: "Update the migration service in docker-compose.yml to use a persistent command" [x]
+  - **Verification**: The migration service remains in "running" state after startup
 
-## 2. Check Environment Variables
-- **Task**: List environment variables available to the migration service
-  - **LLM Prompt**: "Execute `docker-compose exec migration env` and verify that `DATABASE_URL` is set correctly"
-  - **Verification**: The output of `docker-compose exec migration env` includes `DATABASE_URL` with a valid connection string
+## 2. Add Healthcheck to Migration Service
+- **Task**: Implement proper healthcheck for migration service
+- **LLM Prompt**: "Add healthcheck configuration to migration service in docker-compose.yml"
+- **Verification**: Healthcheck passes and service shows as healthy
 
-## 3. Execute Migration with Explicit Path
-- **Task**: Run the migration command with an explicit path to the docker-compose file
-  - **LLM Prompt**: "Execute `docker-compose -f docker-compose.yml up migration` and capture the output"
-  - **Verification**: Migration runs successfully and applies database changes
+## 3. Update Environment Variable Check
+- **Task**: Verify environment variables using the new service configuration
+- **LLM Prompt**: "Execute `docker-compose exec migration env` and verify DATABASE_URL"
+- **Verification**: Output shows DATABASE_URL with valid connection string
 
-## 4. Clean up and reset for autonomous handoff
-- **Task**: Remove assistance signal
-  - **LLM Prompt**: "Delete the file `NEEDS_ASSISTANCE.md` from the root directory."
-  - **Verification**: The file `NEEDS_ASSISTANCE.md` no longer exists.
+## 4. Execute Database Migrations
+- **Task**: Run database migrations using the updated service
+- **LLM Prompt**: "Execute `docker-compose exec migration ./scripts/run-migration.sh`"
+- **Verification**: Migration output shows successful execution
+
+## 5. Clean up and reset for autonomous handoff
+- **Task**: Remove architectural review signal
+- **LLM Prompt**: "Delete the file `NEEDS_ARCHITECTURAL_REVIEW.md` from the root directory."
+- **Verification**: The file `NEEDS_ARCHITECTURAL_REVIEW.md` no longer exists.
