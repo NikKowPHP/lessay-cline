@@ -31,7 +31,9 @@ services:
       - ./.env:/app/.env
     restart: unless-stopped
     networks:
-      - web-network
+      web-network:
+        aliases:
+          - app
     command: sh -c "npm rebuild && npm run dev"
 
   migration:
@@ -40,6 +42,9 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    dns:
+      - 127.0.0.11
+    dns_search: []
     environment:
       - DATABASE_URL
     healthcheck:
@@ -62,7 +67,9 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
-      - web-network
+      web-network:
+        aliases:
+          - db
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U myuser -d mydb"]
       interval: 5s
@@ -72,6 +79,7 @@ services:
 
 networks:
   web-network:
+    name: lessay-cline_web-network
     driver: bridge
 
 volumes:

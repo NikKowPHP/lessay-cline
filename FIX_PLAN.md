@@ -1,26 +1,16 @@
-# Strategic Fix: Migration Service Configuration
+# Emergency Fix Plan: Reset Migration Service
 
-## 1. Make Migration Service Persistent
-- **Task**: Modify the migration service command to keep the container running
-  - **LLM Prompt**: "Update the migration service in docker-compose.yml to use a persistent command" [x]
-  - **Verification**: The migration service remains in "running" state after startup
+## 1. Recreate Migration Service
+- **Task**: Recreate the migration service to ensure a clean state
+  - **LLM Prompt**: "Execute `docker-compose up -d --force-recreate migration`"
+  - **Verification**: The migration service is running
 
-## 2. Add Healthcheck to Migration Service
-- **Task**: Implement proper healthcheck for migration service
-- **LLM Prompt**: "Add healthcheck configuration to migration service in docker-compose.yml"
-- **Verification**: Healthcheck passes and service shows as healthy
+## 2. Run Database Migrations
+- **Task**: Execute database migrations
+  - **LLM Prompt**: "Execute `docker-compose exec migration ./scripts/run-migration.sh`"
+  - **Verification**: Migration output shows successful execution
 
-## 3. Update Environment Variable Check
-- **Task**: Verify environment variables using the new service configuration
-- **LLM Prompt**: "Execute `docker-compose exec migration env` and verify DATABASE_URL"
-- **Verification**: Output shows DATABASE_URL with valid connection string
-
-## 4. Execute Database Migrations
-- **Task**: Run database migrations using the updated service
-- **LLM Prompt**: "Execute `docker-compose exec migration ./scripts/run-migration.sh`"
-- **Verification**: Migration output shows successful execution
-
-## 5. Clean up and reset for autonomous handoff
-- **Task**: Remove architectural review signal
-- **LLM Prompt**: "Delete the file `NEEDS_ARCHITECTURAL_REVIEW.md` from the root directory."
-- **Verification**: The file `NEEDS_ARCHITECTURAL_REVIEW.md` no longer exists.
+## 3. Clean up and reset for autonomous handoff
+- **Task**: Remove assistance signal
+  - **LLM Prompt**: "Delete the file `NEEDS_ASSISTANCE.md` from the root directory."
+  - **Verification**: The file `NEEDS_ASSISTANCE.md` no longer exists.

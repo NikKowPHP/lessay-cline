@@ -2307,11 +2307,50 @@ This plan is structured to follow the logical flow of the Software Development L
 <svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.5 2.5h13v10a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1zM0 1h16v11.5a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 0 12.5zm3.75 4.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5M7 4.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0m1.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5" fill="#666"/></svg>
 </file>
 
-<file path="scripts/run-migration.sh">
-#!/bin/sh
-echo "Running database migrations..."
-npx prisma migrate deploy
-echo "Migration completed successfully"
+<file path=".gitignore">
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+/app/generated/prisma
 </file>
 
 <file path="eslint.config.mjs">
@@ -3994,6 +4033,13 @@ CREATE INDEX "Progress_userId_completedAt_idx" ON "Progress"("userId", "complete
 provider = "postgresql"
 </file>
 
+<file path="scripts/run-migration.sh">
+#!/bin/sh
+echo "Running database migrations..."
+npx prisma migrate deploy
+echo "Migration completed successfully"
+</file>
+
 <file path="tests/cache.test.ts">
 import { cache } from '../lib/cache'
 
@@ -4184,52 +4230,6 @@ export type Database = {
     }
   }
 }
-</file>
-
-<file path=".gitignore">
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
-
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
-/app/generated/prisma
 </file>
 
 <file path="profile.txt">
@@ -8188,6 +8188,100 @@ export async function POST(req: Request) {
   - Verification: Feedback appears after submission
 </file>
 
+<file path="prisma/schema.prisma">
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String @id @default(uuid())
+  email        String @unique
+  password     String
+  targetLang   String
+  nativeLang   String
+  progress     UserProgress[]
+  srsEntries   SRSEntry[]
+  lessons      Lesson[]
+  voiceAnalyses VoiceAnalysis[]
+  progressRecords Progress[]
+  createdAt    DateTime @default(now())
+}
+
+model Lesson {
+  id          String @id @default(uuid())
+  title       String
+  content     String
+  difficulty  Int
+  userId      String
+  user        User @relation(fields: [userId], references: [id])
+  exercises   Exercise[]
+  completedAt DateTime?
+  analysis    VoiceAnalysis[]
+  progress    Progress[]
+  @@index([userId, difficulty])
+}
+
+model Exercise {
+  id          String @id @default(uuid())
+  type        String // 'vocabulary', 'grammar', etc.
+  content     Json
+  difficulty  Int
+  language    String
+  tags        String // comma-separated list of tags
+  lesson      Lesson @relation(fields: [lessonId], references: [id])
+  lessonId    String
+}
+
+model UserProgress {
+  id          String @id @default(uuid())
+  userId      String
+  user        User @relation(fields: [userId], references: [id])
+  metric      String // 'vocabulary', 'grammar', etc.
+  score       Float
+  lastUpdated DateTime @default(now())
+}
+
+model Progress {
+  id          String @id @default(uuid())
+  userId      String
+  user        User @relation(fields: [userId], references: [id])
+  lessonId    String
+  lesson      Lesson @relation(fields: [lessonId], references: [id])
+  completed   Boolean @default(false)
+  score       Float?
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+  @@index([userId, completedAt])
+}
+
+model SRSEntry {
+  id             String @id @default(uuid())
+  userId         String
+  user           User @relation(fields: [userId], references: [id])
+  item           String // word or grammar concept
+  recallStrength Float @default(1.0)
+  nextReview     DateTime @default(now())
+  language       String
+  @@index([userId, nextReview])
+}
+
+model VoiceAnalysis {
+  id        String @id @default(uuid())
+  userId    String
+  user      User @relation(fields: [userId], references: [id])
+  lessonId  String
+  lesson    Lesson @relation(fields: [lessonId], references: [id])
+  metrics   Json // {pace: 120, accuracy: 0.85, ...}
+  audioUrl  String
+  createdAt DateTime @default(now())
+}
+</file>
+
 <file path="todos/dev_todo_phase_7.md">
 # Developer To-Do List: Phase 7 - Performance Optimization
 
@@ -8256,130 +8350,6 @@ export async function POST(req: Request) {
 ### 8. Clean up and reset for autonomous handoff
 - [ ] **LLM Prompt:** "Update todos/master_development_plan.md to mark Phase 7 as complete"
 - [ ] **Verification:** Phase 7 marked [x] in master plan
-</file>
-
-<file path="docker-compose.yml">
-version: '3.3'
-
-services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "3554:3000"
-    env_file:
-      - .env
-    environment:
-      - DATABASE_URL=postgresql://myuser:mypassword@db:5432/mydb
-      - CHOKIDAR_USEPOLLING=true
-      - WATCHPACK_POLLING=true
-      - FAST_REFRESH=false
-      - NODE_ENV=development
-      - CHOKIDAR_INTERVAL=300
-    depends_on:
-      - db
-    volumes:
-      - ./src:/app/src  
-      - ./public:/app/public  
-      - ./package.json:/app/package.json 
-      - ./package-lock.json:/app/package-lock.json  
-      - ./tailwind.config.ts:/app/tailwind.config.ts  
-      - ./src/app/globals.css:/app/src/app/globals.css  
-      - ./tsconfig.json:/app/tsconfig.json  
-      - ./prisma:/app/prisma  
-      # - ./node_modules:/app/node_modules
-      - ./.env:/app/.env
-    restart: unless-stopped
-    networks:
-      - web-network
-    command: sh -c "npm rebuild && npm run dev"
-
-  migration:
-    build: .
-    command: sh -c "./scripts/run-migration.sh"
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      - DATABASE_URL
-    healthcheck:
-      test: ["CMD", "node", "-e", "require('./lib/db').verifyDbConnection()"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    volumes:
-      - ./scripts:/app/scripts
-
-  db:
-    image: postgres:17
-    environment:
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
-      POSTGRES_DB: mydb
-    ports:
-      - "5455:5432"
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    networks:
-      - web-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U myuser -d mydb"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-
-networks:
-  web-network:
-    driver: bridge
-
-volumes:
-  postgres-data:
-</file>
-
-<file path="NEEDS_ARCHITECTURAL_REVIEW.md">
-## Original Problem:
-## Failing Plan Path
-todos/dev_todo_phase_7.md
-
-## Task Description
-Run database migrations for performance indexes:
-- **Command:** `docker-compose up migration`
-- **Verification:** Check Docker logs for "Running database migrations"
-
-## Action Attempted
-1. Executed `docker-compose up migration`
-2. Received error: "no such service: migration"
-
-## Verification Error
-Could not execute database migration. The required migration service is missing from docker-compose.yml. The system cannot proceed with migrations until the docker-compose file is properly configured with the migration service as outlined in the architectural fix plan.
-
-## Failed Fix Attempt:
-# Emergency Fix Plan: Diagnose Docker Compose Migration Failure
-
-## 1. Verify Working Directory
-- **Task**: Check the current working directory
-  - **LLM Prompt**: "Execute `pwd` command and verify the output is `/home/kasjer/projects/lessay-cline` [x]"
-  - **Verification**: The `pwd` command returns the correct working directory
-
-## 2. Check Environment Variables
-- **Task**: List environment variables available to the migration service
-  - **LLM Prompt**: "Execute `docker-compose exec migration env` and verify that `DATABASE_URL` is set correctly"
-  - **Verification**: The output of `docker-compose exec migration env` includes `DATABASE_URL` with a valid connection string
-
-## 3. Execute Migration with Explicit Path
-- **Task**: Run the migration command with an explicit path to the docker-compose file
-  - **LLM Prompt**: "Execute `docker-compose -f docker-compose.yml up migration` and capture the output"
-  - **Verification**: Migration runs successfully and applies database changes
-
-## 4. Clean up and reset for autonomous handoff
-- **Task**: Remove assistance signal
-  - **LLM Prompt**: "Delete the file `NEEDS_ASSISTANCE.md` from the root directory."
-  - **Verification**: The file `NEEDS_ASSISTANCE.md` no longer exists.
-
-## New Error:
-The migration service starts but remains inaccessible. The command `docker-compose exec migration env` fails with "service 'migration' is not running", suggesting a configuration or dependency issue despite the service definition in docker-compose.yml.
 </file>
 
 <file path="tsconfig.json">
@@ -8852,98 +8822,139 @@ export async function analyzeAudioForDiagnostics() {
 }
 </file>
 
-<file path="prisma/schema.prisma">
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
+<file path="docker-compose.yml">
+version: '3.3'
 
-generator client {
-  provider = "prisma-client-js"
-}
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3554:3000"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql://myuser:mypassword@db:5432/mydb
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - FAST_REFRESH=false
+      - NODE_ENV=development
+      - CHOKIDAR_INTERVAL=300
+    depends_on:
+      - db
+    volumes:
+      - ./src:/app/src  
+      - ./public:/app/public  
+      - ./package.json:/app/package.json 
+      - ./package-lock.json:/app/package-lock.json  
+      - ./tailwind.config.ts:/app/tailwind.config.ts  
+      - ./src/app/globals.css:/app/src/app/globals.css  
+      - ./tsconfig.json:/app/tsconfig.json  
+      - ./prisma:/app/prisma  
+      # - ./node_modules:/app/node_modules
+      - ./.env:/app/.env
+    restart: unless-stopped
+    networks:
+      web-network:
+        aliases:
+          - app
+    command: sh -c "npm rebuild && npm run dev"
 
-model User {
-  id           String @id @default(uuid())
-  email        String @unique
-  password     String
-  targetLang   String
-  nativeLang   String
-  progress     UserProgress[]
-  srsEntries   SRSEntry[]
-  lessons      Lesson[]
-  voiceAnalyses VoiceAnalysis[]
-  progressRecords Progress[]
-  createdAt    DateTime @default(now())
-}
+  migration:
+    build: .
+    command: sh -c "./scripts/run-migration.sh && tail -f /dev/null"
+    depends_on:
+      db:
+        condition: service_healthy
+    dns:
+      - 127.0.0.11
+    dns_search: []
+    environment:
+      - DATABASE_URL
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('./lib/db').verifyDbConnection()"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - ./scripts:/app/scripts
+      - ./lib:/app/lib
 
-model Lesson {
-  id          String @id @default(uuid())
-  title       String
-  content     String
-  difficulty  Int
-  userId      String
-  user        User @relation(fields: [userId], references: [id])
-  exercises   Exercise[]
-  completedAt DateTime?
-  analysis    VoiceAnalysis[]
-  progress    Progress[]
-  @@index([userId, difficulty])
-}
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydb
+    ports:
+      - "5455:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      web-network:
+        aliases:
+          - db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U myuser -d mydb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-model Exercise {
-  id          String @id @default(uuid())
-  type        String // 'vocabulary', 'grammar', etc.
-  content     Json
-  difficulty  Int
-  language    String
-  tags        String // comma-separated list of tags
-  lesson      Lesson @relation(fields: [lessonId], references: [id])
-  lessonId    String
-}
 
-model UserProgress {
-  id          String @id @default(uuid())
-  userId      String
-  user        User @relation(fields: [userId], references: [id])
-  metric      String // 'vocabulary', 'grammar', etc.
-  score       Float
-  lastUpdated DateTime @default(now())
-}
+networks:
+  web-network:
+    name: lessay-cline_web-network
+    driver: bridge
 
-model Progress {
-  id          String @id @default(uuid())
-  userId      String
-  user        User @relation(fields: [userId], references: [id])
-  lessonId    String
-  lesson      Lesson @relation(fields: [lessonId], references: [id])
-  completed   Boolean @default(false)
-  score       Float?
-  startedAt   DateTime @default(now())
-  completedAt DateTime?
-  @@index([userId, completedAt])
-}
+volumes:
+  postgres-data:
+</file>
 
-model SRSEntry {
-  id             String @id @default(uuid())
-  userId         String
-  user           User @relation(fields: [userId], references: [id])
-  item           String // word or grammar concept
-  recallStrength Float @default(1.0)
-  nextReview     DateTime @default(now())
-  language       String
-  @@index([userId, nextReview])
-}
+<file path="NEEDS_ARCHITECTURAL_REVIEW.md">
+## Original Problem:
+## Failing Plan Path
+todos/dev_todo_phase_7.md
 
-model VoiceAnalysis {
-  id        String @id @default(uuid())
-  userId    String
-  user      User @relation(fields: [userId], references: [id])
-  lessonId  String
-  lesson    Lesson @relation(fields: [lessonId], references: [id])
-  metrics   Json // {pace: 120, accuracy: 0.85, ...}
-  audioUrl  String
-  createdAt DateTime @default(now())
-}
+## Task Description
+Run database migrations for performance indexes:
+- **Command:** `docker-compose up migration`
+- **Verification:** Check Docker logs for "Running database migrations"
+
+## Action Attempted
+1. Executed `docker-compose up migration`
+2. Received error: "no such service: migration"
+
+## Verification Error
+Could not execute database migration. The required migration service is missing from docker-compose.yml. The system cannot proceed with migrations until the docker-compose file is properly configured with the migration service as outlined in the architectural fix plan.
+
+## Failed Fix Attempt:
+# Emergency Fix Plan: Diagnose Docker Compose Migration Failure
+
+## 1. Verify Working Directory
+- **Task**: Check the current working directory
+  - **LLM Prompt**: "Execute `pwd` command and verify the output is `/home/kasjer/projects/lessay-cline` [x]"
+  - **Verification**: The `pwd` command returns the correct working directory
+
+## 2. Check Environment Variables
+- **Task**: List environment variables available to the migration service
+  - **LLM Prompt**: "Execute `docker-compose exec migration env` and verify that `DATABASE_URL` is set correctly"
+  - **Verification**: The output of `docker-compose exec migration env` includes `DATABASE_URL` with a valid connection string
+
+## 3. Execute Migration with Explicit Path
+- **Task**: Run the migration command with an explicit path to the docker-compose file
+  - **LLM Prompt**: "Execute `docker-compose -f docker-compose.yml up migration` and capture the output"
+  - **Verification**: Migration runs successfully and applies database changes
+
+## 4. Clean up and reset for autonomous handoff
+- **Task**: Remove assistance signal
+  - **LLM Prompt**: "Delete the file `NEEDS_ASSISTANCE.md` from the root directory."
+  - **Verification**: The file `NEEDS_ASSISTANCE.md` no longer exists.
+
+## New Error:
+The migration service starts but remains inaccessible. The command `docker-compose exec migration env` fails with "service 'migration' is not running", suggesting a configuration or dependency issue despite the service definition in docker-compose.yml.
+
+Additionally, the migration container experiences intermittent DNS resolution failures when trying to connect to the database hostname 'db', even though network connectivity tests sometimes succeed. This inconsistency is preventing successful database migrations.
 </file>
 
 <file path="documentation/2_development_plan/dev_todo_phase_4.md">
