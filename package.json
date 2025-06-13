@@ -21,6 +21,7 @@
     "@supabase/supabase-js": "^2.50.0",
     "@types/recharts": "^2.0.1",
     "@types/stripe": "^8.0.417",
+    "@upstash/redis": "^1.35.0",
     "next-auth": "^4.24.11",
     "pino": "^9.7.0",
     "pino-pretty": "^13.0.0",

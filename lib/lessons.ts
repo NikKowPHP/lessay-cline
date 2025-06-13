@@ -1,13 +1,44 @@
 import prisma from '@/lib/prisma';
+import { cache } from './cache';
+import type { Lesson } from '@prisma/client';
+
+export async function getLessons(userId: string): Promise<Lesson[]> {
+  const cacheKey = `lessons:${userId}`;
+  const cached = await cache.get<Lesson[]>(cacheKey);
+  if (cached) return cached;
+
+  const lessons = await prisma.lesson.findMany({
+    where: { userId },
+    take: 10
+  });
+
+  await cache.set(cacheKey, lessons, 300);
+  return lessons;
+}
 
 export async function startLesson(userId: string) {
   const lesson = await prisma.lesson.create({
     data: {
+      title: 'New Lesson',
+      content: 'Lesson content',
+      difficulty: 1,
       userId,
       exercises: {
         create: [
-          { question: 'Sample question 1', answer: 'correct answer' },
-          { question: 'Sample question 2', answer: 'correct answer' },
+          { 
+            language: 'en',
+            content: JSON.stringify({ question: 'Sample 1', options: [] }),
+            type: 'multiple_choice',
+            difficulty: 1,
+            tags: 'beginner'
+          },
+          {
+            language: 'en',
+            content: JSON.stringify({ question: 'Sample 2', options: [] }),
+            type: 'multiple_choice',
+            difficulty: 1,
+            tags: 'beginner'
+          }
         ],
       },
     },
@@ -22,15 +53,15 @@ export async function submitAnswer(exerciseId: string, answer: string) {
     where: { id: exerciseId },
   });
 
-  if (!exercise) {
-    throw new Error('Exercise not found');
+  if (!exercise?.content) {
+    throw new Error('Exercise not found or invalid');
   }
 
-  const isCorrect = exercise.answer === answer;
-  const feedback = isCorrect ? 'Well done!' : 'Try again!';
-
+  const exerciseData = JSON.parse(exercise.content.toString());
+  const isCorrect = exerciseData.answer === answer;
+  
   return {
     correct: isCorrect,
-    feedback,
+    feedback: isCorrect ? 'Correct!' : 'Try again'
   };
 }

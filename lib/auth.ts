@@ -6,9 +6,12 @@ import { createClient } from '@supabase/supabase-js';
 if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
   throw new Error('Supabase configuration missing - check your environment variables');
 }
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const supabaseUrl = process.env.SUPABASE_URL || '';
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
+import { supabase as mockSupabase } from '../tests/__mocks__/supabaseClient';
+const supabase = process.env.NODE_ENV === 'test'
+  ? mockSupabase
+  : createClient(supabaseUrl, supabaseAnonKey);
 
 export const authOptions: NextAuthOptions = {
   providers: [

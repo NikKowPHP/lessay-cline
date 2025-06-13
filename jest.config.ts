@@ -5,7 +5,10 @@ const config: Config.InitialOptions = {
   testEnvironment: 'node',
   roots: ['<rootDir>'],
   testMatch: ['**/*.test.ts'],
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+  setupFiles: [
+    '<rootDir>/tests/setupEnv.ts',
+    '<rootDir>/tests/__mocks__/supabaseClient.ts'
+  ],
   transform: {
     '^.+\\.(t|j)sx?$': 'ts-jest',
   },

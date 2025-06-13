@@ -1,89 +1,108 @@
-# Developer To-Do List: Phase 8 - Asynchronous Processing & Distributed Caching
+# Lessay Development Phase 8: Testing Infrastructure
 
-**Objective:** Decouple long-running AI analysis tasks from request-response cycle and implement production-grade distributed caching.
+## Tasks for Developer AI
 
-## Tasks
+### 1. Install Testing Packages
+- [x] **Add Jest and TypeScript support**
+  ```bash
+  npm install jest ts-jest @types/jest --save-dev
+  ```
+  Verification: Packages appear in `package.json` devDependencies
 
-- [ ] **1. Install Inngest**
-  - Execute: `npm install inngest`
-  - Initialize: `npx inngest-cli init`
-  - Verification: `package.json` includes `"inngest"` in dependencies.
+### 2. Configure Jest (`jest.config.ts`)
+- [x] **Create Jest configuration**
+  ```typescript
+  import type { Config } from '@jest/types'
 
-- [ ] **2. Create Inngest Function Handler**
-  - Create file: `/app/inngest/route.ts`
-    ```typescript
-    import { serve } from 'inngest/next'
-    import { functions } from './functions'
-
-    export const { GET, POST, PUT } = serve({
-      clientId: process.env.INNGEST_CLIENT_ID,
-      functions,
-    })
-    ```
-  - Create file: `/app/inngest/functions.ts`
-    ```typescript
-    import { inngest } from './client'
-    import { analyzeSession } from '../lib/ai-service'
-
-    export const functions = [
-      inngest.createFunction(
-        { id: 'post-session-analysis' },
-        { event: 'ai/post-session-analysis' },
-        async ({ event }) => {
-          const { lessonId, audioUrl } = event.data
-          return analyzeSession(lessonId, audioUrl)
-        }
-      )
-    ]
-    ```
-  - Verification: Both files exist with correct content.
-
-- [ ] **3. Refactor Submit Answer Endpoint**
-  - Modify: `/app/api/lessons/[id]/submit-answer/route.ts`
-    - Remove synchronous AI analysis call
-    - Add Inngest send:
-      ```typescript
-      import { inngest } from '../../../lib/inngest'
-
-      // After returning initial response
-      await inngest.send({
-        name: 'ai/post-session-analysis',
-        data: { lessonId, audioUrl }
-      })
-      ```
-  - Verification: Submit answer endpoint no longer contains direct AI analysis calls.
-
-- [ ] **4. Implement Background Analysis Logic**
-  - Move existing analysis logic from submit endpoint to:
-    ```typescript
-    // /lib/ai-service.ts
-    export async function analyzeSession(lessonId: string, audioUrl: string) {
-      // Existing analysis logic
-      // Update SRS scores
-      // Save VoiceAnalysis records
+  const config: Config.InitialOptions = {
+    preset: 'ts-jest',
+    testEnvironment: 'node',
+    roots: ['<rootDir>'],
+    testMatch: ['**/*.test.ts'],
+    moduleNameMapper: {
+      '^@/(.*)$': '<rootDir>/$1'
     }
-    ```
-  - Verification: All analysis logic resides in `analyzeSession` function.
+  }
 
-- [ ] **5. Install Redis Client**
-  - Execute: `npm install @upstash/redis`
-  - Verification: `package.json` includes `"@upstash/redis"`.
+  export default config
+  ```
+  Verification: Configuration file exists with correct settings
 
-- [ ] **6. Upgrade Cache Utility**
-  - Modify: `/lib/cache.ts`
-    - Replace `Map` with Redis client:
-      ```typescript
-      import { Redis } from '@upstash/redis'
-      
-      const redis = new Redis({
-        url: process.env.REDIS_URL,
-        token: process.env.REDIS_TOKEN,
-      })
-      
-      export const cache = {
-        get: (key: string) => redis.get(key),
-        set: (key: string, value: any, ttl: number) => 
-          redis.setex(key, ttl, value)
-      }
-      ```
-  - Verification: Cache utility uses Redis methods instead of in-memory Map.
+### 3. Create Auth Tests (`/tests/auth.test.ts`)
+- [x] **Implement authentication tests**
+  ```typescript
+  import { describe, it, expect } from '@jest/globals'
+  import { signUp, signIn } from '@/lib/auth'
+
+  describe('Authentication', () => {
+    it('should allow valid user signup', async () => {
+      const result = await signUp('test@example.com', 'password123')
+      expect(result.success).toBe(true)
+    })
+
+    it('should reject duplicate user signup', async () => {
+      await signUp('test@example.com', 'password123')
+      const result = await signUp('test@example.com', 'password123')
+      expect(result.error).toMatch(/already exists/i)
+    })
+
+    it('should allow valid login', async () => {
+      await signUp('test@example.com', 'password123')
+      const result = await signIn('test@example.com', 'password123')
+      expect(result.success).toBe(true)
+    })
+
+    it('should reject invalid login', async () => {
+      const result = await signIn('wrong@example.com', 'wrongpassword')
+      expect(result.error).toMatch(/invalid credentials/i)
+    })
+  })
+  ```
+  Verification: File exists with all test cases
+
+### 4. Create Lesson Tests (`/tests/lessons.test.ts`)
+- [x] **Implement lesson flow tests**
+  ```typescript
+  import { describe, it, expect } from '@jest/globals'
+  import { startLesson, submitAnswer } from '@/lib/lessons'
+
+  describe('Lesson Flow', () => {
+    it('should start a new lesson', async () => {
+      const lesson = await startLesson('user_123')
+      expect(lesson.exercises.length).toBeGreaterThan(0)
+    })
+
+    it('should accept correct answers', async () => {
+      const response = await submitAnswer('ex_123', 'correct answer')
+      expect(response.correct).toBe(true)
+    })
+
+    it('should provide feedback for incorrect answers', async () => {
+      const response = await submitAnswer('ex_123', 'wrong answer')
+      expect(response.correct).toBe(false)
+      expect(response.feedback).toBeDefined()
+    })
+  })
+  ```
+  Verification: File exists with all test cases
+
+### 5. Update Package.json Scripts
+- [x] **Add test command**
+  ```json
+  {
+    "scripts": {
+      "test": "jest"
+    }
+  }
+  ```
+  Verification: `npm test` runs Jest successfully
+
+### 6. Update CI Workflow (`/.github/workflows/ci.yml`)
+- [ ] **Add testing step**
+  ```yaml
+  jobs:
+    build-and-test:
+      steps:
+        - run: npm test
+  ```
+  Verification: CI file includes `npm test` command

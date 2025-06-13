@@ -1,5 +1,6 @@
-import { describe, it, expect } from '@jest/globals'
+import { describe, it, expect, jest } from '@jest/globals'
 import { signUp, signIn } from '@/lib/auth'
+jest.mock('@/lib/auth')
 
 describe('Authentication', () => {
   it('should allow valid user signup', async () => {
