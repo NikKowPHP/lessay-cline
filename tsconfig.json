@@ -14,11 +14,11 @@
     "outDir": "./dist",
     "rootDir": ".",
     "esModuleInterop": true,
+    "allowImportingTsExtensions": false,
     "module": "esnext",
-    "moduleResolution": "bundler",
-    "types": [
-      "node"
-    ],
+    "moduleResolution": "node",
+    "moduleSuffixes": [".js"],
+    "typeRoots": ["./node_modules/@types"],
     "resolveJsonModule": true,
     "isolatedModules": true,
     "incremental": true,
@@ -32,6 +32,7 @@
         "./*"
       ]
     },
+    "noEmit": false
   },
   "include": [
     "next-env.d.ts",

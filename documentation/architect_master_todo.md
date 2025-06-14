@@ -2,9 +2,9 @@
 
 - [x] documentation/2_development_plan/dev_todo_phase_1.md
 - [x] documentation/2_development_plan/dev_todo_phase_2.md
-- [ ] documentation/2_development_plan/dev_todo_phase_3.md
-- [ ] documentation/2_development_plan/dev_todo_phase_4.md
-- [ ] documentation/2_development_plan/dev_todo_phase_5.md
+- [x] documentation/2_development_plan/dev_todo_phase_3.md
+- [x] documentation/2_development_plan/dev_todo_phase_4.md
+- [x] documentation/2_development_plan/dev_todo_phase_5.md
 - [ ] documentation/2_development_plan/dev_todo_phase_6.md
 - [ ] documentation/2_development_plan/dev_todo_phase_7.md
 - [ ] documentation/2_development_plan/dev_todo_phase_8.md
