@@ -1,10 +1,48 @@
 import { NextResponse } from 'next/server'
+import { supabaseServerClient } from '@/lib/supabase/server'
+import prisma from '@/lib/prisma'
 
 export async function POST(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  const body = await request.json()
-  console.log(`Received answer for lesson ${params.id}:`, body)
-  return NextResponse.json({ correct: true })
+  const supabase = supabaseServerClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  try {
+    const { answer } = await request.json()
+    const lessonId = params.id
+
+    // Update progress with the submitted answer
+    const progress = await prisma.progress.update({
+      where: {
+        userId_lessonId: {
+          userId: user.id,
+          lessonId
+        }
+      },
+      data: {
+        lastAnswer: answer,
+        lastAnsweredAt: new Date()
+      }
+    })
+
+    // Simple answer validation - could be expanded with actual validation logic
+    const isValid = answer.trim().length > 0
+
+    return NextResponse.json({
+      correct: isValid,
+      progress
+    })
+  } catch (err) {
+    console.error('Error submitting answer:', err)
+    return NextResponse.json(
+      { error: 'Failed to submit answer' },
+      { status: 500 }
+    )
+  }
 }

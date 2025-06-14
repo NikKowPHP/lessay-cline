@@ -1,7 +1,7 @@
 # Developer Master Roadmap (0_to_prod)
 
 - [x] documentation/2_development_plan/dev_todo_phase_1.md
-- [ ] documentation/2_development_plan/dev_todo_phase_2.md
+- [x] documentation/2_development_plan/dev_todo_phase_2.md
 - [ ] documentation/2_development_plan/dev_todo_phase_3.md
 - [ ] documentation/2_development_plan/dev_todo_phase_4.md
 - [ ] documentation/2_development_plan/dev_todo_phase_5.md

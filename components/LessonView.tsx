@@ -1,13 +1,26 @@
 'use client'
 
-import { useState } from 'react'
+import React from 'react'
+import { useState, useEffect } from 'react'
 
 type Lesson = {
-  lessonId: string
+  id: string
+  title: string
+  content: string
+  nextLessonId?: string
+  prevLessonId?: string
 }
 
 export default function LessonView() {
-  const [lesson, setLesson] = useState<Lesson | null>(null)
+  const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null)
+
+  useEffect(() => {
+    if (currentLesson?.id) {
+      fetch(`/api/lessons/${currentLesson.id}`)
+        .then(res => res.json())
+        .then(data => setCurrentLesson(data))
+    }
+  }, [currentLesson?.id])
 
   const startLesson = async () => {
     try {
@@ -15,24 +28,65 @@ export default function LessonView() {
         method: 'POST'
       })
       const data = await response.json()
-      setLesson(data)
+      setCurrentLesson(data)
     } catch (error) {
       console.error('Failed to start lesson:', error)
     }
   }
 
+  const navigateLesson = async (lessonId?: string) => {
+    if (!lessonId) return
+    
+    try {
+      // Save progress before navigating
+      await fetch(`/api/lessons/${currentLesson?.id}/submit-answer`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ progress: 'in-progress' })
+      })
+
+      const response = await fetch(`/api/lessons/${lessonId}`)
+      const data = await response.json()
+      setCurrentLesson(data)
+    } catch (error) {
+      console.error('Lesson navigation failed:', error)
+    }
+  }
+
   return (
     <div className="lesson-container">
-      {!lesson && (
-        <button onClick={startLesson}>
+      {!currentLesson && (
+        <button onClick={startLesson} className="start-lesson-btn">
           Start New Lesson
         </button>
       )}
       
-      {lesson && (
+      {currentLesson && (
         <div className="lesson-content">
-          <h2>Lesson {lesson.lessonId}</h2>
-          <p>Your lesson content would appear here</p>
+          <h2>{currentLesson.title}</h2>
+          <div dangerouslySetInnerHTML={{ __html: currentLesson.content }} />
+          
+          <div className="lesson-navigation">
+            {currentLesson.prevLessonId && (
+              <button
+                onClick={() => navigateLesson(currentLesson.prevLessonId)}
+                className="nav-btn prev-btn"
+              >
+                Previous Lesson
+              </button>
+            )}
+            
+            {currentLesson.nextLessonId && (
+              <button
+                onClick={() => navigateLesson(currentLesson.nextLessonId)}
+                className="nav-btn next-btn"
+              >
+                Next Lesson
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>

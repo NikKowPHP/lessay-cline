@@ -2,6 +2,7 @@
   "name": "app",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
@@ -10,6 +11,9 @@
     "test": "echo 'No tests yet' && exit 0"
   },
   "dependencies": {
+    "@google-cloud/speech": "^7.1.0",
+    "@google-cloud/text-to-speech": "^6.1.0",
+    "@google/generative-ai": "^0.24.1",
     "@prisma/client": "^6.9.0",
     "@stripe/react-stripe-js": "^3.7.0",
     "@stripe/stripe-js": "^7.3.1",
@@ -23,12 +27,13 @@
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20.19.0",
     "@types/react": "^19.1.8",
-    "@types/react-dom": "^19",
+    "@types/react-dom": "^19.1.6",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
     "next": "^15.3.3",
     "prisma": "^6.9.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
   }
 }

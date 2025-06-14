@@ -3,14 +3,14 @@
 ## Tasks for Developer AI
 
 ### 1. Install Required Packages
-- [ ] **Install Google AI SDKs**
+- [x] **Install Google AI SDKs**
   ```bash
   npm install @google/generative-ai @google-cloud/speech @google-cloud/text-to-speech
   ```
   Verification: Packages appear in `package.json` dependencies
 
 ### 2. Initialize Google Cloud Clients (`/lib/ai-service.ts`)
-- [ ] **Configure credential handling**
+- [x] **Configure credential handling**
   ```typescript
   let geminiClient: GoogleGenerativeAI;
   let speechClient: SpeechClient;
