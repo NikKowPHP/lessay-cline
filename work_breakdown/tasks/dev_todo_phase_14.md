@@ -27,7 +27,7 @@
     - `updateSrsEntry()`
 
 ### 3. API Integration
-- [ ] **Create SRS endpoints**
+- [x] **Create SRS endpoints**
   - `/app/api/srs/due-items/route.ts`
   - `/app/api/srs/record-review/route.ts`
 
