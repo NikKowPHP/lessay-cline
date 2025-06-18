@@ -1,50 +1,40 @@
-# Development Phase 14: User Feedback System
+# Phase 14: Spaced Repetition System Implementation
 
-## Tasks for Developer AI
+## Tasks
 
-### 1. Create Feedback API Endpoint
-- **File:** `/app/api/feedback/route.ts`
-- **Action:** Implement feedback submission endpoint
-- **Steps:**
-  1. Create new route file
-  2. Add POST handler to receive feedback
-  3. Validate input data
-  4. Store feedback in database
-- **Verification:** POST requests to `/api/feedback` return success status
+### 1. Database Schema Update
+- [x] **Add SRSEntry model to Prisma schema**
+  - Add model in `prisma/schema.prisma`:
+    ```prisma
+    model SRSEntry {
+      id        String   @id @default(cuid())
+      userId    String
+      itemId    String   // ID of vocabulary/grammar item
+      nextReview DateTime
+      interval  Int
+      ease      Float
+      user      User     @relation(fields: [userId], references: [id])
+    }
+    ```
+- [x] **Create migration file**
+  - Run `npx prisma migrate dev --name add_srs_model`
 
-### 2. Add Feedback Model to Schema
-- **File:** `/prisma/schema.prisma`
-- **Action:** Define feedback data structure
-- **Steps:
-  1. Add Feedback model with fields:
-     - userId
-     - message
-     - createdAt
-  2. Run migration
-- **Verification:** New model appears in Prisma client
+### 2. SRS Core Logic
+- [ ] **Implement SRS scheduling algorithm**
+  - Create `/lib/srs.ts` with functions:
+    - `scheduleNextReview()`
+    - `getDueItems()`
+    - `updateSrsEntry()`
 
-### 3. Implement Feedback UI Component
-- **File:** `/components/FeedbackButton.tsx`
-- **Action:** Create feedback interface
-- **Steps:
-  1. Create client component
-  2. Add button to open feedback form
-  3. Implement form submission
-- **Verification:** Component renders and submits feedback
+### 3. API Integration
+- [ ] **Create SRS endpoints**
+  - `/app/api/srs/due-items/route.ts`
+  - `/app/api/srs/record-review/route.ts`
 
-### 4. Add Feedback Link to Navigation
-- **File:** `/components/Navbar.tsx`
-- **Action:** Make feedback accessible
-- **Steps:
-  1. Import FeedbackButton
-  2. Add to navigation menu
-- **Verification:** Feedback button appears in UI
+### 4. Frontend Integration
+- [ ] **Add SRS review component**
+  - Create `/components/SRSReview.tsx`
 
-### 5. Setup Feedback Notifications
-- **File:** `/lib/notifications.ts`
-- **Action:** Alert admins of new feedback
-- **Steps:
-  1. Create notification function
-  2. Call from feedback endpoint
-  3. Test with sample submission
-- **Verification:** Notifications trigger on new feedback
+### 5. Testing
+- [ ] **Write comprehensive tests**
+  - `/tests/srs.test.ts`

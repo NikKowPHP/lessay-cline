@@ -1,78 +1,70 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { SpeechClient } from '@google-cloud/speech';
-import { TextToSpeechClient } from '@google-cloud/text-to-speech';
-import { config } from './config';
 
-let geminiClient: GoogleGenerativeAI;
-let speechClient: SpeechClient;
-let textToSpeechClient: TextToSpeechClient;
+/**
+ * AI service for adaptive learning
+ */
+export const aiService = {
+  /**
+   * Generates lesson content using AI
+   * @param progress - User progress data
+   * @returns Lesson content
+   */
+  async generateLessonContent(progress: any): Promise<string> {
+    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-if (config.ai.gcpCredentials) {
-  const apiKey = config.ai.apiKey;
-  geminiClient = new GoogleGenerativeAI(apiKey);
-  speechClient = new SpeechClient({ credentials: config.ai.gcpCredentials });
-  textToSpeechClient = new TextToSpeechClient({ credentials: config.ai.gcpCredentials });
-} else {
-  geminiClient = new GoogleGenerativeAI(config.ai.apiKey);
-  speechClient = new SpeechClient({ keyFilename: './gcp-credentials.json' });
-  textToSpeechClient = new TextToSpeechClient({ keyFilename: './gcp-credentials.json' });
-}
+    const prompt = `Create a personalized language lesson for a user with the following progress: ${JSON.stringify(progress)}`;
 
-export async function generateLessonForUser(_userId: string) { // eslint-disable-line @typescript-eslint/no-unused-vars
-  const model = geminiClient.getGenerativeModel({
-    model: "gemini-pro",
-    generationConfig: {
-      temperature: 0.7,
-      maxOutputTokens: 2048
-    }
-  });
+    const result = await model.generateContent(prompt);
+    return result.response.text();
+  },
 
-  const prompt = `Generate a language lesson...`; // Detailed prompt per design doc
-  const result = await model.generateContent(prompt);
-  const response = await result.response;
+  /**
+   * Generates exercises using AI
+   * @param progress - User progress data
+   * @returns Array of exercise data
+   */
+  async generateExercises(progress: any): Promise<any[]> {
+    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-  return JSON.parse(response.text());
-}
+    const prompt = `Create 5 exercises for a user with the following progress: ${JSON.stringify(progress)}. Return as JSON array.`;
 
-export async function transcribeAudio(audioBuffer: Buffer): Promise<string> {
-  const [response] = await speechClient.recognize({
-    audio: { content: audioBuffer.toString('base64') },
-    config: {
-      encoding: 'WEBM_OPUS',
-      sampleRateHertz: 48000,
-      languageCode: 'en-US'
-    }
-  });
-  if (!response?.results?.length) {
-    return '';
-  }
-  
-  return response.results
-    .flatMap(result =>
-      result.alternatives?.map(alt => alt.transcript) ?? []
-    )
-    .filter((t): t is string => !!t)
-    .join('\n');
-}
+    const result = await model.generateContent(prompt);
+    return JSON.parse(result.response.text());
+  },
 
-export async function synthesizeSpeech(text: string): Promise<Buffer> {
-  const [response] = await textToSpeechClient.synthesizeSpeech({
-    input: { text },
-    voice: {
-      languageCode: 'en-US',
-      name: 'en-US-Standard-C'
-    },
-    audioConfig: {
-      audioEncoding: 'MP3'
-    }
-  });
-  if (!response.audioContent) {
-    throw new Error('No audio content received from text-to-speech service');
-  }
-  return Buffer.from(response.audioContent as string, 'base64');
-}
+  /**
+   * Converts speech to text
+   * @param audio - Audio data
+   * @returns Transcribed text
+   */
+  async speechToText(audio: Buffer): Promise<string> {
+    const client = new SpeechClient();
+    const request = {
+      audio: { content: audio.toString('base64') },
+      config: { encoding: 'LINEAR16', sampleRateHertz: 16000, languageCode: 'en-US' },
+    };
 
-export async function analyzeAudioForDiagnostics() {
-  console.log('AI Service: Analyzing audio');
-  return { fluencyScore: 85, pronunciationAccuracy: 90 };
-}
+    const [response] = await client.recognize(request);
+    return response.results[0]?.alternatives[0]?.transcript || '';
+  },
+
+  /**
+   * Analyzes user progress and provides feedback
+   * @param progress - User progress data
+   * @returns Feedback text
+   */
+  async analyzeProgress(progress: any): Promise<string> {
+    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+    const prompt = `Analyze the following user progress and provide personalized feedback: ${JSON.stringify(progress)}`;
+
+    const result = await model.generateContent(prompt);
+    return result.response.text();
+  },
+};
+
+export default aiService;

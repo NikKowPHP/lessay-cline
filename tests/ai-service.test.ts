@@ -1,18 +1,40 @@
-import { describe, it, expect } from '@jest/globals'
-import { analyzeAudioForDiagnostics } from '@/lib/ai-service'
+import { describe, it, expect } from '@jest/globals';
+import { aiService } from '@/lib/ai-service';
 
-describe('AI Service - Audio Analysis', () => {
-  it('should return a fluency score', async () => {
-    const result = await analyzeAudioForDiagnostics()
-    expect(result.fluencyScore).toBeDefined()
-    expect(result.fluencyScore).toBeGreaterThanOrEqual(0)
-    expect(result.fluencyScore).toBeLessThanOrEqual(100)
-  })
+describe('AI Service', () => {
+  it('should generate lesson content', async () => {
+    const progress = { averageDifficulty: 2 };
+    const content = await aiService.generateLessonContent(progress);
 
-  it('should return a pronunciation accuracy score', async () => {
-    const result = await analyzeAudioForDiagnostics()
-    expect(result.pronunciationAccuracy).toBeDefined()
-    expect(result.pronunciationAccuracy).toBeGreaterThanOrEqual(0)
-    expect(result.pronunciationAccuracy).toBeLessThanOrEqual(100)
-  })
-})
+    expect(content).toBeTruthy();
+    expect(content).toBeString();
+    expect(content.length).toBeGreaterThan(0);
+  });
+
+  it('should generate exercises', async () => {
+    const progress = { averageDifficulty: 2 };
+    const exercises = await aiService.generateExercises(progress);
+
+    expect(exercises).toBeInstanceOf(Array);
+    expect(exercises.length).toBeGreaterThan(0);
+    expect(exercises[0]).toHaveProperty('type');
+    expect(exercises[0]).toHaveProperty('content');
+  });
+
+  it('should convert speech to text', async () => {
+    const audio = Buffer.from('test audio');
+    const transcript = await aiService.speechToText(audio);
+
+    expect(transcript).toBeTruthy();
+    expect(transcript).toBeString();
+  });
+
+  it('should analyze progress', async () => {
+    const progress = { averageDifficulty: 2 };
+    const feedback = await aiService.analyzeProgress(progress);
+
+    expect(feedback).toBeTruthy();
+    expect(feedback).toBeString();
+    expect(feedback.length).toBeGreaterThan(0);
+  });
+});

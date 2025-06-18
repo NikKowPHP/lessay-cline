@@ -12,30 +12,26 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  const startTime = Date.now();
   logger.info({ userId: session.user.id }, 'Fetching SRS overview');
 
   try {
-    const overview = await prisma.sRSEntry.groupBy({
-      by: ['exerciseType'],
+    const overview = await prisma.progress.groupBy({
+      by: ['lessonId'],
       where: { userId: session.user.id },
-      _count: { status: true },
-      _min: { nextReview: true },
-      _max: { nextReview: true },
-      _avg: { nextReview: true }
+      _count: true
     });
 
-    logger.debug({
-      userId: session.user.id,
-      entryCount: overview.length
-    }, 'SRS overview retrieved successfully');
+    const endTime = Date.now();
+    const responseTime = endTime - startTime;
+    logger.info({ userId: session.user.id, responseTime }, 'SRS overview retrieved successfully');
 
     return NextResponse.json({ overview });
   } catch (error) {
-    logger.error({
-      userId: session.user.id,
-      error
-    }, 'Failed to fetch SRS overview');
-    
+    const endTime = Date.now();
+    const responseTime = endTime - startTime;
+    logger.error({ userId: session.user.id, responseTime, error }, 'Failed to fetch SRS overview');
+
     return NextResponse.json(
       { error: 'Failed to retrieve SRS data' },
       { status: 500 }

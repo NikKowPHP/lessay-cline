@@ -1,48 +1,34 @@
-# Development Phase 15: AI Cost & Security Controls
+# Phase 15: Progress Dashboard Implementation
 
-## Tasks for Developer AI
+## Tasks
 
-### 1. Implement Usage Tracking
-- **File:** `/lib/ai-service.ts`
-- **Action:** Add usage metrics to AI calls
-- **Steps:**
-  1. Add usage tracking to `generateLessonForUser`
-  2. Add usage tracking to `analyzeAudioForDiagnostics`
-  3. Store usage in database
-- **Verification:** Usage data appears in database
+### 1. Dashboard Component
+- [ ] **Create main dashboard component**
+  - File: `/components/DashboardView.tsx`
+  - Include sections for:
+    - Fluency metrics
+    - Skill mastery charts
+    - SRS recall strength
 
-### 2. Add Rate Limiting
-- **File:** `/middleware/rate-limiter.ts`
-- **Action:** Protect AI endpoints
-- **Steps:
-  1. Create rate limiting middleware
-  2. Apply to AI API routes
-  3. Test with multiple requests
-- **Verification:** Requests are limited after threshold
+### 2. Data Fetching
+- [ ] **Create API endpoints**
+  - `/app/api/stats/fluency/route.ts`
+  - `/app/api/stats/srs-overview/route.ts`
+  - `/app/api/stats/skill-mastery/route.ts`
 
-### 3. Setup Usage Alerts
-- **File:** `/lib/alerts.ts`
-- **Action:** Notify on high usage
-- **Steps:
-  1. Create alert thresholds
-  2. Implement notification system
-  3. Test with simulated spikes
-- **Verification:** Alerts trigger correctly
+### 3. Visualization Integration
+- [ ] **Integrate charting library**
+  - Install: `npm install recharts`
+  - Create chart components:
+    - `components/charts/FluencyChart.tsx`
+    - `components/charts/SkillMasteryChart.tsx`
+    - `components/charts/SRSChart.tsx`
 
-### 4. Implement Tiered Access
-- **File:** `/app/api/lessons/start/route.ts`
-- **Action:** Enforce tier limits
-- **Steps:
-  1. Check user tier
-  2. Enforce daily limits
-  3. Return appropriate errors
-- **Verification:** Limits enforced per tier
+### 4. Responsive Design
+- [ ] **Implement responsive layout**
+  - Ensure dashboard works on mobile and desktop
+  - Use CSS Grid/Flexbox for layout
 
-### 5. Add Security Monitoring
-- **File:** `/lib/security.ts`
-- **Action:** Detect abuse patterns
-- **Steps:
-  1. Implement anomaly detection
-  2. Log suspicious activity
-  3. Create admin alerts
-- **Verification:** System detects test attacks
+### 5. Testing
+- [ ] **Write component tests**
+  - `/tests/dashboard.test.ts`

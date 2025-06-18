@@ -1,67 +1,81 @@
-import prisma from '@/lib/prisma';
-import { cache } from './cache';
-import type { Lesson } from '@prisma/client';
+import { db } from './db';
+import { aiService } from './ai-service';
+import { User, Lesson, Exercise } from '@prisma/client';
+import { getUserProgress } from './progress';
 
-export async function getLessons(userId: string): Promise<Lesson[]> {
-  const cacheKey = `lessons:${userId}`;
-  const cached = await cache.get<Lesson[]>(cacheKey);
-  if (cached) return cached;
+/**
+ * Generates a personalized lesson based on user progress
+ * @param userId - The ID of the user
+ * @returns A lesson object with exercises
+ */
+export async function generateLesson(userId: string): Promise<Lesson> {
+  // Get user's current progress
+  const progress = await getUserProgress(userId);
 
-  const lessons = await prisma.lesson.findMany({
-    where: { userId },
-    take: 10
-  });
+  // Generate lesson content using AI
+  const content = await aiService.generateLessonContent(progress);
 
-  await cache.set(cacheKey, lessons, 300);
-  return lessons;
-}
-
-export async function startLesson(userId: string) {
-  const lesson = await prisma.lesson.create({
+  // Create a new lesson in the database
+  const newLesson = await db.lesson.create({
     data: {
-      title: 'New Lesson',
-      content: 'Lesson content',
-      difficulty: 1,
       userId,
-      exercises: {
-        create: [
-          { 
-            language: 'en',
-            content: JSON.stringify({ question: 'Sample 1', options: [] }),
-            type: 'multiple_choice',
-            difficulty: 1,
-            tags: 'beginner'
-          },
-          {
-            language: 'en',
-            content: JSON.stringify({ question: 'Sample 2', options: [] }),
-            type: 'multiple_choice',
-            difficulty: 1,
-            tags: 'beginner'
-          }
-        ],
-      },
+      title: 'Personalized Lesson',
+      content,
+      difficulty: progress.averageDifficulty + 1,
     },
-    include: { exercises: true },
   });
 
-  return lesson;
+  // Generate exercises for this lesson
+  const exercises = await generateExercises(newLesson.id, progress);
+
+  return {
+    ...newLesson,
+    exercises,
+  };
 }
 
-export async function submitAnswer(exerciseId: string, answer: string) {
-  const exercise = await prisma.exercise.findUnique({
-    where: { id: exerciseId },
+/**
+ * Generates exercises for a lesson based on user progress
+ * @param lessonId - The ID of the lesson
+ * @param progress - The user's progress data
+ * @returns An array of exercises
+ */
+async function generateExercises(lessonId: string, progress: any): Promise<Exercise[]> {
+  // Generate exercise content using AI
+  const exerciseData = await aiService.generateExercises(progress);
+
+  // Create exercises in the database
+  const exercises = await Promise.all(exerciseData.map((data, index) => {
+    return db.exercise.create({
+      data: {
+        lessonId,
+        type: data.type,
+        content: data.content,
+        difficulty: progress.averageDifficulty + index,
+      },
+    });
+  }));
+
+  return exercises;
+}
+
+/**
+ * Gets the next exercise for a user based on their progress
+ * @param userId - The ID of the user
+ * @returns The next exercise
+ */
+export async function getNextExercise(userId: string): Promise<Exercise | null> {
+  // Get user's current progress
+  const progress = await getUserProgress(userId);
+
+  // Find the next exercise based on progress
+  const nextExercise = await db.exercise.findFirst({
+    where: {
+      lesson: { userId },
+      difficulty: { gte: progress.averageDifficulty },
+    },
+    orderBy: { difficulty: 'asc' },
   });
 
-  if (!exercise?.content) {
-    throw new Error('Exercise not found or invalid');
-  }
-
-  const exerciseData = JSON.parse(exercise.content.toString());
-  const isCorrect = exerciseData.answer === answer;
-  
-  return {
-    correct: isCorrect,
-    feedback: isCorrect ? 'Correct!' : 'Try again'
-  };
+  return nextExercise || null;
 }

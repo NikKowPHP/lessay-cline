@@ -4,16 +4,16 @@
 
 ## Tasks
 
-- [ ] **1. Enhance Logger Configuration (`/lib/logger.ts`)**
+- [x] **1. Enhance Logger Configuration (`/lib/logger.ts`)**
   - Add structured logging with Pino
   - Implement log levels (debug, info, warn, error)
   - Add request ID correlation
   - Verification: All API routes output structured JSON logs
 
-- [ ] **2. Instrument Key Endpoints**
+- [x] **2. Instrument Key Endpoints**
   - Files to modify:
     - `app/api/lessons/start/route.ts`
-    - `app/api/lessons/[id]/submit-answer/route.ts` 
+    - `app/api/lessons/[id]/submit-answer/route.ts`
     - `app/api/stats/srs-overview/route.ts`
   - Add:
     - Response time metrics
@@ -21,7 +21,7 @@
     - Request volume counters
   - Verification: Endpoints log timing and success metrics
 
-- [ ] **3. Implement Metrics Endpoint (`/app/api/metrics/route.ts`)**
+- [x] **3. Implement Metrics Endpoint (`/app/api/metrics/route.ts`)**
   - Expose Prometheus-compatible metrics
   - Track:
     - API response times
@@ -30,7 +30,7 @@
     - Lesson completion rates
   - Verification: `/api/metrics` returns valid Prometheus data
 
-- [ ] **4. Create Monitoring Dashboard**
+- [x] **4. Create Monitoring Dashboard**
   - Install: `npm install @grafana/faro-web-sdk`
   - File: `/components/Monitoring.tsx`
   - Implement:
@@ -39,7 +39,7 @@
     - System health status
   - Verification: Dashboard renders with live data
 
-- [ ] **5. Configure Alerting Rules**
+- [x] **5. Configure Alerting Rules**
   - Create file: `/config/alert-rules.yaml`
   - Define thresholds for:
     - High error rate (>5%)
@@ -47,7 +47,7 @@
     - Service downtime
   - Verification: Alert rules file exists with valid YAML
 
-- [ ] **6. Update Documentation**
+- [x] **6. Update Documentation**
   - File: `/documentation/operations/observability.md`
   - Add:
     - Monitoring architecture overview
