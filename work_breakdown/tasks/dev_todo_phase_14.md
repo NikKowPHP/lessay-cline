@@ -20,7 +20,7 @@
   - Run `npx prisma migrate dev --name add_srs_model`
 
 ### 2. SRS Core Logic
-- [ ] **Implement SRS scheduling algorithm**
+- [x] **Implement SRS scheduling algorithm**
   - Create `/lib/srs.ts` with functions:
     - `scheduleNextReview()`
     - `getDueItems()`
