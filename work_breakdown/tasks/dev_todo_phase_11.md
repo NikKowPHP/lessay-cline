@@ -4,7 +4,7 @@
 
 ## Tasks
 
-- [ ] **1. Implement Audio Retention Policy**
+- [x] **1. Implement Audio Retention Policy**
   - Create Inngest cron job in `/app/inngest/functions.ts`:
     ```typescript
     inngest.createFunction(
@@ -19,14 +19,14 @@
     ```
   - Verification: Function exists with correct schedule.
 
-- [ ] **2. Implement Account Deletion**
+- [x] **2. Implement Account Deletion**
   - Create endpoint: `/app/api/users/delete-account/route.ts`
     - Require re-authentication
     - Delete all user-related data
     - Handle foreign key constraints
   - Verification: Endpoint securely deletes all user data.
 
-- [ ] **3. Add Environment Check**
+- [x] **3. Add Environment Check**
   - Update `package.json`:
     ```json
     "scripts": {
@@ -37,7 +37,7 @@
   - Create `scripts/check-env.js` to validate all required variables.
   - Verification: Build fails if any variables are missing.
 
-- [ ] **4. Final Documentation Review**
+- [x] **4. Final Documentation Review**
   - Audit all JSDoc comments
   - Ensure API routes have proper documentation
   - Verify component prop types

@@ -3,12 +3,8 @@ import type { Config } from '@jest/types'
 const config: Config.InitialOptions = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  roots: ['<rootDir>'],
-  testMatch: ['**/*.test.ts'],
-  setupFiles: [
-    '<rootDir>/tests/setupEnv.ts',
-    '<rootDir>/tests/__mocks__/supabaseClient.ts'
-  ],
+  testMatch: ['**/tests/**/*.test.ts'],
+  setupFilesAfterEnv: ['./tests/setup.ts'],
   transform: {
     '^.+\\.(t|j)sx?$': 'ts-jest',
   },

@@ -4,11 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run check:env && next build",
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
-    "bundle": "NCC_CONFIG_TS_CONFIG=tsconfig.bundle.json ncc build app/api/lessons/start/route.ts -o dist"
+    "bundle": "NCC_CONFIG_TS_CONFIG=tsconfig.bundle.json ncc build app/api/lessons/start/route.ts -o dist",
+    "check:env": "node scripts/check-env.js"
   },
   "dependencies": {
     "@auth/supabase-adapter": "^1.9.1",
@@ -33,7 +34,8 @@
     "recharts": "^2.15.3",
     "redis": "^5.5.6",
     "stripe": "^18.2.1",
-    "zod": "^3.25.64"
+    "zod": "^3.25.64",
+    "zustand": "^5.0.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

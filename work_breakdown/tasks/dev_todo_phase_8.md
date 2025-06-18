@@ -86,7 +86,121 @@
   ```
   Verification: File exists with all test cases
 
-### 5. Update Package.json Scripts
+### 5. Create AI Service Tests (`/tests/ai-service.test.ts`)
+- [x] **Implement AI service tests**
+  ```typescript
+  import { describe, it, expect } from '@jest/globals'
+  import { analyzeAudioForDiagnostics } from '@/lib/ai-service'
+
+  describe('AI Service - Audio Analysis', () => {
+    it('should return a fluency score', async () => {
+      const result = await analyzeAudioForDiagnostics()
+      expect(result.fluencyScore).toBeDefined()
+      expect(result.fluencyScore).toBeGreaterThanOrEqual(0)
+      expect(result.fluencyScore).toBeLessThanOrEqual(100)
+    })
+
+    it('should return a pronunciation accuracy score', async () => {
+      const result = await analyzeAudioForDiagnostics()
+      expect(result.pronunciationAccuracy).toBeDefined()
+      expect(result.pronunciationAccuracy).toBeGreaterThanOrEqual(0)
+      expect(result.pronunciationAccuracy).toBeLessThanOrEqual(100)
+    })
+  })
+  ```
+  Verification: File exists with all test cases
+
+### 6. Create Dashboard Tests (`/tests/dashboard.test.ts`)
+- [x] **Implement dashboard tests**
+  ```typescript
+  import { describe, it, expect } from '@jest/globals'
+  import { getLessons } from '@/lib/lessons'
+
+  describe('Dashboard - Lesson Progress', () => {
+    it('should return a valid list of lessons', async () => {
+      const lessons = await getLessons('user_123')
+      expect(lessons).toBeDefined()
+      expect(lessons.length).toBeGreaterThan(0)
+      expect(lessons[0]).toHaveProperty('id')
+      expect(lessons[0]).toHaveProperty('title')
+      expect(lessons[0]).toHaveProperty('difficulty')
+    })
+  })
+  ```
+  Verification: File exists with all test cases
+
+### 7. Create Payment Tests (`/tests/payments.test.ts`)
+- [x] **Implement payment tests**
+  ```typescript
+  import { describe, it, expect } from '@jest/globals'
+  import { POST } from '@/app/api/payments/create-subscription/route'
+  import { NextRequest } from 'next/server'
+
+  // Mock the Stripe library
+  const mockStripe = {
+    subscriptions: {
+      create: jest.fn()
+    }
+  }
+
+  jest.mock('stripe', () => {
+    return jest.fn().mockImplementation(() => mockStripe)
+  })
+
+  describe('Payment Processing - Subscription Creation', () => {
+    it('should create a valid subscription', async () => {
+      // Mock successful response
+      mockStripe.subscriptions.create.mockResolvedValueOnce({
+        id: 'sub_123',
+        customer: 'cust_123',
+        status: 'active',
+        items: {
+          data: [
+            {
+              price: {
+                id: 'price_123'
+              }
+            }
+          ]
+        }
+      })
+
+      const request = new NextRequest(JSON.stringify({
+        customerId: 'cust_123',
+        priceId: 'price_123'
+      }))
+
+      const response = await POST(request)
+      const result = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(result.subscription).toBeDefined()
+      expect(result.subscription.id).toBe('sub_123')
+      expect(result.subscription.customer).toBe('cust_123')
+      expect(result.subscription.items.data.length).toBeGreaterThan(0)
+      expect(result.subscription.items.data[0].price.id).toBe('price_123')
+    })
+
+    it('should handle errors during subscription creation', async () => {
+      // Mock error response
+      mockStripe.subscriptions.create.mockRejectedValueOnce(new Error('Test error'))
+
+      const request = new NextRequest(JSON.stringify({
+        customerId: 'cust_123',
+        priceId: 'price_123'
+      }))
+
+      const response = await POST(request)
+      const result = await response.json()
+
+      expect(response.status).toBe(500)
+      expect(result.error).toBe('Subscription creation failed')
+    })
+  })
+  ```
+  Verification: File exists with all test cases
+
+### 8. Update Package.json Scripts
 - [x] **Add test command**
   ```json
   {
@@ -97,8 +211,8 @@
   ```
   Verification: `npm test` runs Jest successfully
 
-### 6. Update CI Workflow (`/.github/workflows/ci.yml`)
-- [ ] **Add testing step**
+### 9. Update CI Workflow (`/.github/workflows/ci.yml`)
+- [x] **Add testing step**
   ```yaml
   jobs:
     build-and-test:

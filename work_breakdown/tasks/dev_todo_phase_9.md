@@ -4,11 +4,11 @@
 
 ## Tasks
 
-- [ ] **1. Install Testing Dependencies**
+- [x] **1. Install Testing Dependencies**
   - Execute: `npm install jest ts-jest @types/jest --save-dev`
   - Verification: `package.json` includes these packages in devDependencies.
 
-- [ ] **2. Configure Jest**
+- [x] **2. Configure Jest**
   - Create file: `jest.config.ts`
     ```typescript
     import type { Config } from '@jest/types'
@@ -23,7 +23,7 @@
     ```
   - Verification: File exists with correct content.
 
-- [ ] **3. Create Core Test Files**
+- [x] **3. Create Core Test Files**
   - Create directory: `/tests`
   - Create files:
     - `auth.test.ts` (User auth flows)
@@ -33,35 +33,35 @@
     - `payments.test.ts` (Subscription flows)
   - Verification: All test files exist in `/tests`.
 
-- [ ] **4. Implement Core Learning Loop Tests**
+- [x] **4. Implement Core Learning Loop Tests**
   - In `lessons.test.ts`:
     - Test SRS-driven content generation
     - Test difficulty adjustment after failed exercises
     - Test real-time feedback accuracy
   - Verification: Tests cover all cases from test plan section 1.
 
-- [ ] **5. Implement Vocal Analysis Tests**
+- [x] **5. Implement Vocal Analysis Tests**
   - In `ai-service.test.ts`:
     - Test pronunciation scoring accuracy
     - Test fluency metrics (hesitation, pace)
     - Test filler word detection
   - Verification: Tests cover all cases from test plan section 2.
 
-- [ ] **6. Implement Dashboard Tests**
+- [x] **6. Implement Dashboard Tests**
   - In `dashboard.test.ts`:
     - Test SRS overview accuracy
     - Test error pattern detection
     - Test fluency trend visualization
   - Verification: Tests cover all cases from test plan section 3.
 
-- [ ] **7. Implement Payment Flow Tests**
+- [x] **7. Implement Payment Flow Tests**
   - In `payments.test.ts`:
     - Test subscription scenarios (new, upgrade, failure)
     - Test webhook handling (success, failure, cancellation)
     - Test security measures (tokenization, PCI compliance)
   - Verification: Tests cover all cases from test plan section 5-6.
 
-- [ ] **8. Update CI Workflow**
+- [x] **8. Update CI Workflow**
   - Modify: `/.github/workflows/ci.yml`
     - Add test command: `npm test`
     - Configure test database service
