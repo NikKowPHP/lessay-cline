@@ -1,9 +1,42 @@
-export async function generateLessonForUser() {
-  console.log('AI Service: Generating lesson for user');
-  return { lessonId: 'demo_lesson', content: 'This is a demo lesson' };
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { SpeechClient } from '@google-cloud/speech';
+import { TextToSpeechClient } from '@google-cloud/text-to-speech';
+
+// Client instances
+export let geminiClient: GoogleGenerativeAI;
+export let speechClient: SpeechClient;
+export let textToSpeechClient: TextToSpeechClient;
+
+// Initialize clients
+if (process.env.GCP_CREDENTIALS_JSON) {
+  const credentials = JSON.parse(process.env.GCP_CREDENTIALS_JSON);
+  geminiClient = new GoogleGenerativeAI(process.env.AI_API_KEY || '');
+  speechClient = new SpeechClient({ credentials });
+  textToSpeechClient = new TextToSpeechClient({ credentials });
+} else {
+  geminiClient = new GoogleGenerativeAI(process.env.AI_API_KEY || '');
+  speechClient = new SpeechClient({ 
+    keyFilename: process.env.GCP_CREDENTIALS_PATH || './gcp-credentials.json'
+  });
+  textToSpeechClient = new TextToSpeechClient({ 
+    keyFilename: process.env.GCP_CREDENTIALS_PATH || './gcp-credentials.json'
+  });
 }
 
-export async function analyzeAudioForDiagnostics() {
-  console.log('AI Service: Analyzing audio');
-  return { fluencyScore: 85, pronunciationAccuracy: 90 };
+// Type definitions for AI service responses
+export interface LessonContent {
+  title: string;
+  vocabulary: string[];
+  dialogue: string;
+  exercises: string[];
+}
+
+export interface TranscriptionResult {
+  text: string;
+  confidence: number;
+}
+
+export interface AudioSynthesisResult {
+  audioContent: Buffer;
+  mimeType: string;
 }
