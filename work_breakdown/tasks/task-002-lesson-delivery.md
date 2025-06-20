@@ -7,4 +7,4 @@ Implement lesson delivery system as described in spec section 2.2
 - [x] Build chat-like lesson interface (UI)
 - [x] Integrate TTS for prompts (LOGIC)
 - [x] Implement real-time STT with feedback (LOGIC)
-- [ ] Create feedback display components (UI)
+- [x] Create feedback display components (UI)

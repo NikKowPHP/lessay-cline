@@ -3,6 +3,8 @@
 import React from 'react'
 import { useState, useEffect, useRef } from 'react'
 import { textToSpeech, streamingSpeechToText } from '@/lib/ai-service'
+import PronunciationMeter from '@/components/feedback/PronunciationMeter'
+import ProgressIndicator from '@/components/feedback/ProgressIndicator'
 
 type Lesson = {
   id: string
@@ -14,7 +16,11 @@ type Lesson = {
 
 export default function LessonView() {
   const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null)
-  const [messages, setMessages] = useState<Array<{text: string, isUser: boolean}>>([])
+  const [messages, setMessages] = useState<Array<{
+    text: string
+    isUser: boolean
+    confidence?: number
+  }>>([])
   const [isRecording, setIsRecording] = useState(false)
   const [interimTranscript, setInterimTranscript] = useState('')
   
@@ -110,6 +116,9 @@ export default function LessonView() {
 
   return (
     <div className="flex flex-col h-screen max-w-2xl mx-auto">
+      <div className="p-4">
+        <ProgressIndicator progress={33} /> {/* Temporary static value */}
+      </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {!currentLesson && (
           <button
@@ -134,6 +143,9 @@ export default function LessonView() {
             >
               {message.text}
             </div>
+            {message.isUser && message.confidence && (
+              <PronunciationMeter confidence={message.confidence} />
+            )}
           </div>
         ))}
       </div>
