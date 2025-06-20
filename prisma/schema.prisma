@@ -13,6 +13,8 @@ model User {
   password     String
   targetLang   String
   nativeLang   String
+  primaryGoal  String
+  comfortLevel Int
   progress     UserProgress[]
   srsEntries   SRSEntry[]
   lessons      Lesson[]
