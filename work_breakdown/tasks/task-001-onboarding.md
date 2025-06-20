@@ -7,4 +7,4 @@ Implement user onboarding flow as described in spec section 2.1
 - [x] Create onboarding form UI (UI)
 - [x] Implement voice-based diagnostic (LOGIC)
 - [x] Develop profile storage mechanism (LOGIC)
-- [ ] Design welcome experience (UI)
+- [x] Design welcome experience (UI)
