@@ -41,6 +41,47 @@ export interface AudioSynthesisResult {
   mimeType: string;
 }
 
+export interface StreamingTranscriptionResult {
+  transcript: string;
+  confidence: number;
+  isFinal: boolean;
+}
+
+export async function* streamingSpeechToText(languageCode: string = 'en-US') {
+  const recognizeStream = speechClient.streamingRecognize({
+    config: {
+      encoding: 'WEBM_OPUS',
+      sampleRateHertz: 48000,
+      languageCode: languageCode,
+      model: 'default',
+    },
+    interimResults: true, // This is correctly placed at the root level
+  });
+
+  // Handle errors
+  recognizeStream.on('error', (e) => {
+    throw new Error(`Speech recognition error: ${e.message}`);
+  });
+
+  // Yield transcription results as they come in
+  recognizeStream.on('data', (data) => {
+    if (data.results[0]?.alternatives[0]) {
+      const result = {
+        transcript: data.results[0].alternatives[0].transcript,
+        confidence: data.results[0].alternatives[0].confidence || 0,
+        isFinal: data.results[0].isFinal,
+      };
+      recognizeStream.emit('result', result);
+    }
+  });
+
+  try {
+    yield* (recognizeStream as unknown) as AsyncGenerator<StreamingTranscriptionResult>;
+  } finally {
+    recognizeStream.destroy();
+  }
+}
+
 export async function textToSpeech(text: string): Promise<AudioSynthesisResult> {
   const [response] = await textToSpeechClient.synthesizeSpeech({
     input: { text },

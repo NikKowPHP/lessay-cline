@@ -1,8 +1,8 @@
 'use client'
 
 import React from 'react'
-import { useState, useEffect } from 'react'
-import { textToSpeech } from '@/lib/ai-service'
+import { useState, useEffect, useRef } from 'react'
+import { textToSpeech, streamingSpeechToText } from '@/lib/ai-service'
 
 type Lesson = {
   id: string
@@ -15,6 +15,8 @@ type Lesson = {
 export default function LessonView() {
   const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null)
   const [messages, setMessages] = useState<Array<{text: string, isUser: boolean}>>([])
+  const [isRecording, setIsRecording] = useState(false)
+  const [interimTranscript, setInterimTranscript] = useState('')
   
   const playAudio = async (audioBuffer: Buffer, mimeType: string) => {
     const blob = new Blob([audioBuffer], { type: mimeType })
@@ -25,6 +27,8 @@ export default function LessonView() {
   }
 
   const [newMessage, setNewMessage] = useState('')
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const audioStreamRef = useRef<MediaStream | null>(null)
 
   useEffect(() => {
     if (currentLesson?.id) {
@@ -33,6 +37,64 @@ export default function LessonView() {
         .then(data => setCurrentLesson(data))
     }
   }, [currentLesson?.id])
+
+  const toggleRecording = async () => {
+    if (isRecording) {
+      stopRecording()
+    } else {
+      startRecording()
+    }
+  }
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      audioStreamRef.current = stream
+      const mediaRecorder = new MediaRecorder(stream)
+      mediaRecorderRef.current = mediaRecorder
+      
+      const audioChunks: Blob[] = []
+      mediaRecorder.ondataavailable = (e) => {
+        audioChunks.push(e.data)
+      }
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' })
+        const arrayBuffer = await audioBlob.arrayBuffer()
+        Buffer.from(arrayBuffer) // Prepare for sending to backend
+        // Here you would send the audioBuffer to your backend for processing
+      }
+
+      mediaRecorder.start()
+      setIsRecording(true)
+
+      // Start streaming to STT
+      const sttStream = streamingSpeechToText()
+      for await (const result of sttStream) {
+        if (result.isFinal) {
+          setMessages(prev => [...prev, {text: result.transcript, isUser: true}])
+          setInterimTranscript('')
+        } else {
+          setInterimTranscript(result.transcript)
+        }
+      }
+    } catch (error) {
+      console.error('Error starting recording:', error)
+      setIsRecording(false)
+    }
+  }
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current) {
+      mediaRecorderRef.current.stop()
+      mediaRecorderRef.current = null
+    }
+    if (audioStreamRef.current) {
+      audioStreamRef.current.getTracks().forEach((track: MediaStreamTrack) => track.stop())
+      audioStreamRef.current = null
+    }
+    setIsRecording(false)
+  }
 
   const startLesson = async () => {
     try {
@@ -108,11 +170,27 @@ export default function LessonView() {
             className="flex-1 border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <button
+            type="button"
+            onClick={toggleRecording}
+            className={`px-4 py-2 rounded-lg transition-colors ${
+              isRecording
+                ? 'bg-red-600 text-white hover:bg-red-700'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            {isRecording ? '⏹ Stop' : '🎤 Record'}
+          </button>
+          <button
             type="submit"
             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
           >
             Send
           </button>
+          {interimTranscript && (
+            <div className="absolute bottom-full mb-2 text-sm text-gray-500">
+              {interimTranscript}
+            </div>
+          )}
         </form>
       </div>
     </div>
