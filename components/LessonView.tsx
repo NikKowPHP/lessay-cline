@@ -13,6 +13,8 @@ type Lesson = {
 
 export default function LessonView() {
   const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null)
+  const [messages, setMessages] = useState<Array<{text: string, isUser: boolean}>>([])
+  const [newMessage, setNewMessage] = useState('')
 
   useEffect(() => {
     if (currentLesson?.id) {
@@ -34,61 +36,62 @@ export default function LessonView() {
     }
   }
 
-  const navigateLesson = async (lessonId?: string) => {
-    if (!lessonId) return
-    
-    try {
-      // Save progress before navigating
-      await fetch(`/api/lessons/${currentLesson?.id}/submit-answer`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ progress: 'in-progress' })
-      })
-
-      const response = await fetch(`/api/lessons/${lessonId}`)
-      const data = await response.json()
-      setCurrentLesson(data)
-    } catch (error) {
-      console.error('Lesson navigation failed:', error)
-    }
-  }
-
   return (
-    <div className="lesson-container">
-      {!currentLesson && (
-        <button onClick={startLesson} className="start-lesson-btn">
-          Start New Lesson
-        </button>
-      )}
-      
-      {currentLesson && (
-        <div className="lesson-content">
-          <h2>{currentLesson.title}</h2>
-          <div dangerouslySetInnerHTML={{ __html: currentLesson.content }} />
-          
-          <div className="lesson-navigation">
-            {currentLesson.prevLessonId && (
-              <button
-                onClick={() => navigateLesson(currentLesson.prevLessonId)}
-                className="nav-btn prev-btn"
-              >
-                Previous Lesson
-              </button>
-            )}
-            
-            {currentLesson.nextLessonId && (
-              <button
-                onClick={() => navigateLesson(currentLesson.nextLessonId)}
-                className="nav-btn next-btn"
-              >
-                Next Lesson
-              </button>
-            )}
+    <div className="flex flex-col h-screen max-w-2xl mx-auto">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {!currentLesson && (
+          <button
+            onClick={startLesson}
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Start New Lesson
+          </button>
+        )}
+        
+        {messages.map((message, index) => (
+          <div
+            key={index}
+            className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
+          >
+            <div
+              className={`max-w-xs lg:max-w-md p-4 rounded-lg ${
+                message.isUser
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-800'
+              }`}
+            >
+              {message.text}
+            </div>
           </div>
-        </div>
-      )}
+        ))}
+      </div>
+
+      <div className="border-t p-4">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            if (newMessage.trim()) {
+              setMessages([...messages, {text: newMessage, isUser: true}])
+              setNewMessage('')
+            }
+          }}
+          className="flex gap-2"
+        >
+          <input
+            type="text"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            placeholder="Type your answer..."
+            className="flex-1 border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            type="submit"
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Send
+          </button>
+        </form>
+      </div>
     </div>
   )
 }
