@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { useState, useEffect } from 'react'
+import { textToSpeech } from '@/lib/ai-service'
 
 type Lesson = {
   id: string
@@ -14,6 +15,15 @@ type Lesson = {
 export default function LessonView() {
   const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null)
   const [messages, setMessages] = useState<Array<{text: string, isUser: boolean}>>([])
+  
+  const playAudio = async (audioBuffer: Buffer, mimeType: string) => {
+    const blob = new Blob([audioBuffer], { type: mimeType })
+    const url = URL.createObjectURL(blob)
+    const audio = new Audio(url)
+    await audio.play()
+    URL.revokeObjectURL(url) // Clean up
+  }
+
   const [newMessage, setNewMessage] = useState('')
 
   useEffect(() => {
@@ -55,8 +65,8 @@ export default function LessonView() {
           >
             <div
               className={`max-w-xs lg:max-w-md p-4 rounded-lg ${
-                message.isUser
-                  ? 'bg-blue-600 text-white'
+                message.isUser 
+                  ? 'bg-blue-600 text-white' 
                   : 'bg-gray-100 text-gray-800'
               }`}
             >
@@ -68,11 +78,24 @@ export default function LessonView() {
 
       <div className="border-t p-4">
         <form
-          onSubmit={(e) => {
-            e.preventDefault()
-            if (newMessage.trim()) {
-              setMessages([...messages, {text: newMessage, isUser: true}])
-              setNewMessage('')
+          onSubmit={async (e) => {
+            e.preventDefault();
+            if (!newMessage.trim()) return;
+
+            try {
+              // Add user message
+              setMessages(prev => [...prev, {text: newMessage, isUser: true}]);
+              setNewMessage('');
+              
+              // Simulate bot response
+              const botResponse = "Great! Let's practice that.";
+              setMessages(prev => [...prev, {text: botResponse, isUser: false}]);
+              
+              // Convert bot response to speech
+              const { audioContent, mimeType } = await textToSpeech(botResponse);
+              await playAudio(audioContent, mimeType);
+            } catch (error) {
+              console.error('Error processing message:', error);
             }
           }}
           className="flex gap-2"

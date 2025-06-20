@@ -40,3 +40,25 @@ export interface AudioSynthesisResult {
   audioContent: Buffer;
   mimeType: string;
 }
+
+export async function textToSpeech(text: string): Promise<AudioSynthesisResult> {
+  const [response] = await textToSpeechClient.synthesizeSpeech({
+    input: { text },
+    voice: {
+      languageCode: 'en-US',
+      ssmlGender: 'NEUTRAL'
+    },
+    audioConfig: {
+      audioEncoding: 'MP3'
+    }
+  });
+
+  if (!response.audioContent) {
+    throw new Error('No audio content received from TTS service');
+  }
+
+  return {
+    audioContent: Buffer.from(response.audioContent),
+    mimeType: 'audio/mpeg'
+  };
+}
