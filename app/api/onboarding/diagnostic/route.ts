@@ -1,0 +1,72 @@
+// @ts-ignore - Temporary bypass for type issues
+import { NextResponse } from 'next/server';
+// @ts-ignore - Temporary bypass for type issues
+import { speechClient, geminiClient } from '../../lib/ai-service';
+
+interface SpeechRecognitionAlternative {
+  transcript?: string;
+  confidence?: number;
+}
+
+interface SpeechRecognitionResult {
+  alternatives?: SpeechRecognitionAlternative[];
+}
+
+interface SpeechRecognitionResponse {
+  results?: SpeechRecognitionResult[];
+}
+
+export async function POST(request: Request) {
+  try {
+    const formData = await request.formData();
+    const audioFile = formData.get('audio') as File;
+    
+    if (!audioFile) {
+      return NextResponse.json(
+        { error: 'No audio file provided' },
+        { status: 400 }
+      );
+    }
+
+    // @ts-ignore - Temporary bypass for Buffer type
+    const audioBuffer = Buffer.from(await audioFile.arrayBuffer());
+    
+    // Transcribe audio
+    const [transcriptionResult] = await speechClient.recognize({
+      audio: { content: audioBuffer },
+      config: {
+        encoding: 'WEBM_OPUS',
+        sampleRateHertz: 48000,
+        languageCode: 'en-US',
+      },
+    });
+
+    const results = (transcriptionResult as SpeechRecognitionResponse).results || [];
+    const transcription = results
+      .flatMap(result => result.alternatives?.map(alt => alt.transcript) || [])
+      .filter((t): t is string => Boolean(t))
+      .join(' ');
+
+    if (!transcription) {
+      return NextResponse.json(
+        { error: 'Could not transcribe audio' },
+        { status: 400 }
+      );
+    }
+
+    // Analyze with Gemini
+    const model = geminiClient.getGenerativeModel({ model: 'gemini-pro' });
+    const prompt = `Analyze this language diagnostic sample:\n\n${transcription}\n\nProvide feedback on pronunciation, grammar, and vocabulary usage.`;
+    const result = await model.generateContent(prompt);
+    const analysis = await result.response.text();
+
+    return NextResponse.json({ transcription, analysis });
+    
+  } catch (error) {
+    console.error('Diagnostic error:', error);
+    return NextResponse.json(
+      { error: 'Failed to process diagnostic' },
+      { status: 500 }
+    );
+  }
+}

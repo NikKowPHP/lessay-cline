@@ -1,0 +1,18 @@
+{
+  "active_plan_file": "FIX_PLAN.md",
+  "architectural_map": {
+    "core_components": [
+      "authentication",
+      "lesson_management",
+      "srs_system",
+      "payment_processing",
+      "analytics"
+    ],
+    "file_paths": [
+      "app/",
+      "lib/",
+      "components/",
+      "prisma/"
+    ]
+  }
+}

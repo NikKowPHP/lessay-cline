@@ -18,7 +18,8 @@
     "module": "esnext",
     "moduleResolution": "node",
     "moduleSuffixes": [".js"],
-    "typeRoots": ["./node_modules/@types"],
+    "typeRoots": ["./node_modules/@types", "./typings"],
+    "types": ["node", "next"],
     "resolveJsonModule": true,
     "isolatedModules": true,
     "incremental": true,
@@ -38,7 +39,8 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "typings/**/*.d.ts"
   ],
   "exclude": [
     "node_modules"

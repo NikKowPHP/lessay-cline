@@ -28,7 +28,6 @@
     "@next-auth/prisma-adapter": "^1.0.7",
     "@tailwindcss/postcss": "^4",
     "@types/jsonwebtoken": "^9.0.9",
-    "@types/next": "^9.0.0",
     "@types/next-auth": "^3.15.0",
     "@types/node": "^20.19.0",
     "@types/react": "^19.1.8",
