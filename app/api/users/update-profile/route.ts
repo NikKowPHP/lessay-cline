@@ -1,7 +1,6 @@
-// @ts-expect-error - Temporary bypass for type issues
+
 import { NextResponse } from 'next/server';
-// @ts-expect-error - Temporary bypass for type issues
-import prisma from '../../../lib/prisma';
+import prisma from '@/lib/prisma';
 
 declare const prisma: {
   user: {

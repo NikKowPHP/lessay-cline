@@ -1,9 +1,8 @@
-// @ts-ignore - Temporary bypass for type issues
-const { useRouter } = require('next/router');
-// @ts-ignore - Temporary bypass for type issues
-const prisma = require('./prisma').default;
 
-exports.useAuth = () => {
+import {prisma} from '@/lib/prisma';
+import { useRouter } from 'next/router';
+
+export const  useAuth = () => {
   const router = useRouter();
 
   const startDiagnostic = () => {

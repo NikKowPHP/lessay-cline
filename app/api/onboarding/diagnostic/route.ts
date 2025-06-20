@@ -1,7 +1,7 @@
-// @ts-ignore - Temporary bypass for type issues
+
 import { NextResponse } from 'next/server';
-// @ts-ignore - Temporary bypass for type issues
-import { speechClient, geminiClient } from '../../lib/ai-service';
+
+import { speechClient, geminiClient } from '@/lib/ai-service';
 
 interface SpeechRecognitionAlternative {
   transcript?: string;
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // @ts-ignore - Temporary bypass for Buffer type
+  
     const audioBuffer = Buffer.from(await audioFile.arrayBuffer());
     
     // Transcribe audio

@@ -1,9 +1,9 @@
-// @ts-expect-error - Temporary bypass for React types
+
 import React, { useState, FormEvent, ChangeEvent } from 'react';
-// @ts-expect-error - Temporary bypass for Next.js types
+
 import { useRouter } from 'next/router';
-// @ts-expect-error - Temporary bypass for auth types
-import { useAuth } from '../lib/auth';
+
+
 
 const OnboardingForm = () => {
   const [nativeLang, setNativeLang] = useState<string>('');
@@ -11,7 +11,7 @@ const OnboardingForm = () => {
   const [goal, setGoal] = useState<string>('');
   const [level, setLevel] = useState<string>('');
   const router = useRouter();
-  const { startDiagnostic } = useAuth();
+
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -44,49 +44,92 @@ const OnboardingForm = () => {
   };
 
   return (
-    <div className="onboarding-form">
-      <h1>Welcome to Lessay</h1>
-      <p>Let's create your personalized learning profile</p>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Native Language:</label>
-          <input
-            type="text"
-            value={nativeLang}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => setNativeLang(e.target.value)}
-            required
-          />
+    <div className="max-w-2xl mx-auto p-6">
+      <div className="text-center mb-8">
+        <h1 className="text-4xl font-bold text-blue-600 mb-4">
+          Welcome to Lessay! 🌍
+        </h1>
+        <p className="text-lg text-gray-600">
+          Let&apos;s create your personalized language learning journey
+        </p>
+      </div>
+      
+      <div className="bg-white rounded-lg shadow-md p-8">
+        <div className="mb-6 text-center">
+          <h2 className="text-2xl font-semibold mb-2">
+            Get Started in 3 Simple Steps
+          </h2>
+          <p className="text-gray-500">
+            1. Tell us about yourself<br/>
+            2. Take a quick diagnostic<br/>
+            3. Start your first lesson
+          </p>
         </div>
-        <div>
-          <label>Target Language:</label>
-          <input
-            type="text"
-            value={targetLang}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => setTargetLang(e.target.value)}
-            required
-          />
+        <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Native Language
+            </label>
+            <input
+              type="text"
+              value={nativeLang}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setNativeLang(e.target.value)}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              required
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Target Language
+            </label>
+            <input
+              type="text"
+              value={targetLang}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setTargetLang(e.target.value)}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Primary Goal
+            </label>
+            <input
+              type="text"
+              value={goal}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setGoal(e.target.value)}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Self-Assessed Level
+            </label>
+            <input
+              type="text"
+              value={level}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setLevel(e.target.value)}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            Start Diagnostic
+          </button>
         </div>
-        <div>
-          <label>Primary Goal:</label>
-          <input
-            type="text"
-            value={goal}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => setGoal(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Self-Assessed Level:</label>
-          <input
-            type="text"
-            value={level}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => setLevel(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit">Start Diagnostic</button>
-      </form>
+        </form>
+      </div>
     </div>
+  
   );
 };
 
