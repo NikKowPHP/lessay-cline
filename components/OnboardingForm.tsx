@@ -1,4 +1,6 @@
+// ROO-AUDIT-TAG :: audit_remediation_phase_1.md :: Replace console.log and connect to API
 import { useState, useEffect } from 'react';
+import logger from '@/lib/logger';
 
 interface SpeechRecognitionEvent extends Event {
   results: SpeechRecognitionResultList;
@@ -82,11 +84,28 @@ export default function OnboardingForm() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      console.log('Form submitted:', formData);
-      // TODO: Connect to API
+      logger.info({ formData }, 'Form submitted');
+      try {
+        const response = await fetch('/api/onboarding/create-profile', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...formData,
+            userId: 'current-user-id', // TODO: Replace with actual user ID
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to submit onboarding data');
+        }
+      } catch (error) {
+        logger.error({ error }, 'Onboarding submission failed');
+      }
     }
   };
 

@@ -1,13 +1,15 @@
+// ROO-AUDIT-TAG :: audit_remediation_phase_1.md :: Replace console.error with logger
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { supabaseServerClient } from '@/lib/supabase/server'
 import { checkRateLimit, trackLoginAttempt } from '@/lib/security'
+import logger from '@/lib/logger'
 
 export async function requireAuth(
   req: NextRequest,
   handler: (req: NextRequest, userId: string) => Promise<NextResponse>
 ) {
-  const ip = req.ip || req.headers.get('x-forwarded-for') || 'unknown'
+  const ip = req.headers.get('x-forwarded-for') || 'unknown'
   
   // Check rate limit
   const rateLimitResponse = checkRateLimit(ip)
@@ -59,7 +61,7 @@ export async function refreshSession() {
 
 export async function withAuthMiddleware(handler: (req: NextRequest) => Promise<NextResponse>) {
   return async (req: NextRequest) => {
-    const ip = req.ip || req.headers.get('x-forwarded-for') || 'unknown'
+    const ip = req.headers.get('x-forwarded-for') || 'unknown'
     
     // Check rate limit
     const rateLimitResponse = checkRateLimit(ip)
@@ -76,6 +78,7 @@ export async function withAuthMiddleware(handler: (req: NextRequest) => Promise<
         { status: 401 }
       )
     }
+    // ROO-AUDIT-TAG :: audit_remediation_phase_1.md :: END
 
     // Check if access token is expired
     if (session.expires_at && session.expires_at * 1000 < Date.now()) {
@@ -88,7 +91,7 @@ export async function withAuthMiddleware(handler: (req: NextRequest) => Promise<
           )
         }
       } catch (err: unknown) {
-        console.error('Session refresh error:', err)
+        logger.error({ err }, 'Session refresh error')
         return NextResponse.json(
           { error: 'Failed to refresh session' },
           { status: 401 }
