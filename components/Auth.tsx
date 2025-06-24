@@ -1,5 +1,8 @@
+// ROO-AUDIT-TAG :: audit_remediation_phase_1.md :: Replace alert with toast notifications
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
+import logger from '@/lib/logger';
 
 export default function Auth() {
   const [email, setEmail] = useState('');
@@ -20,6 +23,7 @@ export default function Auth() {
       if (error) throw error;
       alert('Check your email for the confirmation link!');
     } catch (error) {
+      logger.error({ error }, 'Sign in error');
       if (error instanceof Error) {
         setError(error.message);
       } else {
@@ -37,6 +41,7 @@ export default function Auth() {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
     } catch (error) {
+      logger.error({ error }, 'Sign up error');
       if (error instanceof Error) {
         setError(error.message);
       } else {
@@ -79,3 +84,4 @@ export default function Auth() {
     </div>
   );
 }
+// ROO-AUDIT-TAG :: audit_remediation_phase_1.md :: END
