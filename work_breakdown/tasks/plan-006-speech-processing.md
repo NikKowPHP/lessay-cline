@@ -10,7 +10,7 @@ Implement speech processing capabilities including TTS, STT, and audio capture.
 - [x] (UI) Implement audio capture interface with:
   - Real-time waveform visualization
   - Quality monitoring indicators
-- [ ] (LOGIC) Develop STT processing pipeline:
+- [x] (LOGIC) Develop STT processing pipeline:
   - Real-time transcription
   - Audio preprocessing
   - Error handling
