@@ -1,45 +1,66 @@
-// ROO-AUDIT-TAG :: plan-007-memory-system.md :: Implement SRS engine
+// ROO-AUDIT-TAG :: plan-010-srs-tracking.md :: Implement enhanced SRS scheduling algorithm
 type ReviewQuality = 0 | 1 | 2 | 3 | 4 | 5; // 0=worst, 5=best
 
+interface SRSItem {
+  ease: number;
+  interval: number;
+  consecutiveCorrect: number;
+  recallStrength: number;
+  difficulty: number; // 1-5 scale
+}
+
+interface SRSUpdateResult {
+  ease: number;
+  interval: number;
+  consecutiveCorrect: number;
+  recallStrength: number;
+  masteryLevel: number;
+  nextReview: Date;
+  difficulty: number;
+}
+
+const MASTERY_THRESHOLDS = [0.3, 0.6, 0.8, 0.9, 0.95];
+const MIN_EASE_FACTOR = 1.3;
+const MAX_EASE_FACTOR = 3.0;
+
 export class SRSEngine {
-  static calculateNextReview(currentEntry: {
-    ease: number;
-    interval: number;
-    consecutiveCorrect: number;
-    recallStrength: number;
-  }, quality: ReviewQuality) {
-    let { ease, interval, consecutiveCorrect, recallStrength } = currentEntry;
+  static calculateNextReview(currentItem: SRSItem, quality: ReviewQuality): SRSUpdateResult {
+    let { ease, interval, consecutiveCorrect, recallStrength, difficulty } = currentItem;
     
-    // Adjust ease factor based on recall quality
-    ease = Math.max(1.3, ease + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)));
+    // Adjust difficulty based on performance (weighted moving average)
+    difficulty = (difficulty * 0.7) + ((5 - quality) * 0.3);
+    difficulty = Math.max(1, Math.min(5, Number(difficulty.toFixed(1))));
     
-    // Calculate new interval
-    if (quality < 3) {
-      interval = 1;
-      consecutiveCorrect = 0;
-    } else {
+    // Calculate performance-adjusted ease factor
+    const easeAdjustment = this.calculateEaseAdjustment(quality, difficulty);
+    ease = Math.max(MIN_EASE_FACTOR, Math.min(MAX_EASE_FACTOR, ease + easeAdjustment));
+    
+    // Update consecutive correct count and reset interval if needed
+    if (quality >= 3) {
       consecutiveCorrect += 1;
-      if (consecutiveCorrect === 1) {
-        interval = 1;
-      } else if (consecutiveCorrect === 2) {
-        interval = 6;
-      } else {
-        interval = Math.round(interval * ease);
-      }
+    } else {
+      consecutiveCorrect = 0;
+      interval = 1;
     }
 
-    // Calculate new recall strength (0-1 scale)
-    recallStrength = Math.min(1, Math.max(0, 
-      recallStrength + (quality/5 - 0.2) * (1 - recallStrength)
-    ));
+    // Calculate new interval based on performance and difficulty
+    if (consecutiveCorrect > 0) {
+      interval = this.calculateNextInterval(
+        interval,
+        ease,
+        consecutiveCorrect,
+        difficulty
+      );
+    }
 
-    // Calculate mastery level based on consecutive correct
-    const masteryLevel = Math.min(5, Math.floor(consecutiveCorrect / 3) + 1);
+    // Update recall strength using exponential moving average
+    recallStrength = this.calculateRecallStrength(recallStrength, quality);
 
-    // Calculate next review date (minimum 1 day, maximum 365 days)
-    const daysUntilNext = Math.min(365, Math.max(1, interval));
-    const nextReview = new Date();
-    nextReview.setDate(nextReview.getDate() + daysUntilNext);
+    // Calculate mastery level based on recall strength thresholds
+    const masteryLevel = MASTERY_THRESHOLDS.findIndex(t => recallStrength < t) + 1;
+
+    // Calculate next review date with jitter to avoid pile-ups
+    const nextReview = this.calculateNextReviewDate(interval);
 
     return {
       ease: Number(ease.toFixed(2)),
@@ -47,8 +68,53 @@ export class SRSEngine {
       consecutiveCorrect,
       recallStrength: Number(recallStrength.toFixed(2)),
       masteryLevel,
-      nextReview
+      nextReview,
+      difficulty: Number(difficulty.toFixed(1))
     };
   }
+
+  private static calculateEaseAdjustment(quality: ReviewQuality, difficulty: number): number {
+    const qualityFactor = (quality - 2.5) / 10; // Normalize to -0.25 to +0.25
+    const difficultyFactor = (3 - difficulty) / 20; // Easier items get slightly bigger boosts
+    return qualityFactor + difficultyFactor;
+  }
+
+  private static calculateNextInterval(
+    currentInterval: number,
+    ease: number,
+    consecutiveCorrect: number,
+    difficulty: number
+  ): number {
+    if (consecutiveCorrect === 1) return 1;
+    if (consecutiveCorrect === 2) return 6;
+    
+    // Base interval with difficulty scaling
+    let interval = currentInterval * ease * (1 + (1 - (difficulty / 5)));
+    
+    // Apply graduated interval increases for higher mastery
+    if (consecutiveCorrect > 5) {
+      interval *= 1.2;
+    }
+    if (consecutiveCorrect > 10) {
+      interval *= 1.1;
+    }
+
+    return Math.max(1, Math.min(Math.round(interval), 365));
+  }
+
+  private static calculateRecallStrength(current: number, quality: ReviewQuality): number {
+    const target = quality / 5;
+    return current + (target - current) * 0.3; // 30% weight to new observation
+  }
+
+  private static calculateNextReviewDate(intervalDays: number): Date {
+    // Add jitter (+/- 10%) to avoid review pile-ups
+    const jitter = intervalDays * 0.2 * (Math.random() - 0.5);
+    const daysUntilNext = Math.max(1, Math.min(365, intervalDays + jitter));
+    
+    const nextReview = new Date();
+    nextReview.setDate(nextReview.getDate() + Math.round(daysUntilNext));
+    return nextReview;
+  }
 }
-// ROO-AUDIT-TAG :: plan-007-memory-system.md :: END
+// ROO-AUDIT-TAG :: plan-010-srs-tracking.md :: END
