@@ -21,6 +21,7 @@ model User {
   comfortLevel Int
   dailyTarget  Int @default(15) // minutes
   studyPreferences Json? // {darkMode: Boolean, notifications: Boolean, etc.}
+  learningStyle String? @default("visual") // visual, auditory, or kinesthetic
   progress     UserProgress[]
   srsEntries   SRSEntry[]
   lessons      Lesson[]
