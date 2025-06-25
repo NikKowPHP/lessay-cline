@@ -4,7 +4,7 @@
 Implement the lesson data model and associated management features.
 
 ## Tasks
-- [ ] (LOGIC) Define Prisma schema for lessons:
+- [x] (LOGIC) Define Prisma schema for lessons:
   - Content storage (prompts, expected responses)
   - Difficulty level tracking
   - Target concept mapping

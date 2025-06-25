@@ -50,18 +50,27 @@ model LessonAnalysis {
   createdAt        DateTime @default(now())
 }
 
+// ROO-AUDIT-TAG :: plan-009-lesson-structure.md :: Define Prisma schema for lessons
 model Lesson {
-  id          String @id @default(uuid())
+  id          String   @id @default(uuid())
   title       String
-  content     String
-  difficulty  Int
+  description String?
+  content     Json     // Stores structured lesson content {prompts: [], expectedResponses: []}
+  difficulty  Int      @default(1) // 1-5 scale
+  targetConcepts String[] // Mapped to SRS items
+  language    String   // Target language for the lesson
   userId      String
-  user        User @relation(fields: [userId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
   exercises   Exercise[]
   completedAt DateTime?
   analysis    VoiceAnalysis[]
   progress    Progress[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  @@index([userId, difficulty])
+  @@index([userId, language])
 }
+// ROO-AUDIT-TAG :: plan-009-lesson-structure.md :: END
 
 model Exercise {
   id          String @id @default(uuid())
