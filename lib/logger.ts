@@ -1,9 +1,12 @@
-// ROO-AUDIT-TAG :: audit_remediation_phase_1.md :: Implement centralized logging utility
+// ROO-AUDIT-TAG :: audit_remediation_phase_2.md :: Create production-ready logger
 import pino from 'pino';
 import type { Level } from 'pino';
 
 const logger = pino({
-  level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+  level: process.env.LOG_LEVEL || (process.env.NODE_ENV === 'production' ? 'info' : 'debug'),
+  serializers: {
+    err: pino.stdSerializers.err,
+  },
   formatters: {
     level: (label: Level) => ({ level: label.toUpperCase() }),
   },
@@ -20,4 +23,4 @@ export const childLogger = (requestId: string) => {
 };
 
 export default logger;
-// ROO-AUDIT-TAG :: audit_remediation_phase_1.md :: END
+// ROO-AUDIT-TAG :: audit_remediation_phase_2.md :: END

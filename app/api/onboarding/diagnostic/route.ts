@@ -1,7 +1,7 @@
 
 import { NextResponse } from 'next/server';
-
 import { speechClient, geminiClient } from '@/lib/ai-service';
+import logger from '@/lib/logger';
 
 interface SpeechRecognitionAlternative {
   transcript?: string;
@@ -17,9 +17,10 @@ interface SpeechRecognitionResponse {
 }
 
 export async function POST(request: Request) {
+  let audioFile: File | null = null;
   try {
     const formData = await request.formData();
-    const audioFile = formData.get('audio') as File;
+    audioFile = formData.get('audio') as File;
     
     if (!audioFile) {
       return NextResponse.json(
@@ -63,7 +64,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ transcription, analysis });
     
   } catch (error) {
-    console.error('Diagnostic error:', error);
+    logger.error('Failed to process language diagnostic', {
+      error,
+      audioFile: audioFile ? {
+        name: audioFile.name,
+        size: audioFile.size,
+        type: audioFile.type
+      } : null
+    });
     return NextResponse.json(
       { error: 'Failed to process diagnostic' },
       { status: 500 }

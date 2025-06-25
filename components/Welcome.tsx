@@ -1,5 +1,6 @@
 // ROO-AUDIT-TAG :: plan-001-onboarding.md :: Implement welcome screen after onboarding completion
 import { useEffect, useState } from 'react';
+import logger from '@/lib/logger';
 import { useRouter } from 'next/router';
 
 interface UserProfile {
@@ -18,7 +19,7 @@ export default function Welcome() {
         const data = await response.json();
         setProfile(data);
       } catch (error) {
-        console.error('Failed to fetch profile:', error);
+        logger.error({ err: error }, 'Failed to fetch profile');
       }
     };
 

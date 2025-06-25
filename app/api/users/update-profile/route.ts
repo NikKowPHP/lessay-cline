@@ -1,19 +1,12 @@
 
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
-
-declare const prisma: {
-  user: {
-    update: (params: {
-      where: { id: string };
-      data: { nativeLang: string; targetLang: string };
-    }) => Promise<void>;
-  };
-};
+import { prisma } from '@/lib/prisma';
+import logger from '@/lib/logger';
 
 export async function POST(request: Request) {
+  const { userId, nativeLang, targetLang } = await request.json();
+  
   try {
-    const { userId, nativeLang, targetLang } = await request.json();
     
     await prisma.user.update({
       where: { id: userId },
@@ -25,7 +18,11 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Profile update error:', error);
+    logger.error('Failed to update user profile', {
+      error,
+      userId: userId,
+      errorType: error instanceof Error ? error.constructor.name : typeof error
+    });
     return NextResponse.json(
       { error: 'Failed to update profile' },
       { status: 500 }

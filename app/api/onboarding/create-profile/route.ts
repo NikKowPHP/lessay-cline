@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import logger from '@/lib/logger';
 
 const prisma = new PrismaClient();
 
@@ -11,8 +12,11 @@ interface ProfileUpdateData {
 }
 
 export async function POST(request: Request) {
+  let userId: string | undefined;
   try {
-    const { userId, nativeLanguage, targetLanguage, primaryGoal, comfortLevel } = await request.json();
+    const data = await request.json();
+    userId = data.userId;
+    const { nativeLanguage, targetLanguage, primaryGoal, comfortLevel } = data;
     
     // Basic validation
     if (!userId || !nativeLanguage || !targetLanguage || !primaryGoal || !comfortLevel) {
@@ -39,7 +43,10 @@ export async function POST(request: Request) {
     return NextResponse.json(updatedUser);
     
   } catch (error) {
-    console.error('Profile creation error:', error);
+    logger.error('Failed to create user profile', {
+      error,
+      userId: userId || 'unknown'
+    });
     return NextResponse.json(
       { error: 'Failed to update profile' },
       { status: 500 }

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import logger from '@/lib/logger';
 import type { ReactElement } from 'react';
 import { useSession } from 'next-auth/react';
 
@@ -41,7 +42,7 @@ export default function SettingsView(): ReactElement {
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
     } catch (error) {
-      console.error('Error updating settings:', error);
+      logger.error({ err: error }, 'Error updating settings');
     }
   };
 

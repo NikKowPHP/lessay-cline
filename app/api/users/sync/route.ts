@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
+import { prisma } from '@/lib/prisma'
+import logger from '@/lib/logger'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -29,14 +30,20 @@ export async function POST() {
           email: user.email!,
           password: '', // Empty string since we don't store auth passwords
           targetLang: 'en', // Default target language
-          nativeLang: 'en' // Default native language
+          nativeLang: 'en', // Default native language
+          primaryGoal: 'general', // Default learning goal
+          comfortLevel: 1 // Default comfort level (1 = beginner)
         }
       })
     }
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('User sync failed:', error)
+    logger.error('Failed to sync users', {
+      error,
+      errorType: error instanceof Error ? error.constructor.name : typeof error,
+      userCount: users?.length || 0
+    })
     return NextResponse.json(
       { error: 'User sync failed' },
       { status: 500 }

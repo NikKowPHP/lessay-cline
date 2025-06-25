@@ -1,5 +1,7 @@
 // ROO-AUDIT-TAG :: audit_remediation_phase_1.md :: Replace console.log and connect to API
+// ROO-AUDIT-TAG :: audit_remediation_phase_2.md :: Replace placeholder user ID
 import { useState, useEffect } from 'react';
+import { useUser } from '@supabase/auth-helpers-react';
 import logger from '@/lib/logger';
 
 interface SpeechRecognitionEvent extends Event {
@@ -33,6 +35,7 @@ declare global {
 }
 
 export default function OnboardingForm() {
+  const user = useUser();
   const [formData, setFormData] = useState({
     nativeLanguage: '',
     targetLanguage: '',
@@ -96,7 +99,7 @@ export default function OnboardingForm() {
           },
           body: JSON.stringify({
             ...formData,
-            userId: 'current-user-id', // TODO: Replace with actual user ID
+            userId: user?.id || '',
           }),
         });
 

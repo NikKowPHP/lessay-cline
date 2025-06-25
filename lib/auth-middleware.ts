@@ -1,4 +1,4 @@
-// ROO-AUDIT-TAG :: audit_remediation_phase_1.md :: Replace console.error with logger
+// ROO-AUDIT-TAG :: audit_remediation_phase_2.md :: Replace remaining console.error with logger
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { supabaseServerClient } from '@/lib/supabase/server'
@@ -40,7 +40,7 @@ export async function requireAuth(
     return await handler(req, user.id)
   } catch (err: unknown) {
     const error = err instanceof Error ? err : new Error('Unknown error')
-    console.error('Auth middleware error:', error)
+    logger.error({ err: error }, 'Auth middleware error');
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -78,7 +78,7 @@ export async function withAuthMiddleware(handler: (req: NextRequest) => Promise<
         { status: 401 }
       )
     }
-    // ROO-AUDIT-TAG :: audit_remediation_phase_1.md :: END
+    // ROO-AUDIT-TAG :: audit_remediation_phase_2.md :: END
 
     // Check if access token is expired
     if (session.expires_at && session.expires_at * 1000 < Date.now()) {

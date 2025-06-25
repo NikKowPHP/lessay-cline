@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
+import logger from '@/lib/logger';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-04-10'
+  apiVersion: '2025-05-28.basil'
 });
 
 export async function POST(request: Request) {
@@ -33,12 +34,12 @@ export async function POST(request: Request) {
         break;
 
       default:
-        console.log(`Unhandled event type: ${event.type}`);
+        logger.info(`Unhandled Stripe event type`, { eventType: event.type });
     }
 
     return NextResponse.json({ received: true }, { status: 200 });
   } catch (err) {
-    console.error('Webhook error:', err);
+    logger.error('Stripe webhook processing failed', { error: err });
     return NextResponse.json(
       { error: 'Webhook handler failed' },
       { status: 400 }

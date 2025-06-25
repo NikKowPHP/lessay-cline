@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getUserSession } from '@/lib/supabase/server'
-import prisma from '@/lib/prisma'
+import { prisma } from '@/lib/prisma'
+import logger from '@/lib/logger'
 
 export async function GET() {
   const session = await getUserSession()
@@ -63,7 +64,11 @@ export async function PUT(request: Request) {
 
     return NextResponse.json(updatedUser);
   } catch (error) {
-    console.error('Profile update failed:', error);
+    logger.error('Failed to update user profile', {
+      error,
+      userId: session.user.id,
+      errorType: error instanceof Error ? error.constructor.name : typeof error
+    });
     return NextResponse.json(
       { error: 'Profile update failed' },
       { status: 500 }

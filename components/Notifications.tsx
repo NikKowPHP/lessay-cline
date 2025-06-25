@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import logger from '@/lib/logger';
 import { useSession } from 'next-auth/react';
 
 interface Notification {
@@ -28,7 +29,7 @@ export default function Notifications() {
         setNotifications(data);
         setUnreadCount(data.filter(n => !n.read).length);
       } catch (error) {
-        console.error('Error fetching notifications:', error);
+        logger.error({ err: error }, 'Error fetching notifications');
       }
     };
 
@@ -56,7 +57,7 @@ export default function Notifications() {
       );
       setUnreadCount((prev: number) => prev - 1);
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+      logger.error({ err: error }, 'Error marking notification as read');
     }
   };
 
@@ -66,7 +67,7 @@ export default function Notifications() {
       setNotifications((prev: Notification[]) => prev.map((n: Notification) => ({ ...n, read: true })));
       setUnreadCount(0);
     } catch (error) {
-      console.error('Error marking all notifications as read:', error);
+      logger.error({ err: error }, 'Error marking all notifications as read');
     }
   };
 

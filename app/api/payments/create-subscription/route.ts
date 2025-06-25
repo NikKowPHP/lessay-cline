@@ -1,13 +1,23 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import logger from '@/lib/logger';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-04-10'
+  apiVersion: '2025-05-28.basil'
 });
 
 export async function POST(request: Request) {
+  let tier = '';
   try {
-    const { tier } = await request.json();
+    const data = await request.json();
+    tier = data.tier || '';
+    
+    if (!tier) {
+      return NextResponse.json(
+        { error: 'Missing tier parameter' },
+        { status: 400 }
+      );
+    }
     
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -22,7 +32,12 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ sessionId: session.id });
   } catch (error) {
-    console.error('Stripe error:', error);
+    logger.error('Failed to create Stripe subscription', {
+      error,
+      tier: tier || 'validation_failed',
+      // Redact sensitive Stripe error details
+      errorType: error instanceof Error ? error.constructor.name : typeof error
+    });
     return NextResponse.json(
       { error: 'Failed to create subscription' },
       { status: 500 }
