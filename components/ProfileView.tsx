@@ -11,6 +11,8 @@ interface UserProfile {
   targetLang: string
   nativeLang: string
   socialMediaLinks?: string[]
+  memoryRetentionRate: number
+  preferredReviewTime: string
   createdAt: string
 }
 
@@ -19,6 +21,8 @@ interface ProfileForm {
   nativeLang: string
   bio?: string
   socialMediaLinks?: string[]
+  memoryRetentionRate: number
+  preferredReviewTime: string
 }
 
 export const ProfileView: FC = (): React.JSX.Element => {
@@ -31,7 +35,9 @@ export const ProfileView: FC = (): React.JSX.Element => {
     targetLang: '',
     nativeLang: '',
     bio: '',
-    socialMediaLinks: []
+    socialMediaLinks: [],
+    memoryRetentionRate: 0.7,
+    preferredReviewTime: 'morning'
   })
 
   useEffect(() => {
@@ -47,7 +53,9 @@ export const ProfileView: FC = (): React.JSX.Element => {
         setUserData(profile)
         setFormData({
           targetLang: profile.targetLang,
-          nativeLang: profile.nativeLang
+          nativeLang: profile.nativeLang,
+          memoryRetentionRate: profile.memoryRetentionRate,
+          preferredReviewTime: profile.preferredReviewTime
         })
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error occurred')
@@ -106,6 +114,8 @@ export const ProfileView: FC = (): React.JSX.Element => {
           <p>Email: {userData.email}</p>
           <p>Target Language: {userData.targetLang}</p>
           <p>Native Language: {userData.nativeLang}</p>
+          <p>Memory Retention: {(userData.memoryRetentionRate * 100).toFixed(0)}%</p>
+          <p>Preferred Review Time: {userData.preferredReviewTime}</p>
           {userData.bio && <p className="mt-2 text-gray-600">{userData.bio}</p>}
           {userData.socialMediaLinks && userData.socialMediaLinks.length > 0 && (
             <div className="mt-2">
@@ -169,6 +179,33 @@ export const ProfileView: FC = (): React.JSX.Element => {
               })}
               className="w-full p-2 border rounded h-32"
             />
+          </div>
+
+          <div>
+            <label className="block">Memory Retention Rate</label>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.1"
+              value={formData.memoryRetentionRate}
+              onChange={(e) => setFormData({...formData, memoryRetentionRate: parseFloat(e.target.value)})}
+              className="w-full"
+            />
+            <span>{(formData.memoryRetentionRate * 100).toFixed(0)}%</span>
+          </div>
+
+          <div>
+            <label className="block">Preferred Review Time</label>
+            <select
+              value={formData.preferredReviewTime}
+              onChange={(e) => setFormData({...formData, preferredReviewTime: e.target.value})}
+              className="w-full p-2 border rounded"
+            >
+              <option value="morning">Morning</option>
+              <option value="afternoon">Afternoon</option>
+              <option value="evening">Evening</option>
+            </select>
           </div>
 
           <div>
