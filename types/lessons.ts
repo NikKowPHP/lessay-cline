@@ -57,4 +57,15 @@ export interface VocabularyValidation {
   isValid: boolean;
   suggestions: string[];
 }
+// ROO-AUDIT-TAG :: plan-009-lesson-structure.md :: Add Lesson type
+export interface Lesson {
+  id: string;
+  title: string;
+  description: string;
+  difficulty: number;
+  duration: number;
+  concepts?: string[];
+  progress?: number;
+}
+// ROO-AUDIT-TAG :: plan-009-lesson-structure.md :: END
 // ROO-AUDIT-TAG :: plan-003-adaptive-learning.md :: END
