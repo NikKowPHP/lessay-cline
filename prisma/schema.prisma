@@ -30,6 +30,8 @@ model User {
   lessonAnalyses LessonAnalysis[]
   lessonAttempts LessonAttempt[]
   role          UserRole @default(USER)
+  memoryRetentionRate Float? @default(0.7)
+  preferredReviewTime String? @default("morning") // morning, afternoon, evening
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
