@@ -14,7 +14,7 @@ Implement speech processing capabilities including TTS, STT, and audio capture.
   - Real-time transcription
   - Audio preprocessing
   - Error handling
-- [ ] (UI) Create audio playback controls for TTS output
+- [x] (UI) Create audio playback controls for TTS output
 
 ## Technical Requirements
 - Use Web Audio API for browser-based processing
