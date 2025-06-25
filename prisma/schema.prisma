@@ -29,6 +29,8 @@ model User {
   progressRecords Progress[]
   lessonAnalyses LessonAnalysis[]
   lessonAttempts LessonAttempt[]
+  studySessions StudySession[]
+  progressSnapshots ProgressSnapshot[]
   role          UserRole @default(USER)
   memoryRetentionRate Float? @default(0.7)
   preferredReviewTime String? @default("morning") // morning, afternoon, evening
@@ -135,6 +137,27 @@ model LessonAttempt {
   overallScore   Float
   weakAreas      String[]
 }
+
+// ROO-AUDIT-TAG :: plan-007-memory-system.md :: Add performance history models
+model StudySession {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  duration     Int      // in minutes
+  itemsReviewed Int
+  accuracy     Float
+  newItems     Int
+  createdAt    DateTime @default(now())
+}
+
+model ProgressSnapshot {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  snapshot  String   // JSON string of progress data
+  createdAt DateTime @default(now())
+}
+// ROO-AUDIT-TAG :: plan-007-memory-system.md :: END
 
 enum UserRole {
   USER
