@@ -14,9 +14,14 @@ export default async function Navigation() {
         </div>
         <div className="flex space-x-4">
           {session ? (
-            <Link href="/profile" className="text-white hover:text-gray-300">
-              Profile
-            </Link>
+            <>
+              <Link href="/dashboard" className="text-white hover:text-gray-300">
+                Dashboard
+              </Link>
+              <Link href="/profile" className="text-white hover:text-gray-300">
+                Profile
+              </Link>
+            </>
           ) : (
             <Link href="/login" className="text-white hover:text-gray-300">
               Login

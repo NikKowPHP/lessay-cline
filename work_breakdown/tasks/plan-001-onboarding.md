@@ -11,7 +11,7 @@ Implement the onboarding flow to collect user data and establish baseline profic
   - Self-assessed comfort level
 - [x] (LOGIC) Implement initial voice-based diagnostic
 - [x] (LOGIC) Create user profile storage in database
-- [ ] (UI) Design welcome screen after onboarding completion
+- [x] (UI) Design welcome screen after onboarding completion
 
 ## Technical Requirements
 - Use React for form components

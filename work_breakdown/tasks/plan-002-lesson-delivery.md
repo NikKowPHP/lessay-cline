@@ -9,11 +9,11 @@ Implement the core lesson delivery interface with real-time speech processing an
   - STT input component
   - Feedback panel
 - [x] (LOGIC) Integrate Google TTS and AWS Polly for prompt delivery
-- [ ] (LOGIC) Implement real-time STT processing with feedback mechanisms:
+- [x] (LOGIC) Implement real-time STT processing with feedback mechanisms:
   - Pronunciation scoring
   - Grammar correction
   - Vocabulary validation
-- [ ] (UI) Design response visualization components
+- [x] (UI) Design response visualization components
 
 ## Technical Requirements
 - Use Web Speech API for browser-based STT

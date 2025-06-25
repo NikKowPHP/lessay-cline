@@ -18,14 +18,16 @@
     "@prisma/client": "^6.9.0",
     "@stripe/react-stripe-js": "^3.7.0",
     "@stripe/stripe-js": "^7.3.1",
-    "@supabase/auth-helpers-nextjs": "^0.10.0",
+    "@supabase/auth-helpers-nextjs": "^0.6.0",
+    "@supabase/auth-helpers-react": "^0.4.0",
     "@supabase/supabase-js": "^2.50.0",
+    "chart.js": "^4.5.0",
+    "pino": "^9.7.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.5.2",
     "stripe": "^18.2.1",
-    "pino": "^9.7.0",
-    "@supabase/auth-helpers-react": "^0.10.0"
+    "swr": "^2.3.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -40,7 +42,6 @@
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
     "next": "^15.3.3",
-    "@types/pino": "^9.0.0",
     "prisma": "^6.9.0",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",

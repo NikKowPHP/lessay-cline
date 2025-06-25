@@ -7,22 +7,31 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// ROO-AUDIT-TAG :: plan-008-user-profile.md :: Define Prisma schema for user profile
 model User {
   id           String @id @default(uuid())
   email        String @unique
   password     String
+  name         String?
+  avatarUrl    String?
   targetLang   String
   nativeLang   String
   primaryGoal  String
+  secondaryGoals String[]
   comfortLevel Int
+  dailyTarget  Int @default(15) // minutes
+  studyPreferences Json? // {darkMode: Boolean, notifications: Boolean, etc.}
   progress     UserProgress[]
   srsEntries   SRSEntry[]
   lessons      Lesson[]
   voiceAnalyses VoiceAnalysis[]
   progressRecords Progress[]
   lessonAnalyses LessonAnalysis[]
+  lessonAttempts LessonAttempt[]
   createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
+// ROO-AUDIT-TAG :: plan-008-user-profile.md :: END
 
 model LessonAnalysis {
   id               String   @id @default(cuid())
@@ -89,7 +98,13 @@ model SRSEntry {
   recallStrength Float @default(1.0)
   nextReview     DateTime @default(now())
   language       String
+  ease           Float @default(2.5)
+  interval       Int @default(1)
+  masteryLevel   Int @default(1)
+  consecutiveCorrect Int @default(0)
+  lastReviewed   DateTime @default(now())
   @@index([userId, nextReview])
+  @@index([userId, masteryLevel])
 }
 
 model VoiceAnalysis {
@@ -102,3 +117,18 @@ model VoiceAnalysis {
   audioUrl  String
   createdAt DateTime @default(now())
 }
+
+// ROO-AUDIT-TAG :: plan-004-progress-tracking.md :: Add LessonAttempt model
+model LessonAttempt {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  createdAt      DateTime @default(now())
+  phoneticScore  Float
+  fluencyScore   Float
+  grammarScore   Float
+  vocabularyScore Float
+  overallScore   Float
+  weakAreas      String[]
+}
+// ROO-AUDIT-TAG :: plan-004-progress-tracking.md :: END

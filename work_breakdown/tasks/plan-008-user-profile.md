@@ -4,12 +4,12 @@
 Implement the user profile data model and associated management features.
 
 ## Tasks
-- [ ] (LOGIC) Define Prisma schema for:
+- [x] (LOGIC) Define Prisma schema for:
   - Languages (native, target)
   - Goals
   - Proficiency levels
   - Learning preferences
-- [ ] (LOGIC) Create CRUD API endpoints for profile management
+- [x] (LOGIC) Create CRUD API endpoints for profile management
 - [ ] (LOGIC) Implement validation rules for profile data
 - [ ] (UI) Design profile editing interface
 
