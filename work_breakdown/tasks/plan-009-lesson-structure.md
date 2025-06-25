@@ -9,7 +9,7 @@ Implement the lesson data model and associated management features.
   - Difficulty level tracking
   - Target concept mapping
 - [x] (LOGIC) Create lesson generation endpoints
-- [ ] (LOGIC) Implement timestamp recording for lesson progress
+- [x] (LOGIC) Implement timestamp recording for lesson progress
 - [ ] (UI) Design lesson selection interface
 
 ## Technical Requirements

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getUserSession } from '@/lib/supabase/server';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 
 export async function POST(request: Request) {
   const session = await getUserSession();
@@ -19,7 +19,12 @@ export async function POST(request: Request) {
   });
 
   if (existingProgress) {
-    return NextResponse.json(existingProgress);
+    // Update existing progress with new start time
+    const progress = await prisma.progress.update({
+      where: { id: existingProgress.id },
+      data: { startedAt: new Date() }
+    });
+    return NextResponse.json(progress);
   }
 
   // Create new progress record

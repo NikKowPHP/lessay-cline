@@ -83,16 +83,21 @@ export async function POST(
     }
 
     // Update progress with the submitted answer
-    // ROO-AUDIT-TAG :: audit_remediation_phase_2.md :: Handle null score and type definitions
-    const score = calculateScore(answer, existingProgress.score || 0)
-    // ROO-AUDIT-TAG :: audit_remediation_phase_2.md :: Fix attempts field type
+    // ROO-AUDIT-TAG :: plan-009-lesson-structure.md :: Calculate lesson duration
+    const completedAt = new Date();
+    const duration = Math.floor(
+      (completedAt.getTime() - existingProgress.startedAt.getTime()) / 1000
+    );
+    
+    const score = calculateScore(answer, existingProgress.score || 0);
     const updateData = {
       score,
-      completedAt: new Date(),
+      completedAt,
+      duration,
       attempts: {
         increment: 1
       }
-    } as Prisma.ProgressUpdateInput
+    } as Prisma.ProgressUpdateInput;
     // ROO-AUDIT-TAG :: audit_remediation_phase_2.md :: END
     
     const progress = await prisma.progress.update({
