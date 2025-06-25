@@ -7,7 +7,7 @@ Implement speech processing capabilities including TTS, STT, and audio capture.
 - [x] (LOGIC) Integrate TTS services:
   - Google Cloud Text-to-Speech
   - AWS Polly
-- [ ] (UI) Implement audio capture interface with:
+- [x] (UI) Implement audio capture interface with:
   - Real-time waveform visualization
   - Quality monitoring indicators
 - [ ] (LOGIC) Develop STT processing pipeline:
