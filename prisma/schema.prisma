@@ -29,6 +29,7 @@ model User {
   progressRecords Progress[]
   lessonAnalyses LessonAnalysis[]
   lessonAttempts LessonAttempt[]
+  role          UserRole @default(USER)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
@@ -131,5 +132,10 @@ model LessonAttempt {
   vocabularyScore Float
   overallScore   Float
   weakAreas      String[]
+}
+
+enum UserRole {
+  USER
+  ADMIN
 }
 // ROO-AUDIT-TAG :: plan-004-progress-tracking.md :: END

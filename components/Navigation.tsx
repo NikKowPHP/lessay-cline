@@ -1,8 +1,19 @@
+// ROO-AUDIT-TAG :: plan-005-ai-brain.md :: Add admin navigation link
 import Link from 'next/link'
 import { getUserSession } from '@/lib/supabase/server'
+import { prisma } from '@/lib/prisma'
 
 export default async function Navigation() {
   const session = await getUserSession()
+  let isAdmin = false
+  
+  if (session?.user?.id) {
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { role: true }
+    })
+    isAdmin = user?.role === 'ADMIN'
+  }
   
   return (
     <nav className="bg-gray-800 p-4">
@@ -21,6 +32,11 @@ export default async function Navigation() {
               <Link href="/profile" className="text-white hover:text-gray-300">
                 Profile
               </Link>
+              {isAdmin && (
+                <Link href="/ai-monitor" className="text-white hover:text-gray-300">
+                  AI Monitor
+                </Link>
+              )}
             </>
           ) : (
             <Link href="/login" className="text-white hover:text-gray-300">
