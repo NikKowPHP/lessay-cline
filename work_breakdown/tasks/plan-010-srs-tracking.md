@@ -8,7 +8,7 @@ Implement the spaced repetition system for tracking concept mastery and review s
   - Concept ID mapping
   - Recall strength tracking
   - Review history logging
-- [ ] (LOGIC) Implement scheduling algorithm:
+- [x] (LOGIC) Implement scheduling algorithm:
   - Next review date calculation
   - Mastery level adjustments
   - Difficulty scaling
