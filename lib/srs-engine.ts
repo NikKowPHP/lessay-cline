@@ -1,5 +1,5 @@
 // ROO-AUDIT-TAG :: plan-010-srs-tracking.md :: Implement enhanced SRS scheduling algorithm
-type ReviewQuality = 0 | 1 | 2 | 3 | 4 | 5; // 0=worst, 5=best
+export type ReviewQuality = 0 | 1 | 2 | 3 | 4 | 5; // 0=worst, 5=best
 
 interface SRSItem {
   ease: number;

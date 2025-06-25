@@ -1,6 +1,26 @@
 // ROO-AUDIT-TAG :: plan-003-adaptive-learning.md :: Implement SRS scoring algorithm
 import { prisma } from './prisma';
 
+// ROO-AUDIT-TAG :: plan-010-srs-tracking.md :: Implement review session processing
+import { SRSEngine, type ReviewQuality } from './srs-engine';
+
+interface ReviewSessionResult {
+  srsEntry: {
+    id: string;
+    ease: number;
+    interval: number;
+    nextReview: Date;
+    recallStrength: number;
+    masteryLevel: number;
+    difficulty: number;
+  };
+  review: {
+    id: string;
+    score: number;
+    reviewedAt: Date;
+  };
+}
+
 type ReviewOutcome = {
   ease: number;
   interval: number;
@@ -56,6 +76,65 @@ export async function calculateSrsScore(
     masteryLevel
   };
 }
+export async function processReviewSession(
+  entryId: string,
+  quality: ReviewQuality,
+  responseTimeMs: number
+): Promise<ReviewSessionResult> {
+  const entry = await prisma.sRSEntry.findUnique({
+    where: { id: entryId }
+  });
+
+  if (!entry) {
+    throw new Error('SRS entry not found');
+  }
+
+  // Calculate new SRS parameters using the engine
+  const updateResult = SRSEngine.calculateNextReview({
+    ease: entry.ease,
+    interval: entry.interval,
+    consecutiveCorrect: entry.consecutiveCorrect,
+    recallStrength: entry.recallStrength,
+    difficulty: entry.difficulty || 3 // Default to medium difficulty
+  }, quality);
+
+  // Update the SRS entry
+  const updatedEntry = await prisma.sRSEntry.update({
+    where: { id: entryId },
+    data: {
+      ease: updateResult.ease,
+      interval: updateResult.interval,
+      nextReview: updateResult.nextReview,
+      recallStrength: updateResult.recallStrength,
+      masteryLevel: updateResult.masteryLevel,
+      consecutiveCorrect: updateResult.consecutiveCorrect,
+      difficulty: updateResult.difficulty,
+      lastReviewed: new Date()
+    }
+  });
+
+  // Create review history record
+  const review = await prisma.sRSReview.create({
+    data: {
+      srsEntryId: entryId,
+      reviewedAt: new Date(),
+      score: quality,
+      responseTime: responseTimeMs,
+      difficulty: updateResult.difficulty,
+      interval: updateResult.interval,
+      easeFactor: updateResult.ease
+    }
+  });
+
+  return {
+    srsEntry: updatedEntry,
+    review: {
+      id: review.id,
+      score: review.score,
+      reviewedAt: review.reviewedAt
+    }
+  };
+}
 
 export async function updateSrsEntry(
   entryId: string,
@@ -68,26 +147,31 @@ export async function updateSrsEntry(
 
   if (!entry) return;
 
-  const { ease, interval, nextReview, recallStrength, masteryLevel } =
-    await calculateSrsScore(
-      entry.ease,
-      entry.interval,
-      entry.recallStrength,
-      performance,
-      consecutiveCorrect
-    );
+  // Convert performance score to ReviewQuality (0-5 scale)
+  const quality = Math.round(performance * 5) as ReviewQuality;
+
+  const updateResult = SRSEngine.calculateNextReview({
+    ease: entry.ease,
+    interval: entry.interval,
+    consecutiveCorrect: entry.consecutiveCorrect,
+    recallStrength: entry.recallStrength,
+    difficulty: entry.difficulty || 3
+  }, quality);
 
   await prisma.sRSEntry.update({
     where: { id: entryId },
     data: {
-      ease,
-      interval,
-      nextReview,
-      recallStrength,
-      masteryLevel
+      ease: updateResult.ease,
+      interval: updateResult.interval,
+      nextReview: updateResult.nextReview,
+      recallStrength: updateResult.recallStrength,
+      masteryLevel: updateResult.masteryLevel,
+      consecutiveCorrect: updateResult.consecutiveCorrect,
+      difficulty: updateResult.difficulty
     }
   });
 }
+
 
 export async function getDueReviews(userId: string) {
   return prisma.sRSEntry.findMany({
