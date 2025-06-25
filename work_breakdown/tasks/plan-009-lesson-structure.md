@@ -10,7 +10,7 @@ Implement the lesson data model and associated management features.
   - Target concept mapping
 - [x] (LOGIC) Create lesson generation endpoints
 - [x] (LOGIC) Implement timestamp recording for lesson progress
-- [ ] (UI) Design lesson selection interface
+- [x] (UI) Design lesson selection interface
 
 ## Technical Requirements
 - Extend Prisma schema with lesson models
