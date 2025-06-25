@@ -1,3 +1,4 @@
+// ROO-AUDIT-TAG :: plan-011-non-functional.md :: Enhance schema for security measures
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -7,11 +8,10 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// ROO-AUDIT-TAG :: plan-008-user-profile.md :: Define Prisma schema for user profile
 model User {
   id           String @id @default(uuid())
   email        String @unique
-  password     String
+  password     String // Will store hashed value
   name         String?
   avatarUrl    String?
   targetLang   String
@@ -20,8 +20,8 @@ model User {
   secondaryGoals String[]
   comfortLevel Int
   dailyTarget  Int @default(15) // minutes
-  studyPreferences Json? // {darkMode: Boolean, notifications: Boolean, etc.}
-  learningStyle String? @default("visual") // visual, auditory, or kinesthetic
+  studyPreferences Json?
+  learningStyle String? @default("visual")
   progress     UserProgress[]
   srsEntries   SRSEntry[]
   lessons      Lesson[]
@@ -33,11 +33,24 @@ model User {
   progressSnapshots ProgressSnapshot[]
   role          UserRole @default(USER)
   memoryRetentionRate Float? @default(0.7)
-  preferredReviewTime String? @default("morning") // morning, afternoon, evening
+  preferredReviewTime String? @default("morning")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  auditLogs    AuditLog[]
 }
-// ROO-AUDIT-TAG :: plan-008-user-profile.md :: END
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String   // e.g., 'LOGIN', 'PROFILE_UPDATE'
+  entity    String?  // e.g., 'User', 'Lesson'
+  entityId  String?
+  details   Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+}
 
 model LessonAnalysis {
   id               String   @id @default(cuid())
@@ -50,15 +63,14 @@ model LessonAnalysis {
   createdAt        DateTime @default(now())
 }
 
-// ROO-AUDIT-TAG :: plan-009-lesson-structure.md :: Define Prisma schema for lessons
 model Lesson {
   id          String   @id @default(uuid())
   title       String
   description String?
-  content     Json     // Stores structured lesson content {prompts: [], expectedResponses: []}
-  difficulty  Int      @default(1) // 1-5 scale
-  targetConcepts String[] // Mapped to SRS items
-  language    String   // Target language for the lesson
+  content     Json
+  difficulty  Int      @default(1)
+  targetConcepts String[]
+  language    String
   userId      String
   user        User     @relation(fields: [userId], references: [id])
   exercises   Exercise[]
@@ -70,15 +82,14 @@ model Lesson {
   @@index([userId, difficulty])
   @@index([userId, language])
 }
-// ROO-AUDIT-TAG :: plan-009-lesson-structure.md :: END
 
 model Exercise {
   id          String @id @default(uuid())
-  type        String // 'vocabulary', 'grammar', etc.
+  type        String
   content     Json
   difficulty  Int
   language    String
-  tags        String // comma-separated list of tags
+  tags        String
   lesson      Lesson @relation(fields: [lessonId], references: [id])
   lessonId    String
 }
@@ -87,7 +98,7 @@ model UserProgress {
   id          String @id @default(uuid())
   userId      String
   user        User @relation(fields: [userId], references: [id])
-  metric      String // 'vocabulary', 'grammar', etc.
+  metric      String
   score       Float
   lastUpdated DateTime @default(now())
 }
@@ -103,14 +114,14 @@ model Progress {
   attempts    Int     @default(0)
   startedAt   DateTime @default(now())
   completedAt DateTime?
-  duration    Int?      // in seconds
+  duration    Int?
 }
 
 model SRSEntry {
   id             String @id @default(uuid())
   userId         String
   user           User @relation(fields: [userId], references: [id])
-  item           String // word or grammar concept
+  item           String
   recallStrength Float @default(1.0)
   nextReview     DateTime @default(now())
   language       String
@@ -124,19 +135,17 @@ model SRSEntry {
   reviews      SRSReview[]
 }
 
-// ROO-AUDIT-TAG :: plan-010-srs-tracking.md :: Add SRS review history model
 model SRSReview {
   id           String   @id @default(uuid())
   srsEntryId   String
   srsEntry     SRSEntry @relation(fields: [srsEntryId], references: [id])
   reviewedAt   DateTime @default(now())
-  score        Float    // 0-5 scale
-  responseTime Int      // in milliseconds
-  difficulty   Float    // user-reported difficulty 1-5
-  interval     Int      // days until next review
-  easeFactor   Float    // updated ease factor
+  score        Float
+  responseTime Int
+  difficulty   Float
+  interval     Int
+  easeFactor   Float
 }
-// ROO-AUDIT-TAG :: plan-010-srs-tracking.md :: END
 
 model VoiceAnalysis {
   id        String @id @default(uuid())
@@ -144,12 +153,11 @@ model VoiceAnalysis {
   user      User @relation(fields: [userId], references: [id])
   lessonId  String
   lesson    Lesson @relation(fields: [lessonId], references: [id])
-  metrics   Json // {pace: 120, accuracy: 0.85, ...}
+  metrics   Json
   audioUrl  String
   createdAt DateTime @default(now())
 }
 
-// ROO-AUDIT-TAG :: plan-004-progress-tracking.md :: Add LessonAttempt model
 model LessonAttempt {
   id             String   @id @default(cuid())
   userId         String
@@ -163,12 +171,11 @@ model LessonAttempt {
   weakAreas      String[]
 }
 
-// ROO-AUDIT-TAG :: plan-007-memory-system.md :: Add performance history models
 model StudySession {
   id           String   @id @default(cuid())
   userId       String
   user         User     @relation(fields: [userId], references: [id])
-  duration     Int      // in minutes
+  duration     Int
   itemsReviewed Int
   accuracy     Float
   newItems     Int
@@ -179,13 +186,12 @@ model ProgressSnapshot {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id])
-  snapshot  String   // JSON string of progress data
+  snapshot  String
   createdAt DateTime @default(now())
 }
-// ROO-AUDIT-TAG :: plan-007-memory-system.md :: END
 
 enum UserRole {
   USER
   ADMIN
+  AUDITOR
 }
-// ROO-AUDIT-TAG :: plan-004-progress-tracking.md :: END
