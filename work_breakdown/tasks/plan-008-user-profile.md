@@ -10,7 +10,7 @@ Implement the user profile data model and associated management features.
   - Proficiency levels
   - Learning preferences
 - [x] (LOGIC) Create CRUD API endpoints for profile management
-- [ ] (LOGIC) Implement validation rules for profile data
+- [x] (LOGIC) Implement validation rules for profile data
 - [ ] (UI) Design profile editing interface
 
 ## Technical Requirements
