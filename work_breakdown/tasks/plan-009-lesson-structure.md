@@ -8,7 +8,7 @@ Implement the lesson data model and associated management features.
   - Content storage (prompts, expected responses)
   - Difficulty level tracking
   - Target concept mapping
-- [ ] (LOGIC) Create lesson generation endpoints
+- [x] (LOGIC) Create lesson generation endpoints
 - [ ] (LOGIC) Implement timestamp recording for lesson progress
 - [ ] (UI) Design lesson selection interface
 

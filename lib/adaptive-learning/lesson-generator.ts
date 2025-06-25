@@ -15,7 +15,15 @@ type LessonPlan = {
 // ROO-AUDIT-TAG :: plan-005-ai-brain.md :: END
 
 // ROO-AUDIT-TAG :: plan-005-ai-brain.md :: Enhance lesson generation with personalization
-export async function generateLessonPlan(userId: string): Promise<LessonPlan> {
+// ROO-AUDIT-TAG :: plan-009-lesson-structure.md :: Enhance lesson generator with params
+export async function generateLessonPlan(
+  userId: string,
+  params?: {
+    difficulty?: number;
+    targetConcepts?: string[];
+    language?: string;
+  }
+): Promise<LessonPlan> {
   // ROO-AUDIT-TAG :: plan-005-ai-brain.md :: Fetch user data for personalization
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -38,13 +46,22 @@ export async function generateLessonPlan(userId: string): Promise<LessonPlan> {
   const weakConcepts = await getWeakConcepts(userId);
 
   // Select new material based on progress and goals
-  const newMaterial = await selectNewMaterial(userId, {
+  let newMaterial = await selectNewMaterial(userId, {
     primary: user?.primaryGoal,
     secondary: user?.secondaryGoals
   });
 
+  // Prioritize provided target concepts
+  if (params?.targetConcepts?.length) {
+    newMaterial = [...new Set([...params.targetConcepts, ...newMaterial])];
+  }
+
   // Calculate overall difficulty with more factors
-  const difficulty = await calculatePersonalizedDifficulty(userId, reviewItems.length, weakConcepts.length);
+  let difficulty = await calculatePersonalizedDifficulty(userId, reviewItems.length, weakConcepts.length);
+  // Use provided difficulty if available
+  if (params?.difficulty) {
+    difficulty = params.difficulty;
+  }
 
   // Determine learning style (simplified for now)
   const learningStyle = 'visual'; // Temporarily hardcoded until migration is run
