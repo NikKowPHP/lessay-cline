@@ -16,7 +16,7 @@ Implement the spaced repetition system for tracking concept mastery and review s
   - Response evaluation
   - Score updating
   - History recording
-- [ ] (UI) Design review session interface
+- [x] (UI) Design review session interface
 
 ## Technical Requirements
 - Extend Prisma schema with SRS models
