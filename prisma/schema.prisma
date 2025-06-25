@@ -121,7 +121,22 @@ model SRSEntry {
   lastReviewed   DateTime @default(now())
   @@index([userId, nextReview])
   @@index([userId, masteryLevel])
+  reviews      SRSReview[]
 }
+
+// ROO-AUDIT-TAG :: plan-010-srs-tracking.md :: Add SRS review history model
+model SRSReview {
+  id           String   @id @default(uuid())
+  srsEntryId   String
+  srsEntry     SRSEntry @relation(fields: [srsEntryId], references: [id])
+  reviewedAt   DateTime @default(now())
+  score        Float    // 0-5 scale
+  responseTime Int      // in milliseconds
+  difficulty   Float    // user-reported difficulty 1-5
+  interval     Int      // days until next review
+  easeFactor   Float    // updated ease factor
+}
+// ROO-AUDIT-TAG :: plan-010-srs-tracking.md :: END
 
 model VoiceAnalysis {
   id        String @id @default(uuid())

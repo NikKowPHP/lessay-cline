@@ -4,7 +4,7 @@
 Implement the spaced repetition system for tracking concept mastery and review schedules.
 
 ## Tasks
-- [ ] (LOGIC) Design SRS item schema:
+- [x] (LOGIC) Design SRS item schema:
   - Concept ID mapping
   - Recall strength tracking
   - Review history logging
