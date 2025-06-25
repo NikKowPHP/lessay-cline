@@ -11,7 +11,7 @@ Implement the user profile data model and associated management features.
   - Learning preferences
 - [x] (LOGIC) Create CRUD API endpoints for profile management
 - [x] (LOGIC) Implement validation rules for profile data
-- [ ] (UI) Design profile editing interface
+- [x] (UI) Design profile editing interface
 
 ## Technical Requirements
 - Extend existing Prisma schema
