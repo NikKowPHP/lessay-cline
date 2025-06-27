@@ -10,6 +10,7 @@ export const UserProfileSchema = z.object({
   secondaryGoals: z.array(z.string().min(3).max(50)).max(5),
   comfortLevel: z.number().min(1).max(5),
   dailyTarget: z.number().min(5).max(120),
+  role: z.enum(['USER', 'ADMIN', 'TUTOR']).optional().default('USER'),
   studyPreferences: z.object({
     darkMode: z.boolean().optional(),
     notifications: z.boolean().optional(),

@@ -3,6 +3,7 @@ import type { FC, FormEvent, ChangeEvent } from 'react'
 import React from 'react'
 import { useSupabase } from '@/lib/supabase/client'
 
+// ROO-AUDIT-TAG :: plan-007-memory-system.md :: Implement profile management UI
 interface UserProfile {
   id: string
   email: string
@@ -13,6 +14,9 @@ interface UserProfile {
   socialMediaLinks?: string[]
   memoryRetentionRate: number
   preferredReviewTime: string
+  recallStrength: number
+  nextReviewDate: string
+  masteryLevel: number
   createdAt: string
 }
 
@@ -116,6 +120,9 @@ export const ProfileView: FC = (): React.JSX.Element => {
           <p>Native Language: {userData.nativeLang}</p>
           <p>Memory Retention: {(userData.memoryRetentionRate * 100).toFixed(0)}%</p>
           <p>Preferred Review Time: {userData.preferredReviewTime}</p>
+          <p>Recall Strength: {(userData.recallStrength * 100).toFixed(0)}%</p>
+          <p>Next Review Date: {new Date(userData.nextReviewDate).toLocaleDateString()}</p>
+          <p>Mastery Level: {userData.masteryLevel}/5</p>
           {userData.bio && <p className="mt-2 text-gray-600">{userData.bio}</p>}
           {userData.socialMediaLinks && userData.socialMediaLinks.length > 0 && (
             <div className="mt-2">
