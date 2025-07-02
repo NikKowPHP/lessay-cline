@@ -1,22 +1,12 @@
-import { getServerSession } from 'next-auth';
 import { NextResponse } from 'next/server';
-import { authOptions } from '@/lib/auth-options';
+import { supabaseServerClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
 import logger from '@/lib/logger';
-import type { Session } from 'next-auth';
-
-interface CustomSession extends Session {
-  user: {
-    id: string;
-    name?: string | null;
-    email?: string | null;
-    image?: string | null;
-  };
-}
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions) as CustomSession | null;
-  if (!session?.user?.id) {
+  const supabase = supabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -25,7 +15,7 @@ export async function POST(req: Request) {
     
     // Update user in database
     await prisma.user.update({
-      where: { id: session.user.id },
+      where: { id: user.id },
       data: {
         email: body.email,
         // Note: In a real application, we'd hash the password before saving
@@ -42,7 +32,7 @@ export async function POST(req: Request) {
   } catch (error) {
     logger.error('Failed to update user settings', {
       error,
-      userId: session.user.id,
+      userId: user.id,
       errorType: error instanceof Error ? error.constructor.name : typeof error
     });
     return NextResponse.json(

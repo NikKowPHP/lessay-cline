@@ -1,13 +1,13 @@
 // ROO-AUDIT-TAG :: plan-005-ai-brain.md :: Create AI stats endpoint
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth-options';
+import { supabaseServerClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
+  const supabase = supabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
   
-  if (!session?.user?.id) {
+  if (!user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

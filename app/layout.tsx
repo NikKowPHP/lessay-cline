@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import getServerSession from '@/lib/auth-options';
+import { supabaseServerClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 
 const geistSans = Geist({
@@ -25,10 +25,11 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await getServerSession();
+  const supabase = supabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
   
   // Basic check for new users - note: missing pathname check
-  if (session?.user?.status === 'new') {
+  if (user?.user_metadata?.status === 'new') {
     redirect('/onboarding');
   }
   return (

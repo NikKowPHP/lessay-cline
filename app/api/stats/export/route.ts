@@ -1,8 +1,7 @@
 // ROO-AUDIT-TAG :: plan-004-progress-tracking.md :: Create data export endpoint
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth-options';
+import { supabaseServerClient } from '@/lib/supabase/server';
 
 type ProgressEntry = {
   createdAt: Date;
@@ -27,13 +26,14 @@ function convertToCSV(data: ProgressEntry[]) {
 }
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
+  const supabase = supabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
   
-  if (!session?.user?.id) {
+  if (!user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const userId = session.user.id;
+  const userId = user.id;
 
   try {
     const progressData = await prisma.lessonAttempt.groupBy({

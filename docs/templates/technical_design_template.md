@@ -220,7 +220,69 @@ model VoiceAnalysis {
 }
 ```
 
-## 6. Non-Functional Considerations
+## 6. Security & Monitoring Components
+
+### 6.1 Audit Logging System
+```mermaid
+classDiagram
+    class AuditLog {
+        +String id
+        +String userId
+        +String action
+        +String ipAddress
+        +String userAgent
+        +DateTime createdAt
+        +Json metadata
+    }
+```
+
+**Key Functions**:
+- `logSecurityEvent()`: Records security-relevant actions (logins, password changes, etc.)
+- Automatic logging of sensitive API operations
+- Retention policy: 90 days for debug logs, 1 year for security events
+
+### 6.2 User Synchronization
+**Supabase-to-Prisma Sync Flow**:
+```mermaid
+sequenceDiagram
+    participant S as Supabase Auth
+    participant B as Backend
+    participant P as Prisma
+    
+    S->>B: Auth event (user created/updated)
+    B->>P: Check if user exists
+    alt New User
+        P->>P: Create user record
+    else Existing User
+        P->>P: Update profile fields
+    end
+    P-->>B: Sync confirmation
+    B-->>S: 200 OK
+```
+
+**API Endpoint**: `POST /api/users/sync`
+- Triggered by Supabase webhooks
+- Handles profile field synchronization
+
+### 6.3 Route Protection Middleware
+**Implementation**:
+```typescript
+// middleware.ts
+const middleware = createMiddlewareClient({ req, res });
+const { data: { session } } = await middleware.auth.getSession();
+
+if (!session && isProtectedRoute(req)) {
+  return redirectToLogin(req.url);
+}
+```
+
+**Features**:
+- JWT verification
+- CSRF protection
+- Rate limiting
+- Session invalidation handling
+
+## 7. Non-Functional Considerations
 ### 6.1 AI Performance
 - Model inference optimization
 - Async task processing

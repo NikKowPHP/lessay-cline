@@ -154,6 +154,11 @@ docker-compose -f docker-compose.proxy.yml up -d
 ### 6.1 Environment Variables
 ### 6.1.1 Required Variables
 ```env
+### Infrastructure Variables
+REDIS_URL=redis://:password@host:port  # Redis connection string
+LOG_LEVEL=info  # Controls logging verbosity (error, warn, info, debug, trace)
+AWS_REGION=us-east-1  # AWS region for any cloud services
+
 ### Supabase Secrets
 ```bash
 supabase secrets set STRIPE_SECRET_KEY=sk_live_***

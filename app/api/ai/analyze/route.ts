@@ -1,14 +1,14 @@
 // ROO-AUDIT-TAG :: plan-005-ai-brain.md :: Create language analysis endpoint
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth-options';
+import { supabaseServerClient } from '@/lib/supabase/server';
 import { PostLessonAnalyzer } from '@/lib/adaptive-learning/analysis';
 import type { LessonAttempt } from '@/types/lessons';
 
 export async function POST(request: Request) {
-  const session = await getServerSession(authOptions);
+  const supabase = supabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
   
-  if (!session?.user?.id) {
+  if (!user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

@@ -142,9 +142,43 @@
 ##### Response
 ```json
 {
-  "tier": "pro",
-  "status": "active",
-  "nextPaymentDate": "2025-07-10"
+  "status": "active|inactive",
+  "currentPeriodEnd": "2025-07-01T00:00:00Z",
+  "plan": {
+    "id": "price_123",
+    "name": "Premium",
+    "amount": 999,
+    "interval": "month"
+  }
+}
+```
+
+### 6. Settings Management
+#### POST /api/settings
+##### Request
+```json
+{
+  "theme": "dark|light",
+  "notificationsEnabled": true|false,
+  "dailyTargetMinutes": 15
+}
+```
+##### Response
+```json
+{
+  "success": true,
+  "updatedFields": ["theme", "notificationsEnabled"]
+}
+```
+
+### 7. User Sync
+#### POST /api/users/sync
+##### Description: Syncs user data between Supabase Auth and Prisma
+##### Response
+```json
+{
+  "synced": true,
+  "profileUpdated": false
 }
 ```
 

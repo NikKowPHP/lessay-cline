@@ -28,6 +28,9 @@
   - `AI_API_KEY`
 
 ### 4. Google Cloud (for TTS/STT)
+- [ ] **AWS_REGION**: Required for any AWS services used (e.g., S3 for file storage)
+- [ ] **REDIS_URL**: Connection string for Redis cache (format: redis://:password@host:port)
+- [ ] **LOG_LEVEL**: Controls logging verbosity (options: error, warn, info, debug, trace)
 - [ ] Go to the Google Cloud Console at https://console.cloud.google.com
 - [ ] Create a new Service Account
 - [ ] Enable the following APIs for the project:

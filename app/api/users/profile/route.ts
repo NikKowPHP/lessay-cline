@@ -2,8 +2,7 @@
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
+import { supabaseServerClient } from '@/lib/supabase/server';
 
 // ROO-AUDIT-TAG :: plan-011-non-functional.md :: Enhance profile validation
 import { hashPassword, logSecurityEvent } from '@/lib/security';
@@ -25,13 +24,14 @@ const profileSchema = z.object({
 // ROO-AUDIT-TAG :: plan-008-user-profile.md :: END
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
+  const supabase = supabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
+    where: { id: user.id },
     select: {
       id: true,
       name: true,
@@ -53,8 +53,9 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
+  const supabase = supabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -115,7 +116,7 @@ export async function PUT(request: Request) {
   if (body.password) {
     updateData.password = await hashPassword(body.password);
     await logSecurityEvent({
-      userId: session.user.id,
+      userId: user.id,
       action: 'PASSWORD_CHANGE',
       ipAddress,
       userAgent
@@ -123,7 +124,7 @@ export async function PUT(request: Request) {
   }
 
   const updatedUser = await prisma.user.update({
-    where: { id: session.user.id },
+    where: { id: user.id },
     data: updateData,
     select: {
       id: true,

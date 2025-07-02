@@ -41,21 +41,7 @@ The content is organized as follows:
 
 <directory_structure>
 .kilocode/
-  rules-auditor/
-    rules.md
   rules-developer/
-    rules.md
-  rules-dispatcher/
-    rules.md
-  rules-emergency/
-    rules.md
-  rules-planner/
-    rules.md
-  rules-product-manager/
-    rules.md
-  rules-refactorer/
-    rules.md
-  rules-system-supervisor/
     rules.md
   custom_modes.yaml
 app/
@@ -106,6 +92,8 @@ app/
         route.ts
   dashboard/
     page.tsx
+  onboarding/
+    page.tsx
   globals.css
   layout.tsx
   page.tsx
@@ -118,6 +106,7 @@ components/
     PronunciationMeter.tsx
     VocabularyValidation.tsx
   ui/
+    button.tsx
     card.tsx
   AIMonitor.tsx
   AudioCapture.tsx
@@ -128,6 +117,7 @@ components/
   LessonView.tsx
   Navigation.tsx
   Notifications.tsx
+  OnboardingFlow.tsx
   OnboardingForm.tsx
   PricingPage.tsx
   ProfileView.tsx
@@ -156,43 +146,6 @@ docs/
     test_plan_template.md
     user_documentation_template.md
   work_breakdown/
-    tasks/
-      dev_todo_phase_1.md
-      dev_todo_phase_10.md
-      dev_todo_phase_11.md
-      dev_todo_phase_12.md
-      dev_todo_phase_13.md
-      dev_todo_phase_14.md
-      dev_todo_phase_15.md
-      dev_todo_phase_2.md
-      dev_todo_phase_3.md
-      dev_todo_phase_4.md
-      dev_todo_phase_5.md
-      dev_todo_phase_6.md
-      dev_todo_phase_7.md
-      dev_todo_phase_8.md
-      dev_todo_phase_9.md
-      feature_phase_1_feedback.md
-      feature_phase_2_transactional_integrity.md
-      feature_phase_3_onboarding.md
-      hardening_phase_1_observability.md
-      hardening_phase_1_todo.md
-      hardening_phase_2_error_handling.md
-      hardening_phase_3_security.md
-      hardening_phase_4_performance.md
-      hardening_phase_5_testing.md
-      infra_phase_1_connection_pooling.md
-      infra_phase_2_deployment_automation.md
-      logic_phase_1_todo.md
-      logic_phase_2_todo.md
-      logic_phase_3_todo.md
-      logic_phase_4_todo.md
-      logic_phase_5_todo.md
-      logic_phase_6_todo.md
-      prod_polish_phase_5_state_management.md
-      prod_polish_phase_6_environments.md
-      prod_security_phase_2_cost_control.md
-      prod_security_phase_3_authorization.md
     master_plan.md
   app_description.md
   canonical_spec.md
@@ -237,28 +190,12 @@ public/
   next.svg
   vercel.svg
   window.svg
-signals/
-  PLANNING_COMPLETE.md
 types/
   lessons.ts
   speech-recognition.d.ts
   supabase.ts
   swr.d.ts
   users.ts
-work_breakdown/
-  tasks/
-    plan-001-onboarding.md
-    plan-002-lesson-delivery.md
-    plan-003-adaptive-learning.md
-    plan-004-progress-tracking.md
-    plan-005-ai-brain.md
-    plan-006-speech-processing.md
-    plan-007-memory-system.md
-    plan-008-user-profile.md
-    plan-009-lesson-structure.md
-    plan-010-srs-tracking.md
-    plan-011-non-functional.md
-  master_plan.md
 .gitignore
 BLUEPRINT_COMPLETE.md
 docker-compose.yml
@@ -268,7 +205,6 @@ FIX_PLAN.md
 middleware.ts
 next.config.ts
 package.json
-POST_COMPLETION_GUIDE.md
 postcss.config.mjs
 project_manifest.json
 README.md
@@ -436,6 +372,167 @@ export default async function DashboardPage() {
   );
 }
 // ROO-AUDIT-TAG :: plan-004-progress-tracking.md :: END
+</file>
+
+<file path="app/onboarding/page.tsx">
+import getServerSession from '@/lib/auth-options';
+import { redirect } from 'next/navigation';
+import OnboardingFlow from '@/components/OnboardingFlow';
+
+export default async function OnboardingPage() {
+  const session = await getServerSession();
+  
+  if (!session?.user) {
+    redirect('/login');
+  }
+
+  if (session.user.status === 'active') {
+    redirect('/dashboard');
+  }
+
+  return (
+    <main className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+      <div className="container mx-auto px-4 py-8">
+        <OnboardingFlow />
+      </div>
+    </main>
+  );
+}
+</file>
+
+<file path="app/globals.css">
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+</file>
+
+<file path="app/page.tsx">
+import Image from "next/image";
+
+export default function Home() {
+  return (
+    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+        <Image
+          className="dark:invert"
+          src="/next.svg"
+          alt="Next.js logo"
+          width={180}
+          height={38}
+          priority
+        />
+        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
+          <li className="mb-2 tracking-[-.01em]">
+            Get started by editing{" "}
+            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
+              app/page.tsx
+            </code>
+            .
+          </li>
+          <li className="tracking-[-.01em]">
+            Save and see your changes instantly.
+          </li>
+        </ol>
+
+        <div className="flex gap-4 items-center flex-col sm:flex-row">
+          <a
+            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
+            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Image
+              className="dark:invert"
+              src="/vercel.svg"
+              alt="Vercel logomark"
+              width={20}
+              height={20}
+            />
+            Deploy now
+          </a>
+          <a
+            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
+            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Read our docs
+          </a>
+        </div>
+      </main>
+      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
+        <a
+          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
+          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Image
+            aria-hidden
+            src="/file.svg"
+            alt="File icon"
+            width={16}
+            height={16}
+          />
+          Learn
+        </a>
+        <a
+          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
+          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Image
+            aria-hidden
+            src="/window.svg"
+            alt="Window icon"
+            width={16}
+            height={16}
+          />
+          Examples
+        </a>
+        <a
+          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
+          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Image
+            aria-hidden
+            src="/globe.svg"
+            alt="Globe icon"
+            width={16}
+            height={16}
+          />
+          Go to nextjs.org →
+        </a>
+      </footer>
+    </div>
+  );
+}
 </file>
 
 <file path="components/feedback/ErrorHighlight.tsx">
@@ -649,6 +746,38 @@ export default function VocabularyValidation({ validations }: VocabularyValidati
   );
 }
 // ROO-AUDIT-TAG :: plan-002-lesson-delivery.md :: END
+</file>
+
+<file path="components/ui/button.tsx">
+import { cn } from '@/lib/utils';
+import { forwardRef } from 'react';
+
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'default' | 'outline';
+}
+
+const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant = 'default', ...props }, ref) => {
+    return (
+      <button
+        className={cn(
+          'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:pointer-events-none',
+          variant === 'default' &&
+            'bg-primary text-primary-foreground hover:bg-primary/90',
+          variant === 'outline' &&
+            'border border-input hover:bg-accent hover:text-accent-foreground',
+          className
+        )}
+        ref={ref}
+        {...props}
+      />
+    );
+  }
+);
+Button.displayName = 'Button';
+
+export { Button };
 </file>
 
 <file path="components/ui/card.tsx">
@@ -1225,6 +1354,147 @@ export default function LessonSelector({ lessons }: LessonSelectorProps) {
   );
 }
 // ROO-AUDIT-TAG :: plan-009-lesson-structure.md :: END
+</file>
+
+<file path="components/OnboardingFlow.tsx">
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+
+const languages = [
+  { code: 'en', name: 'English' },
+  { code: 'es', name: 'Spanish' },
+  { code: 'fr', name: 'French' },
+  { code: 'de', name: 'German' },
+];
+
+const goals = [
+  { id: 'travel', name: 'Travel' },
+  { id: 'business', name: 'Business' },
+  { id: 'school', name: 'School' },
+  { id: 'friends', name: 'Friends' },
+];
+
+export default function OnboardingFlow() {
+  const router = useRouter();
+  const [step, setStep] = useState(1);
+  const [targetLang, setTargetLang] = useState('');
+  const [nativeLang, setNativeLang] = useState('');
+  const [primaryGoal, setPrimaryGoal] = useState('');
+
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch('/api/onboarding/create-profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          targetLang,
+          nativeLang,
+          primaryGoal,
+        }),
+      });
+
+      if (response.ok) {
+        router.push('/dashboard');
+      }
+    } catch (error) {
+      console.error('Onboarding failed:', error);
+    }
+  };
+
+  return (
+    <div className="max-w-2xl mx-auto p-4 space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Welcome to Lessay! 🎉</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {step === 1 && (
+            <>
+              <h3 className="text-lg font-medium">Step 1: Language Setup</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    What&apos;s your native language?
+                  </label>
+                  <select
+                    className="w-full p-2 border rounded-md"
+                    value={nativeLang}
+                    onChange={(e) => setNativeLang(e.target.value)}
+                  >
+                    <option value="">Select your native language</option>
+                    {languages.map((lang) => (
+                      <option key={lang.code} value={lang.code}>
+                        {lang.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    What language do you want to learn?
+                  </label>
+                  <select
+                    className="w-full p-2 border rounded-md"
+                    value={targetLang}
+                    onChange={(e) => setTargetLang(e.target.value)}
+                  >
+                    <option value="">Select target language</option>
+                    {languages.map((lang) => (
+                      <option key={lang.code} value={lang.code}>
+                        {lang.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </>
+          )}
+
+          {step === 2 && (
+            <>
+              <h3 className="text-lg font-medium">Step 2: Learning Goals</h3>
+              <div className="grid grid-cols-2 gap-4">
+                {goals.map((goal) => (
+                  <Button
+                    key={goal.id}
+                    variant={primaryGoal === goal.id ? 'default' : 'outline'}
+                    onClick={() => setPrimaryGoal(goal.id)}
+                  >
+                    {goal.name}
+                  </Button>
+                ))}
+              </div>
+            </>
+          )}
+
+          <div className="flex justify-between">
+            {step > 1 && (
+              <Button variant="outline" onClick={() => setStep(step - 1)}>
+                Back
+              </Button>
+            )}
+            {step < 2 ? (
+              <Button
+                disabled={!nativeLang || !targetLang}
+                onClick={() => setStep(2)}
+              >
+                Next
+              </Button>
+            ) : (
+              <Button disabled={!primaryGoal} onClick={handleSubmit}>
+                Complete Setup
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 </file>
 
 <file path="components/ReviewSession.tsx">
@@ -3142,2856 +3412,6 @@ flowchart LR
 | Payment issues | Update card or contact support |
 </file>
 
-<file path="docs/work_breakdown/tasks/dev_todo_phase_1.md">
-# Developer To-Do List: Phase 1 - Core Backend & User Auth
-
-## Task 1: Create Supabase Server-Side Client Helper
-- **File:** `/lib/supabase/server.ts`
-- **Action:** Create server-side Supabase client utilities
-- **Steps:**
-  1. Create directory `lib/supabase`
-  2. Create file `server.ts` with:
-     - `supabaseServerClient` function using `createServerComponentClient`
-     - `getUserSession` helper to fetch user session
-- **Verification:** File exports both functions with proper TypeScript types
-
-## Task 2: Implement Profile GET Route
-- **File:** `/app/api/users/profile/route.ts`
-- **Action:** Add authenticated profile retrieval
-- **Steps:**
-  1. Import `getUserSession` from `@/lib/supabase/server`
-  2. Add session check to GET function
-  3. Query Prisma for user data
-- **Verification:** Returns 401 when unauthenticated, profile data when valid
-
-## Task 3: Implement Profile PUT Route
-- **File:** `/app/api/users/profile/route.ts`
-- **Action:** Add profile update functionality
-- **Steps:**
-  1. Reuse auth check from GET route
-  2. Add Prisma `user.update` call
-  3. Return updated profile
-- **Verification:** PUT requests update user data successfully
-
-## Task 4: Create Auth UI Component
-- **File:** `/components/Auth.tsx`
-- **Action:** Build sign-up/sign-in interface
-- **Steps:**
-  1. Create client-side Supabase client
-  2. Add email/password fields
-  3. Implement sign-up/sign-in buttons
-- **Verification:** Component renders and allows user registration/login
-
-## Task 5: Implement User Sync Endpoint
-- **File:** `/api/users/sync/route.ts`
-- **Action:** Create public profile after auth sign-up
-- **Steps:**
-  1. Create new route file
-  2. Listen for Supabase auth events
-  3. Create corresponding Prisma user record
-- **Verification:** New auth users get public profiles automatically
-</file>
-
-<file path="docs/work_breakdown/tasks/dev_todo_phase_10.md">
-# Developer To-Do List: Phase 10 - UI Implementation & Polish
-
-**Objective:** Transform placeholder UI into a polished, responsive, and accessible interface.
-
-## Tasks
-
-- [ ] **1. Style Auth Component**
-  - File: `/components/Auth.tsx`
-  - Requirements:
-    - Tailwind CSS styling for all states (default, loading, error)
-    - Clear visual feedback for form validation
-    - Responsive design for mobile/desktop
-  - Verification: Component matches design specs in user documentation.
-
-- [ ] **2. Implement Lesson UI**
-  - File: `/components/LessonView.tsx`
-  - Requirements:
-    - Visual cues for listening/processing states
-    - Clear answer feedback display
-    - Responsive layout adjustments
-  - Verification: All interaction states implemented per docs.
-
-- [ ] **3. Build Dashboard Visualizations**
-  - Install: `npm install recharts`
-  - File: `/components/DashboardView.tsx`
-  - Requirements:
-    - SRS pie chart (knowledge retention)
-    - Fluency line chart (progress over time)
-    - Loading skeletons for async data
-  - Verification: Charts match documentation examples.
-
-- [ ] **4. Create Main Layout**
-  - File: `/components/AppLayout.tsx`
-  - Requirements:
-    - Shared header with navigation
-    - Consistent footer
-    - Responsive breakpoints
-  - Verification: All pages wrapped in layout.
-
-- [ ] **5. Implement Accessibility**
-  - Requirements:
-    - ARIA labels for all interactive elements
-    - Keyboard navigation support
-    - Color contrast checks
-  - Verification: Passes basic a11y audits.
-</file>
-
-<file path="docs/work_breakdown/tasks/dev_todo_phase_11.md">
-# Developer To-Do List: Phase 11 - Data Governance & Finalization
-
-**Objective:** Implement data management policies and perform final project cleanup.
-
-## Tasks
-
-- [ ] **1. Implement Audio Retention Policy**
-  - Create Inngest cron job in `/app/inngest/functions.ts`:
-    ```typescript
-    inngest.createFunction(
-      { id: 'audio-retention' },
-      { cron: '0 0 * * *' }, // Daily at midnight
-      async () => {
-        // Query VoiceAnalysis records older than 30 days
-        // Delete associated audio files from Supabase Storage
-        // Delete database records
-      }
-    )
-    ```
-  - Verification: Function exists with correct schedule.
-
-- [ ] **2. Implement Account Deletion**
-  - Create endpoint: `/app/api/users/delete-account/route.ts`
-    - Require re-authentication
-    - Delete all user-related data
-    - Handle foreign key constraints
-  - Verification: Endpoint securely deletes all user data.
-
-- [ ] **3. Add Environment Check**
-  - Update `package.json`:
-    ```json
-    "scripts": {
-      "check:env": "node scripts/check-env.js",
-      "build": "npm run check:env && next build"
-    }
-    ```
-  - Create `scripts/check-env.js` to validate all required variables.
-  - Verification: Build fails if any variables are missing.
-
-- [ ] **4. Final Documentation Review**
-  - Audit all JSDoc comments
-  - Ensure API routes have proper documentation
-  - Verify component prop types
-  - Verification: All major components and functions documented.
-</file>
-
-<file path="docs/work_breakdown/tasks/dev_todo_phase_12.md">
-# Development Phase 12: Client-Side State Management Implementation
-
-## Tasks for Developer AI
-
-### 1. Implement Zustand Store with TypeScript
-- **File:** `/lib/stores/app-state.ts`
-- **Action:** Create global state store with user session and lesson progress
-- **Steps:**
-  1. Install zustand: `npm install zustand`
-  2. Create store with types:
-     ```typescript
-     interface AppState {
-       user: { id: string; email: string } | null;
-       currentLesson: { id: string; progress: number } | null;
-       setUser: (user: AppState['user']) => void;
-       setLessonProgress: (lessonId: string, progress: number) => void;
-     }
-     ```
-  3. Implement store with initial empty state
-- **Verification:** File exists and exports `useAppStore` hook
-
-### 2. Add Supabase Auth Integration
-- **File:** `/lib/stores/app-state.ts`
-- **Action:** Sync auth state with Supabase
-- **Steps:**
-  1. Import `supabase` client
-  2. Add auth listener in store setup:
-     ```typescript
-     supabase.auth.onAuthStateChange((event, session) => {
-       useAppStore.getState().setUser(session?.user ?? null);
-     })
-     ```
-- **Verification:** User state updates when logging in/out
-
-### 3. Implement LocalStorage Persistence
-- **File:** `/lib/stores/persist.ts`
-- **Action:** Add state persistence middleware
-- **Steps:**
-  1. Create middleware function
-  2. Handle JSON serialization of state
-  3. Add hydration on app load
-- **Verification:** State persists across page refreshes
-
-### 4. Update LessonView Component
-- **File:** `/components/LessonView.tsx`
-- **Action:** Migrate to global state
-- **Steps:
-  1. Import `useAppStore`
-  2. Replace `useState` with store hooks
-  3. Update lesson progress calls
-- **Verification:** Lesson progress updates work as before
-
-### 5. Update PricingPage Component
-- **File:** `/components/PricingPage.tsx`
-- **Action:** Use store for user state
-- **Steps:
-  1. Import `useAppStore`
-  2. Check `user` state for auth status
-  3. Update button behavior accordingly
-- **Verification:** Pricing page reflects user auth state
-
-### 6. Add State Management Documentation
-- **File:** `/docs/state-management.md`
-- **Action:** Create usage guide
-- **Steps:
-  1. Document store structure
-  2. Add usage examples
-  3. Include best practices
-- **Verification:** Documentation file exists
-</file>
-
-<file path="docs/work_breakdown/tasks/dev_todo_phase_13.md">
-# Development Phase 13: Environment Configurations
-
-## Tasks for Developer AI
-
-### 1. Create Environment Configuration Files
-- **File:** `/lib/config.ts`
-- **Action:** Implement environment configuration loader
-- **Steps:**
-  1. Create `lib/config.ts` with environment validation
-  2. Define required environment variables:
-     ```typescript
-     interface AppConfig {
-       NODE_ENV: 'development' | 'production' | 'test';
-       DATABASE_URL: string;
-       SUPABASE_URL: string;
-       SUPABASE_KEY: string;
-     }
-     ```
-  3. Add validation for required variables
-- **Verification:** File exists and exports validated config object
-
-### 2. Update Environment Template File
-- **File:** `/.env.example`
-- **Action:** Create example environment file
-- **Steps:
-  1. List all required environment variables
-  2. Include comments explaining each variable
-  3. Add dummy values for sensitive fields
-- **Verification:** File contains all production-required variables
-
-### 3. Implement Environment-Specific Settings
-- **File:** `/lib/config.ts`
-- **Action:** Add environment-specific defaults
-- **Steps:
-  1. Add development-only defaults
-  2. Configure production security settings
-  3. Enable debug modes for development
-- **Verification:** Different settings load per NODE_ENV
-
-### 4. Update Deployment Configuration
-- **File:** `/next.config.ts`
-- **Action:** Configure build-time environment
-- **Steps:
-  1. Add environment variable validation
-  2. Configure public runtime config
-  3. Set up build-time optimizations
-- **Verification:** Config is accessible in both server and client
-
-### 5. Create Environment Documentation
-- **File:** `/docs/environments.md`
-- **Action:** Document environment setup
-- **Steps:
-  1. List all environment variables
-  2. Explain deployment process
-  3. Add troubleshooting guide
-- **Verification:** Documentation file exists
-</file>
-
-<file path="docs/work_breakdown/tasks/dev_todo_phase_14.md">
-# Development Phase 14: User Feedback System
-
-## Tasks for Developer AI
-
-### 1. Create Feedback API Endpoint
-- **File:** `/app/api/feedback/route.ts`
-- **Action:** Implement feedback submission endpoint
-- **Steps:**
-  1. Create new route file
-  2. Add POST handler to receive feedback
-  3. Validate input data
-  4. Store feedback in database
-- **Verification:** POST requests to `/api/feedback` return success status
-
-### 2. Add Feedback Model to Schema
-- **File:** `/prisma/schema.prisma`
-- **Action:** Define feedback data structure
-- **Steps:
-  1. Add Feedback model with fields:
-     - userId
-     - message
-     - createdAt
-  2. Run migration
-- **Verification:** New model appears in Prisma client
-
-### 3. Implement Feedback UI Component
-- **File:** `/components/FeedbackButton.tsx`
-- **Action:** Create feedback interface
-- **Steps:
-  1. Create client component
-  2. Add button to open feedback form
-  3. Implement form submission
-- **Verification:** Component renders and submits feedback
-
-### 4. Add Feedback Link to Navigation
-- **File:** `/components/Navbar.tsx`
-- **Action:** Make feedback accessible
-- **Steps:
-  1. Import FeedbackButton
-  2. Add to navigation menu
-- **Verification:** Feedback button appears in UI
-
-### 5. Setup Feedback Notifications
-- **File:** `/lib/notifications.ts`
-- **Action:** Alert admins of new feedback
-- **Steps:
-  1. Create notification function
-  2. Call from feedback endpoint
-  3. Test with sample submission
-- **Verification:** Notifications trigger on new feedback
-</file>
-
-<file path="docs/work_breakdown/tasks/dev_todo_phase_15.md">
-# Development Phase 15: AI Cost & Security Controls
-
-## Tasks for Developer AI
-
-### 1. Implement Usage Tracking
-- **File:** `/lib/ai-service.ts`
-- **Action:** Add usage metrics to AI calls
-- **Steps:**
-  1. Add usage tracking to `generateLessonForUser`
-  2. Add usage tracking to `analyzeAudioForDiagnostics`
-  3. Store usage in database
-- **Verification:** Usage data appears in database
-
-### 2. Add Rate Limiting
-- **File:** `/middleware/rate-limiter.ts`
-- **Action:** Protect AI endpoints
-- **Steps:
-  1. Create rate limiting middleware
-  2. Apply to AI API routes
-  3. Test with multiple requests
-- **Verification:** Requests are limited after threshold
-
-### 3. Setup Usage Alerts
-- **File:** `/lib/alerts.ts`
-- **Action:** Notify on high usage
-- **Steps:
-  1. Create alert thresholds
-  2. Implement notification system
-  3. Test with simulated spikes
-- **Verification:** Alerts trigger correctly
-
-### 4. Implement Tiered Access
-- **File:** `/app/api/lessons/start/route.ts`
-- **Action:** Enforce tier limits
-- **Steps:
-  1. Check user tier
-  2. Enforce daily limits
-  3. Return appropriate errors
-- **Verification:** Limits enforced per tier
-
-### 5. Add Security Monitoring
-- **File:** `/lib/security.ts`
-- **Action:** Detect abuse patterns
-- **Steps:
-  1. Implement anomaly detection
-  2. Log suspicious activity
-  3. Create admin alerts
-- **Verification:** System detects test attacks
-</file>
-
-<file path="docs/work_breakdown/tasks/dev_todo_phase_2.md">
-# Lessay Development Phase 2: Learning Loop Implementation
-
-## Tasks for Developer AI
-
-### 1. Implement Lesson Start Route (`/app/api/lessons/start/route.ts`)
-- [x] **Add authentication check**
-  - Import `getUserSession` from `@/lib/supabase-server`
-  - At start of POST function, add:
-    ```typescript
-    const session = await getUserSession()
-    if (!session) return new Response('Unauthorized', { status: 401 })
-    ```
-  - Verification: Route returns 401 for unauthenticated requests
-
-- [ ] **Implement lesson generation**
-  - Call `AIService.generateLessonForUser(session.user.id)`
-  - Store returned lesson data in Prisma:
-    ```typescript
-    const lesson = await prisma.lesson.create({
-      data: {
-        userId: session.user.id,
-        content: generatedLesson.content
-      }
-    })
-    ```
-  - Verification: New lesson appears in database after API call
-
-- [ ] **Create exercise record**
-  - Add exercise creation after lesson creation:
-    ```typescript
-    const exercise = await prisma.exercise.create({
-      data: {
-        lessonId: lesson.id,
-        prompt: generatedLesson.exercise.prompt,
-        correctAnswer: generatedLesson.exercise.correctAnswer
-      }
-    })
-    ```
-  - Verification: Exercise linked to lesson in database
-
-### 2. Implement Answer Submission Route (`/app/api/lessons/[id]/submit-answer/route.ts`)
-- [ ] **Add authentication check**
-  - Same pattern as lesson start route
-  - Verification: Route rejects unauthenticated requests
-
-- [ ] **Implement answer validation**
-  - Find exercise by ID from URL params
-  - Compare `textResponse` to `exercise.correctAnswer`
-  - Verification: API correctly identifies matching answers
-
-- [ ] **Create progress record**
-  - Add progress tracking:
-    ```typescript
-    await prisma.userProgress.create({
-      data: {
-        userId: session.user.id,
-        exerciseId: exercise.id,
-        submittedAnswer: textResponse,
-        isCorrect: answerMatches
-      }
-    })
-    ```
-  - Verification: Progress records appear in database
-
-### 3. Update Lesson View Component (`/components/LessonView.tsx`)
-- [ ] **Add answer input UI**
-  - Create controlled text input component
-  - Add state management for answer text
-  - Verification: Input field appears and updates properly
-
-- [ ] **Implement submission logic**
-  - Add submit button handler that:
-    - Calls `/api/lessons/${lessonId}/submit-answer`
-    - Disables during submission
-    - Handles errors
-  - Verification: Button works and shows loading state
-
-- [ ] **Add feedback display**
-  - Create section showing:
-    - Correct/incorrect indicator
-    - Correct answer
-    - Explanation (if available)
-  - Style with Tailwind classes
-  - Verification: Feedback appears after submission
-</file>
-
-<file path="docs/work_breakdown/tasks/dev_todo_phase_3.md">
-# Lessay Development Phase 3: AI Service Integration
-
-## Tasks for Developer AI
-
-### 1. Install Required Packages
-- [x] **Install Google AI SDKs**
-  ```bash
-  npm install @google/generative-ai @google-cloud/speech @google-cloud/text-to-speech
-  ```
-  Verification: Packages appear in `package.json` dependencies
-
-### 2. Initialize Google Cloud Clients (`/lib/ai-service.ts`)
-- [x] **Configure credential handling**
-  ```typescript
-  let geminiClient: GoogleGenerativeAI;
-  let speechClient: SpeechClient;
-  let textToSpeechClient: TextToSpeechClient;
-
-  if (process.env.GCP_CREDENTIALS_JSON) {
-    const credentials = JSON.parse(process.env.GCP_CREDENTIALS_JSON);
-    geminiClient = new GoogleGenerativeAI(process.env.AI_API_KEY);
-    speechClient = new SpeechClient({ credentials });
-    textToSpeechClient = new TextToSpeechClient({ credentials });
-  } else {
-    geminiClient = new GoogleGenerativeAI(process.env.AI_API_KEY);
-    speechClient = new SpeechClient({ keyFilename: './gcp-credentials.json' });
-    textToSpeechClient = new TextToSpeechClient({ keyFilename: './gcp-credentials.json' });
-  }
-  ```
-  Verification: Clients initialize without errors in dev/prod environments
-
-### 3. Implement Lesson Generation (`/lib/ai-service.ts`)
-- [ ] **Replace generateLessonForUser stub**
-  ```typescript
-  async function generateLessonForUser(userId: string) {
-    const model = geminiClient.getGenerativeModel({ 
-      model: "gemini-pro",
-      generationConfig: {
-        temperature: 0.7,
-        maxOutputTokens: 2048
-      }
-    });
-    
-    const prompt = `Generate a language lesson...`; // Detailed prompt per design doc
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    
-    return JSON.parse(response.text());
-  }
-  ```
-  Verification: Function returns valid lesson structure from API call
-
-### 4. Implement Speech-to-Text (`/lib/ai-service.ts`)
-- [ ] **Create transcribeAudio function**
-  ```typescript
-  async function transcribeAudio(audioBuffer: Buffer): Promise<string> {
-    const [response] = await speechClient.recognize({
-      audio: { content: audioBuffer.toString('base64') },
-      config: {
-        encoding: 'WEBM_OPUS',
-        sampleRateHertz: 48000,
-        languageCode: 'en-US'
-      }
-    });
-    return response.results
-      .map(result => result.alternatives[0].transcript)
-      .join('\n');
-  }
-  ```
-  Verification: Audio files are accurately transcribed
-
-### 5. Implement Text-to-Speech (`/lib/ai-service.ts`)
-- [ ] **Create synthesizeSpeech function**
-  ```typescript
-  async function synthesizeSpeech(text: string): Promise<Buffer> {
-    const [response] = await textToSpeechClient.synthesizeSpeech({
-      input: { text },
-      voice: {
-        languageCode: 'en-US',
-        name: 'en-US-Standard-C'
-      },
-      audioConfig: {
-        audioEncoding: 'MP3'
-      }
-    });
-    return Buffer.from(response.audioContent, 'base64');
-  }
-  ```
-  Verification: Text input produces valid audio output
-</file>
-
-<file path="docs/work_breakdown/tasks/dev_todo_phase_4.md">
-# Lessay Development Phase 4: Dashboard & Payments Implementation
-
-## Tasks for Developer AI
-
-### 1. Implement Fluency Stats Route (`/app/api/stats/fluency/route.ts`)
-- [ ] **Add Prisma aggregations**
-  ```typescript
-  const stats = await prisma.userProgress.groupBy({
-    by: ['createdAt'],
-    where: { userId: session.user.id },
-    _avg: { accuracyScore: true },
-    _count: { _all: true },
-    orderBy: { createdAt: 'asc' }
-  });
-  ```
-  Verification: Route returns daily accuracy averages and counts
-
-### 2. Implement SRS Overview Route (`/app/api/stats/srs-overview/route.ts`)
-- [ ] **Add SRS metrics**
-  ```typescript
-  const overview = await prisma.sRSEntry.groupBy({
-    by: ['exerciseType'],
-    where: { userId: session.user.id },
-    _count: { status: true },
-    _min: { nextReview: true },
-    _max: { nextReview: true },
-    _avg: { nextReview: true }
-  });
-  ```
-  Verification: Route returns grouped SRS metrics
-
-### 3. Update Dashboard View (`/components/DashboardView.tsx`)
-- [ ] **Fetch and display stats**
-  - Use `useEffect` to fetch from both stats endpoints
-  - Implement:
-    - Line chart for accuracy trends
-    - Pie chart for SRS status distribution
-    - Table for recent activity
-  Verification: All visualizations render with real data
-
-### 4. Implement Stripe Subscriptions (`/app/api/payments/create-subscription/route.ts`)
-- [ ] **Install and configure Stripe**
-  ```bash
-  npm install stripe
-  ```
-  ```typescript
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-  const subscription = await stripe.subscriptions.create({
-    customer: req.body.customerId,
-    items: [{ price: req.body.priceId }],
-    payment_behavior: 'default_incomplete'
-  });
-  ```
-  Verification: Subscription objects created in Stripe dashboard
-
-### 5. Secure Webhook (`/app/api/stripe/webhook/route.ts`)
-- [ ] **Add signature verification**
-  ```typescript
-  const event = stripe.webhooks.constructEvent(
-    req.body,
-    req.headers['stripe-signature'],
-    process.env.STRIPE_WEBHOOK_SECRET
-  );
-  ```
-  Verification: Webhook rejects invalid signatures
-</file>
-
-<file path="docs/work_breakdown/tasks/dev_todo_phase_5.md">
-# Lessay Development Phase 5: Production Hardening - Observability & Error Handling
-
-## Tasks for Developer AI
-
-### 1. Install Logging Packages
-- [ ] **Add pino and pino-pretty**
-  ```bash
-  npm install pino pino-pretty
-  ```
-  Verification: Packages appear in `package.json` dependencies
-
-### 2. Create Logger Utility (`/lib/logger.ts`)
-- [ ] **Implement centralized logger**
-  ```typescript
-  import pino from 'pino';
-
-  const logger = pino({
-    level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-    transport: {
-      target: 'pino-pretty',
-      options: {
-        colorize: true,
-        translateTime: 'SYS:standard'
-      }
-    }
-  });
-
-  export default logger;
-  ```
-  Verification: File exists and exports logger instance
-
-### 3. Replace Console Logs in API Routes
-- [ ] **Update all API routes to use logger**
-  Files to modify:
-  - `app/api/lessons/[id]/submit-answer/route.ts`
-  - `app/api/lessons/start/route.ts`
-  - `app/api/payments/create-subscription/route.ts`
-  - `app/api/stats/fluency/route.ts`
-  - `app/api/stats/srs-overview/route.ts`
-  - `app/api/stripe/webhook/route.ts`
-  - `app/api/users/profile/route.ts`
-
-  Verification: No `console.log` statements remain in API routes
-
-### 4. Implement Error Handling Utility (`/lib/errors.ts`)
-- [ ] **Create error handler**
-  ```typescript
-  import { NextResponse } from 'next/server';
-  import logger from '@/lib/logger';
-  import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-
-  export function handleError(error: unknown) {
-    if (error instanceof PrismaClientKnownRequestError) {
-      logger.error({ error }, 'Database error occurred');
-      return NextResponse.json(
-        { error: 'Database operation failed' },
-        { status: getPrismaErrorStatus(error) }
-      );
-    }
-
-    logger.error({ error }, 'Unexpected error occurred');
-    return NextResponse.json(
-      { error: 'An unexpected error occurred' },
-      { status: 500 }
-    );
-  }
-
-  function getPrismaErrorStatus(error: PrismaClientKnownRequestError): number {
-    switch (error.code) {
-      case 'P2002': return 409; // Unique constraint
-      case 'P2025': return 404; // Not found
-      default: return 400; // Bad request
-    }
-  }
-  ```
-  Verification: File exists and handles Prisma/unknown errors
-
-### 5. Add Health Check Endpoint (`/app/api/health/route.ts`)
-- [ ] **Implement health check**
-  ```typescript
-  import { NextResponse } from 'next/server';
-  import prisma from '@/lib/prisma';
-  import logger from '@/lib/logger';
-  import { handleError } from '@/lib/errors';
-
-  export async function GET() {
-    try {
-      await prisma.$queryRaw`SELECT 1`;
-      logger.info('Health check successful');
-      return NextResponse.json({ status: 'ok' }, { status: 200 });
-    } catch (error) {
-      return handleError(error);
-    }
-  }
-  ```
-  Verification: Endpoint returns 200 when database is accessible
-
-### 6. Wrap API Routes in Try/Catch
-- [ ] **Update all API routes with error handling**
-  Example modification:
-  ```typescript
-  import { handleError } from '@/lib/errors';
-
-  export async function POST(request: Request) {
-    try {
-      // Route logic here
-    } catch (error) {
-      return handleError(error);
-    }
-  }
-  ```
-  Verification: All API routes have proper error handling
-</file>
-
-<file path="docs/work_breakdown/tasks/dev_todo_phase_6.md">
-# Lessay Development Phase 6: Production Hardening - Security & Performance
-
-## Tasks for Developer AI
-
-### 1. Install Security Dependencies
-- [ ] **Add Zod and Rate Limiter**
-  ```bash
-  npm install zod @upstash/ratelimit
-  ```
-  Verification: Packages appear in `package.json` dependencies
-
-### 2. Create Validation Schemas (`/lib/validators.ts`)
-- [ ] **Implement input validators**
-  ```typescript
-  import { z } from 'zod';
-
-  export const lessonStartSchema = z.object({
-    userId: z.string().uuid(),
-    targetLanguage: z.string().length(2)
-  });
-
-  export const answerSubmitSchema = z.object({
-    exerciseId: z.string().uuid(),
-    textResponse: z.string().min(1),
-    audioBlobUrl: z.string().url().optional()
-  });
-  ```
-  Verification: File exists with exported schemas
-
-### 3. Validate API Routes
-- [ ] **Add validation to routes**
-  Files to modify:
-  - `app/api/lessons/[id]/submit-answer/route.ts`
-  - `app/api/lessons/start/route.ts`
-  - `app/api/payments/create-subscription/route.ts`
-  - `app/api/users/profile/route.ts`
-
-  Example implementation:
-  ```typescript
-  const body = await request.json();
-  const validation = answerSubmitSchema.safeParse(body);
-  if (!validation.success) {
-    return NextResponse.json(
-      { error: 'Invalid request', details: validation.error.flatten() },
-      { status: 400 }
-    );
-  }
-  ```
-  Verification: Routes return 400 for invalid requests
-
-### 4. Configure Rate Limiting (`/lib/rateLimit.ts`)
-- [ ] **Set up rate limiter**
-  ```typescript
-  import { Ratelimit } from '@upstash/ratelimit';
-  import { Redis } from '@upstash/redis';
-
-  export const ratelimit = new Ratelimit({
-    redis: Redis.fromEnv(),
-    limiter: Ratelimit.slidingWindow(10, '1 m'),
-    analytics: true
-  });
-  ```
-  Verification: File exports rate limiter instance
-
-### 5. Apply Rate Limits to Sensitive Endpoints
-- [ ] **Protect high-traffic routes**
-  Files to modify:
-  - `app/api/lessons/start/route.ts`
-  - `app/api/users/profile/route.ts`
-
-  Example implementation:
-  ```typescript
-  const ip = request.headers.get('x-forwarded-for') ?? '127.0.0.1';
-  const { success } = await ratelimit.limit(ip);
-  if (!success) {
-    return NextResponse.json(
-      { error: 'Too many requests' },
-      { status: 429 }
-    );
-  }
-  ```
-  Verification: Routes return 429 after 10 requests/minute
-
-### 6. Optimize Database Performance
-- [ ] **Add index to UserProgress model**
-  Modify `prisma/schema.prisma`:
-  ```prisma
-  model UserProgress {
-    // ... existing fields
-    @@index([userId, metric], name: "UserProgress_userId_metric_index")
-  }
-  ```
-  Verification: Index definition exists in schema
-
-- [ ] **Create and apply migration**
-  ```bash
-  npx prisma migrate dev --name add_performance_indexes
-  ```
-  Verification: New migration file created
-
-### 7. Implement Caching (`/lib/cache.ts`)
-- [ ] **Create cache utility**
-  ```typescript
-  const cache = new Map<string, { data: any, expires: number }>();
-
-  export function getFromCache<T>(key: string): T | null {
-    const item = cache.get(key);
-    return item?.expires > Date.now() ? item.data : null;
-  }
-
-  export function setToCache(key: string, data: any, ttl = 300000) {
-    cache.set(key, { data, expires: Date.now() + ttl });
-  }
-  ```
-  Verification: File exports cache functions
-
-### 8. Cache Stats Endpoints
-- [ ] **Add caching to dashboard routes**
-  Files to modify:
-  - `app/api/stats/fluency/route.ts`
-  - `app/api/stats/srs-overview/route.ts`
-
-  Example implementation:
-  ```typescript
-  const cacheKey = `stats-${userId}`;
-  const cached = getFromCache(cacheKey);
-  if (cached) return NextResponse.json(cached);
-
-  const data = await fetchData();
-  setToCache(cacheKey, data);
-  return NextResponse.json(data);
-  ```
-  Verification: Repeated requests return cached data
-</file>
-
-<file path="docs/work_breakdown/tasks/dev_todo_phase_7.md">
-# Lessay Development Phase 7: Production Hardening - Testing
-
-## Tasks for Developer AI
-
-### 1. Install Testing Packages
-- [ ] **Add Jest and TypeScript support**
-  ```bash
-  npm install jest ts-jest @types/jest --save-dev
-  ```
-  Verification: Packages appear in `package.json` devDependencies
-
-### 2. Configure Jest (`jest.config.ts`)
-- [ ] **Create Jest configuration**
-  ```typescript
-  import type { Config } from '@jest/types'
-
-  const config: Config.InitialOptions = {
-    preset: 'ts-jest',
-    testEnvironment: 'node',
-    roots: ['<rootDir>'],
-    testMatch: ['**/*.test.ts'],
-    moduleNameMapper: {
-      '^@/(.*)$': '<rootDir>/$1'
-    }
-  }
-
-  export default config
-  ```
-  Verification: Configuration file exists with correct settings
-
-### 3. Create Auth Tests (`/tests/auth.test.ts`)
-- [ ] **Implement authentication tests**
-  ```typescript
-  import { describe, it, expect } from '@jest/globals'
-  import { signUp, signIn } from '@/lib/auth'
-
-  describe('Authentication', () => {
-    it('should allow valid user signup', async () => {
-      const result = await signUp('test@example.com', 'password123')
-      expect(result.success).toBe(true)
-    })
-
-    it('should reject duplicate user signup', async () => {
-      await signUp('test@example.com', 'password123')
-      const result = await signUp('test@example.com', 'password123')
-      expect(result.error).toMatch(/already exists/i)
-    })
-
-    it('should allow valid login', async () => {
-      await signUp('test@example.com', 'password123')
-      const result = await signIn('test@example.com', 'password123')
-      expect(result.success).toBe(true)
-    })
-
-    it('should reject invalid login', async () => {
-      const result = await signIn('wrong@example.com', 'wrongpassword')
-      expect(result.error).toMatch(/invalid credentials/i)
-    })
-  })
-  ```
-  Verification: File exists with all test cases
-
-### 4. Create Lesson Tests (`/tests/lessons.test.ts`)
-- [ ] **Implement lesson flow tests**
-  ```typescript
-  import { describe, it, expect } from '@jest/globals'
-  import { startLesson, submitAnswer } from '@/lib/lessons'
-
-  describe('Lesson Flow', () => {
-    it('should start a new lesson', async () => {
-      const lesson = await startLesson('user_123')
-      expect(lesson.exercises.length).toBeGreaterThan(0)
-    })
-
-    it('should accept correct answers', async () => {
-      const response = await submitAnswer('ex_123', 'correct answer')
-      expect(response.correct).toBe(true)
-    })
-
-    it('should provide feedback for incorrect answers', async () => {
-      const response = await submitAnswer('ex_123', 'wrong answer')
-      expect(response.correct).toBe(false)
-      expect(response.feedback).toBeDefined()
-    })
-  })
-  ```
-  Verification: File exists with all test cases
-
-### 5. Update Package.json Scripts
-- [ ] **Add test command**
-  ```json
-  {
-    "scripts": {
-      "test": "jest"
-    }
-  }
-  ```
-  Verification: `npm test` runs Jest successfully
-
-### 6. Update CI Workflow (`/.github/workflows/ci.yml`)
-- [ ] **Add testing step**
-  ```yaml
-  jobs:
-    build-and-test:
-      steps:
-        - run: npm test
-  ```
-  Verification: CI file includes `npm test` command
-</file>
-
-<file path="docs/work_breakdown/tasks/dev_todo_phase_8.md">
-# Developer To-Do List: Phase 8 - Asynchronous Processing & Distributed Caching
-
-**Objective:** Decouple long-running AI analysis tasks from request-response cycle and implement production-grade distributed caching.
-
-## Tasks
-
-- [ ] **1. Install Inngest**
-  - Execute: `npm install inngest`
-  - Initialize: `npx inngest-cli init`
-  - Verification: `package.json` includes `"inngest"` in dependencies.
-
-- [ ] **2. Create Inngest Function Handler**
-  - Create file: `/app/inngest/route.ts`
-    ```typescript
-    import { serve } from 'inngest/next'
-    import { functions } from './functions'
-
-    export const { GET, POST, PUT } = serve({
-      clientId: process.env.INNGEST_CLIENT_ID,
-      functions,
-    })
-    ```
-  - Create file: `/app/inngest/functions.ts`
-    ```typescript
-    import { inngest } from './client'
-    import { analyzeSession } from '../lib/ai-service'
-
-    export const functions = [
-      inngest.createFunction(
-        { id: 'post-session-analysis' },
-        { event: 'ai/post-session-analysis' },
-        async ({ event }) => {
-          const { lessonId, audioUrl } = event.data
-          return analyzeSession(lessonId, audioUrl)
-        }
-      )
-    ]
-    ```
-  - Verification: Both files exist with correct content.
-
-- [ ] **3. Refactor Submit Answer Endpoint**
-  - Modify: `/app/api/lessons/[id]/submit-answer/route.ts`
-    - Remove synchronous AI analysis call
-    - Add Inngest send:
-      ```typescript
-      import { inngest } from '../../../lib/inngest'
-
-      // After returning initial response
-      await inngest.send({
-        name: 'ai/post-session-analysis',
-        data: { lessonId, audioUrl }
-      })
-      ```
-  - Verification: Submit answer endpoint no longer contains direct AI analysis calls.
-
-- [ ] **4. Implement Background Analysis Logic**
-  - Move existing analysis logic from submit endpoint to:
-    ```typescript
-    // /lib/ai-service.ts
-    export async function analyzeSession(lessonId: string, audioUrl: string) {
-      // Existing analysis logic
-      // Update SRS scores
-      // Save VoiceAnalysis records
-    }
-    ```
-  - Verification: All analysis logic resides in `analyzeSession` function.
-
-- [ ] **5. Install Redis Client**
-  - Execute: `npm install @upstash/redis`
-  - Verification: `package.json` includes `"@upstash/redis"`.
-
-- [ ] **6. Upgrade Cache Utility**
-  - Modify: `/lib/cache.ts`
-    - Replace `Map` with Redis client:
-      ```typescript
-      import { Redis } from '@upstash/redis'
-      
-      const redis = new Redis({
-        url: process.env.REDIS_URL,
-        token: process.env.REDIS_TOKEN,
-      })
-      
-      export const cache = {
-        get: (key: string) => redis.get(key),
-        set: (key: string, value: any, ttl: number) => 
-          redis.setex(key, ttl, value)
-      }
-      ```
-  - Verification: Cache utility uses Redis methods instead of in-memory Map.
-</file>
-
-<file path="docs/work_breakdown/tasks/dev_todo_phase_9.md">
-# Developer To-Do List: Phase 9 - Comprehensive Testing
-
-**Objective:** Implement a complete test suite covering core functionality, edge cases, and integration points.
-
-## Tasks
-
-- [ ] **1. Install Testing Dependencies**
-  - Execute: `npm install jest ts-jest @types/jest --save-dev`
-  - Verification: `package.json` includes these packages in devDependencies.
-
-- [ ] **2. Configure Jest**
-  - Create file: `jest.config.ts`
-    ```typescript
-    import type { Config } from '@jest/types'
-
-    const config: Config.InitialOptions = {
-      preset: 'ts-jest',
-      testEnvironment: 'node',
-      testMatch: ['**/tests/**/*.test.ts'],
-      setupFilesAfterEnv: ['./tests/setup.ts'],
-    }
-    export default config
-    ```
-  - Verification: File exists with correct content.
-
-- [ ] **3. Create Core Test Files**
-  - Create directory: `/tests`
-  - Create files:
-    - `auth.test.ts` (User auth flows)
-    - `lessons.test.ts` (Lesson generation/submission)
-    - `ai-service.test.ts` (AI integration)
-    - `dashboard.test.ts` (Stats/analytics)
-    - `payments.test.ts` (Subscription flows)
-  - Verification: All test files exist in `/tests`.
-
-- [ ] **4. Implement Core Learning Loop Tests**
-  - In `lessons.test.ts`:
-    - Test SRS-driven content generation
-    - Test difficulty adjustment after failed exercises
-    - Test real-time feedback accuracy
-  - Verification: Tests cover all cases from test plan section 1.
-
-- [ ] **5. Implement Vocal Analysis Tests**
-  - In `ai-service.test.ts`:
-    - Test pronunciation scoring accuracy
-    - Test fluency metrics (hesitation, pace)
-    - Test filler word detection
-  - Verification: Tests cover all cases from test plan section 2.
-
-- [ ] **6. Implement Dashboard Tests**
-  - In `dashboard.test.ts`:
-    - Test SRS overview accuracy
-    - Test error pattern detection
-    - Test fluency trend visualization
-  - Verification: Tests cover all cases from test plan section 3.
-
-- [ ] **7. Implement Payment Flow Tests**
-  - In `payments.test.ts`:
-    - Test subscription scenarios (new, upgrade, failure)
-    - Test webhook handling (success, failure, cancellation)
-    - Test security measures (tokenization, PCI compliance)
-  - Verification: Tests cover all cases from test plan section 5-6.
-
-- [ ] **8. Update CI Workflow**
-  - Modify: `/.github/workflows/ci.yml`
-    - Add test command: `npm test`
-    - Configure test database service
-  - Verification: CI file includes test step and database setup.
-</file>
-
-<file path="docs/work_breakdown/tasks/feature_phase_1_feedback.md">
-# Feature Phase 1: User Feedback Implementation
-
-## Tasks for Developer AI
-
-### 1. Create Feedback API Endpoint
-- **File:** `/app/api/feedback/report/route.ts`
-- **Action:** Implement endpoint to handle feedback submissions
-- **Content:**
-```typescript
-import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
-
-export async function POST(request: Request) {
-  const { lessonId, userId, feedbackText, errorType } = await request.json();
-  
-  try {
-    const feedback = await prisma.feedback.create({
-      data: {
-        lessonId,
-        userId,
-        feedbackText,
-        errorType,
-      }
-    });
-    return NextResponse.json(feedback);
-  } catch (error) {
-    return NextResponse.json(
-      { error: 'Failed to submit feedback' },
-      { status: 500 }
-    );
-  }
-}
-```
-- **Verification:** Endpoint exists and accepts POST requests
-
-### 2. Update Prisma Schema
-- **File:** `/prisma/schema.prisma`
-- **Action:** Add Feedback model
-- **Modification:**
-```prisma
-model Feedback {
-  id           String   @id @default(uuid())
-  lessonId     String
-  lesson       Lesson   @relation(fields: [lessonId], references: [id])
-  userId       String
-  user         User     @relation(fields: [userId], references: [id])
-  feedbackText String
-  errorType    String?
-  createdAt    DateTime @default(now())
-}
-```
-- **Verification:** Model exists in schema
-
-### 3. Run Database Migration
-- **Command:** `npx prisma migrate dev --name add_feedback_model`
-- **Verification:** New migration file created in `prisma/migrations`
-
-### 4. Add Feedback Button to Lesson UI
-- **File:** `/components/LessonView.tsx`
-- **Action:** Implement feedback reporting UI
-- **Modification:**
-```typescript
-function ReportIssueButton() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [feedback, setFeedback] = useState('');
-
-  const submitFeedback = async () => {
-    await fetch('/api/feedback/report', {
-      method: 'POST',
-      body: JSON.stringify({
-        lessonId: currentLesson.id,
-        feedbackText: feedback,
-        errorType: 'general'
-      })
-    });
-    setIsOpen(false);
-  };
-
-  return (
-    <>
-      <button onClick={() => setIsOpen(true)}>Report Issue</button>
-      {isOpen && (
-        <div className="feedback-modal">
-          <textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} />
-          <button onClick={submitFeedback}>Submit</button>
-        </div>
-      )}
-    </>
-  );
-}
-```
-- **Verification:** Button appears in lesson interface
-</file>
-
-<file path="docs/work_breakdown/tasks/feature_phase_2_transactional_integrity.md">
-### Feature Phase 2: Transactional Integrity & User Communication
-
-**Objective:** Ensure critical operations maintain data consistency and keep users informed through transactional emails.
-
-#### Tasks:
-1. **Install Email SDK:**
-   ```bash
-   npm install resend
-   ```
-
-2. **Create Email Service:**
-   - Create `/lib/email.ts`:
-     ```typescript
-     import { Resend } from 'resend'
-     
-     const resend = new Resend(process.env.RESEND_API_KEY)
-     
-     export async function sendWelcomeEmail(email: string, name: string) {
-       await resend.emails.send({
-         from: 'welcome@lessay.com',
-         to: email,
-         subject: 'Welcome to Lessay!',
-         html: `<p>Hi ${name}, thank you for joining Lessay!</p>`
-       })
-     }
-     
-     export async function sendSubscriptionConfirmation(email: string) {
-       await resend.emails.send({
-         from: 'subscriptions@lessay.com',
-         to: email,
-         subject: 'Your Lessay Subscription is Active!',
-         html: `<p>Your Lessay premium subscription is now active.</p>`
-       })
-     }
-     ```
-
-3. **Refactor Sign-Up Flow:**
-   - Update `/api/users/sync` route to use transaction:
-     ```typescript
-     await prisma.$transaction(async (tx) => {
-       const user = await tx.user.create({ data: profileData })
-       await sendWelcomeEmail(user.email, user.name)
-       return user
-     })
-     ```
-
-4. **Enhance Stripe Webhook Handler:**
-   - Update `/api/stripe/webhook` route:
-     ```typescript
-     // After successful subscription update
-     await sendSubscriptionConfirmation(user.email)
-     ```
-
-5. **Implement Webhook Idempotency:**
-   - Add event ID tracking to prevent duplicate processing:
-     ```typescript
-     const processedEvent = await prisma.processedEvent.findUnique({
-       where: { eventId: stripeEvent.id }
-     })
-     if (processedEvent) return
-     // Process event...
-     await prisma.processedEvent.create({
-       data: { eventId: stripeEvent.id }
-     })
-     ```
-
-**Verification:**
-- Test sign-up flow creates both auth and profile records
-- Confirm welcome emails are received
-- Verify subscription emails trigger on payment
-- Ensure duplicate webhook events are ignored
-
-**Completion Criteria:**
-- All critical operations maintain data consistency
-- Users receive timely email confirmations
-- Webhook processing is idempotent
-</file>
-
-<file path="docs/work_breakdown/tasks/feature_phase_3_onboarding.md">
-### Feature Phase 3: User Onboarding & Activation Flow
-
-**Objective:** Guide new users through initial setup to ensure personalized experience from first login.
-
-#### Tasks:
-1. **Update User Model:**
-   - Modify `prisma/schema.prisma`:
-     ```prisma
-     model User {
-       // ... existing fields
-       status String @default("new") // 'new' | 'active'
-     }
-   ```
-
-2. **Create Onboarding UI:**
-   - Create `/components/OnboardingFlow.tsx`:
-     ```typescript
-     export default function OnboardingFlow() {
-       // Language selection and goal setup UI
-     }
-     ```
-   - Create `/app/onboarding/page.tsx` to host the flow
-
-3. **Implement Onboarding Logic:**
-   - Add middleware check in root layout:
-     ```typescript
-     if (session?.user?.status === 'new' && !pathname.startsWith('/onboarding')) {
-       redirect('/onboarding')
-     }
-     ```
-   - Create API route to complete onboarding:
-     ```typescript
-     await prisma.user.update({
-       where: { id: userId },
-       data: { status: 'active' }
-     })
-     ```
-
-**Verification:**
-- New users are redirected to onboarding
-- User status updates correctly after completion
-- Existing users bypass onboarding
-
-**Completion Criteria:**
-- All new users complete onboarding before accessing main app
-- User model accurately reflects activation status
-</file>
-
-<file path="docs/work_breakdown/tasks/hardening_phase_1_observability.md">
-# Hardening Phase 1: Observability Implementation
-
-## Tasks for Developer AI
-
-### 1. Install Logging Dependencies
-**File Path:** Project root (`./`)
-**Action:** Execute command to install pino and pino-pretty
-**LLM Prompt:** "Execute the following shell command to install logging dependencies:"
-**Command:** `npm install pino pino-pretty`
-**Verification:** `pino` and `pino-pretty` appear in `package.json` dependencies
-
----
-
-### 2. Create Logger Utility
-**File Path:** `/lib/logger.ts`
-**Action:** Create a centralized logger instance
-**LLM Prompt:** "Create a new file at `/lib/logger.ts` with the following content:"
-```typescript
-import pino from 'pino'
-
-const logger = pino({
-  level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-  transport: {
-    target: 'pino-pretty',
-    options: {
-      colorize: true,
-      translateTime: 'SYS:standard'
-    }
-  }
-})
-
-export default logger
-```
-**Verification:** File exists and exports a `logger` instance
-
----
-
-### 3. Replace Console Logs in API Routes
-**Action:** Update all API routes to use the new logger
-**Files to Modify:**
-- `app/api/lessons/[id]/submit-answer/route.ts`
-- `app/api/lessons/start/route.ts`
-- `app/api/payments/create-subscription/route.ts`
-- `app/api/stripe/webhook/route.ts`
-- `app/api/users/profile/route.ts`
-
-**LLM Prompt:** "In each specified API route file, replace all `console.log` statements with appropriate logger methods (`logger.info`, `logger.error`, etc.)"
-**Verification:** No `console.log` statements remain in API route files
-
----
-
-### 4. Implement Health Check Endpoint
-**File Path:** `/app/api/health/route.ts`
-**Action:** Create a health check API route
-**LLM Prompt:** "Create a new file at `/app/api/health/route.ts` with the following content:"
-```typescript
-import { NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
-import logger from '@/lib/logger'
-
-export async function GET() {
-  try {
-    await prisma.$queryRaw`SELECT 1`
-    logger.info('Health check successful')
-    return NextResponse.json({ status: 'ok' }, { status: 200 })
-  } catch (error) {
-    logger.error('Health check failed', error)
-    return NextResponse.json(
-      { status: 'error', message: 'Database connection failed' },
-      { status: 503 }
-    )
-  }
-}
-```
-**Verification:** File exists and returns 200 OK when database is accessible
-
----
-
-### 5. Verify Logging Implementation
-**Action:** Test the logging functionality
-**LLM Prompt:** "Execute the following command to test the application and verify logs are being generated:"
-**Command:** `npm run dev`
-**Verification:** Application starts and logs appear in the console with proper formatting
-</file>
-
-<file path="docs/work_breakdown/tasks/hardening_phase_1_todo.md">
-# Hardening Phase 1: Security & Reliability
-
-## Tasks for Developer AI
-
-### 1. Implement Rate Limiting
-- **File:** `/middleware/rate-limiter.ts`
-- **Action:** Add Redis-based rate limiting
-- **Steps:**
-  1. Install `@upstash/ratelimit`
-  2. Create Redis client config
-  3. Apply to API routes
-- **Verification:** 429 responses after 10 requests
-
-### 2. Add Input Validation
-- **File:** `/lib/validators/*`
-- **Action:** Create Zod schemas
-- **Steps:
-  1. Add `zod` dependency
-  2. Create schemas for all API inputs
-  3. Integrate with routes
-- **Verification:** Invalid inputs rejected
-
-### 3. Setup Error Tracking
-- **File:** `/lib/sentry.ts`
-- **Action:** Configure Sentry
-- **Steps:
-  1. Add `@sentry/nextjs`
-  2. Initialize in `_app.tsx`
-  3. Add error boundaries
-- **Verification:** Errors appear in Sentry
-</file>
-
-<file path="docs/work_breakdown/tasks/hardening_phase_2_error_handling.md">
-# Hardening Phase 2: Error Handling Implementation
-
-## Tasks for Developer AI
-
-### 1. Prepare Error Handling Utilities
-**File Path:** `/lib/errors.ts`
-**Action:** Create error handling utilities
-**LLM Prompt:** "Create a new file at `/lib/errors.ts` with the following content:"
-```typescript
-import { NextResponse } from 'next/server'
-import logger from '@/lib/logger'
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
-
-export function handleError(error: unknown) {
-  if (error instanceof PrismaClientKnownRequestError) {
-    logger.error({ error }, 'Database error occurred')
-    return NextResponse.json(
-      { error: 'Database operation failed' },
-      { status: getPrismaErrorStatus(error) }
-    )
-  }
-
-  logger.error({ error }, 'Unexpected error occurred')
-  return NextResponse.json(
-    { error: 'An unexpected error occurred' },
-    { status: 500 }
-  )
-}
-
-function getPrismaErrorStatus(error: PrismaClientKnownRequestError): number {
-  switch (error.code) {
-    case 'P2002': return 409 // Unique constraint violation
-    case 'P2025': return 404 // Record not found
-    default: return 400 // Bad request
-  }
-}
-```
-**Verification:** File exists and exports `handleError` function
-
----
-
-### 2. Update API Routes with Error Handling
-**Action:** Modify all API routes to use structured error handling
-**Files to Modify:**
-- `app/api/lessons/[id]/submit-answer/route.ts`
-- `app/api/lessons/start/route.ts`
-- `app/api/payments/create-subscription/route.ts`
-- `app/api/stats/fluency/route.ts`
-- `app/api/stats/srs-overview/route.ts`
-- `app/api/stripe/webhook/route.ts`
-- `app/api/users/profile/route.ts`
-
-**LLM Prompt:** "For each specified API route file:
-1. Wrap the entire exported function body in a try/catch block
-2. Use the handleError utility from '@/lib/errors' in catch blocks
-3. Ensure all errors are properly logged
-4. Maintain existing functionality"
-
-**Example Modification:**
-```typescript
-// Before
-export async function POST(request: Request) {
-  const { tier } = await request.json()
-  console.log('Creating subscription for tier:', tier)
-  return NextResponse.json({ status: 'active' })
-}
-
-// After
-import { handleError } from '@/lib/errors'
-
-export async function POST(request: Request) {
-  try {
-    const { tier } = await request.json()
-    logger.info('Creating subscription for tier:', { tier })
-    return NextResponse.json({ status: 'active' })
-  } catch (error) {
-    return handleError(error)
-  }
-}
-```
-**Verification:** All API routes have try/catch blocks and use handleError
-
----
-
-### 3. Add Health Check Error Handling
-**File Path:** `/app/api/health/route.ts`
-**Action:** Update health check to use new error handler
-**LLM Prompt:** "Modify `/app/api/health/route.ts` to use the handleError utility:"
-```typescript
-import { NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
-import logger from '@/lib/logger'
-import { handleError } from '@/lib/errors'
-
-export async function GET() {
-  try {
-    await prisma.$queryRaw`SELECT 1`
-    logger.info('Health check successful')
-    return NextResponse.json({ status: 'ok' }, { status: 200 })
-  } catch (error) {
-    return handleError(error)
-  }
-}
-```
-**Verification:** Health check uses handleError and maintains functionality
-
----
-
-### 4. Verify Error Handling
-**Action:** Test error scenarios
-**LLM Prompt:** "Execute the following command to test the application and verify error handling:"
-**Command:** `npm run dev`
-**Verification:**
-1. Trigger intentional errors in API routes
-2. Confirm proper error responses (status codes and JSON format)
-3. Check that errors appear in logs with appropriate levels
-</file>
-
-<file path="docs/work_breakdown/tasks/hardening_phase_3_security.md">
-# Hardening Phase 3: Security Implementation
-
-## Tasks for Developer AI
-
-### 1. Install Zod for Validation
-**File Path:** Project root (`./`)
-**Action:** Execute command to install Zod
-**LLM Prompt:** "Execute the following shell command to install Zod:"
-**Command:** `npm install zod`
-**Verification:** `zod` appears in `package.json` dependencies
-
----
-
-### 2. Create Validation Schemas
-**File Path:** `/lib/validators.ts`
-**Action:** Create shared validation schemas
-**LLM Prompt:** "Create a new file at `/lib/validators.ts` with the following content:"
-```typescript
-import { z } from 'zod'
-
-export const lessonStartSchema = z.object({
-  userId: z.string().uuid(),
-  targetLanguage: z.string().length(2)
-})
-
-export const answerSubmitSchema = z.object({
-  exerciseId: z.string().uuid(),
-  textResponse: z.string().min(1),
-  audioBlobUrl: z.string().url().optional()
-})
-
-export const subscriptionSchema = z.object({
-  tier: z.enum(['free', 'premium', 'pro']),
-  paymentMethodId: z.string()
-})
-```
-**Verification:** File exists and exports validation schemas
-
----
-
-### 3. Implement Route Validation
-**Action:** Add validation to API routes with request bodies
-**Files to Modify:**
-- `app/api/lessons/[id]/submit-answer/route.ts`
-- `app/api/lessons/start/route.ts`
-- `app/api/payments/create-subscription/route.ts`
-- `app/api/users/profile/route.ts`
-
-**LLM Prompt:** "For each specified API route:
-1. Import appropriate validator from '@/lib/validators'
-2. Validate request body at start of handler
-3. Return 400 with validation errors if invalid
-4. Maintain existing functionality"
-
-**Example Modification:**
-```typescript
-import { NextResponse } from 'next/server'
-import { answerSubmitSchema } from '@/lib/validators'
-import { handleError } from '@/lib/errors'
-
-export async function POST(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const body = await request.json()
-    const validation = answerSubmitSchema.safeParse(body)
-    
-    if (!validation.success) {
-      return NextResponse.json(
-        { error: 'Invalid request', details: validation.error.flatten() },
-        { status: 400 }
-      )
-    }
-
-    // Existing handler logic...
-  } catch (error) {
-    return handleError(error)
-  }
-}
-```
-**Verification:** Routes return 400 for invalid requests with error details
-
----
-
-### 4. Install Rate Limiting Package
-**File Path:** Project root (`./`)
-**Action:** Execute command to install rate limiter
-**LLM Prompt:** "Execute the following shell command to install rate limiting:"
-**Command:** `npm install @upstash/ratelimit`
-**Verification:** `@upstash/ratelimit` appears in `package.json` dependencies
-
----
-
-### 5. Configure Rate Limiting
-**File Path:** `/lib/rateLimit.ts`
-**Action:** Create rate limiting configuration
-**LLM Prompt:** "Create a new file at `/lib/rateLimit.ts` with the following content:"
-```typescript
-import { Ratelimit } from '@upstash/ratelimit'
-import { Redis } from '@upstash/redis'
-
-export const ratelimit = new Ratelimit({
-  redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(10, '1 m'),
-  analytics: true
-})
-```
-**Verification:** File exists and exports rate limiter instance
-
----
-
-### 6. Apply Rate Limiting to Sensitive Endpoints
-**Action:** Add rate limiting to high-risk routes
-**Files to Modify:**
-- `app/api/lessons/start/route.ts`
-- `app/api/users/profile/route.ts`
-
-**LLM Prompt:** "For each specified API route:
-1. Import rate limiter from '@/lib/rateLimit'
-2. Get client IP from headers (request.headers.get('x-forwarded-for'))
-3. Check rate limit at start of handler
-4. Return 429 if limit exceeded
-5. Maintain existing functionality"
-
-**Example Modification:**
-```typescript
-import { ratelimit } from '@/lib/rateLimit'
-
-export async function POST(request: Request) {
-  const ip = request.headers.get('x-forwarded-for') ?? '127.0.0.1'
-  const { success } = await ratelimit.limit(ip)
-  
-  if (!success) {
-    return NextResponse.json(
-      { error: 'Too many requests' },
-      { status: 429 }
-    )
-  }
-
-  // Existing handler logic...
-}
-```
-**Verification:** Routes return 429 after exceeding request limits
-
----
-
-### 7. Verify Security Features
-**Action:** Test validation and rate limiting
-**LLM Prompt:** "Execute the following command to test the security features:"
-**Command:** `npm run dev`
-**Verification:**
-1. Invalid requests return 400 with error details
-2. Excessive requests to limited endpoints return 429
-3. Valid requests function normally
-</file>
-
-<file path="docs/work_breakdown/tasks/hardening_phase_4_performance.md">
-# Hardening Phase 4: Performance Optimization
-
-## Tasks for Developer AI
-
-### 1. Add Database Indexes
-**File Path:** `/prisma/schema.prisma`
-**Action:** Add compound index to UserProgress model
-**LLM Prompt:** "Modify the UserProgress model in `/prisma/schema.prisma` to add a compound index:"
-```prisma
-model UserProgress {
-  id          String   @id @default(uuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  metric      String
-  score       Float
-  lastUpdated DateTime @default(now())
-
-  @@index([userId, metric], name: "UserProgress_userId_metric_index")
-}
-```
-**Verification:** Index definition exists in schema.prisma
-
----
-
-### 2. Apply Database Migration
-**File Path:** Project root (`./`)
-**Action:** Create and apply migration
-**LLM Prompt:** "Execute the following command to create and apply the migration:"
-**Command:** `npx prisma migrate dev --name add_performance_indexes`
-**Verification:** New migration file exists in prisma/migrations directory
-
----
-
-### 3. Implement Basic Caching
-**File Path:** `/lib/cache.ts`
-**Action:** Create caching utility
-**LLM Prompt:** "Create a new file at `/lib/cache.ts` with the following content:"
-```typescript
-const cache = new Map<string, { data: any, expires: number }>()
-
-export function getFromCache<T>(key: string): T | null {
-  const item = cache.get(key)
-  if (!item || item.expires < Date.now()) {
-    return null
-  }
-  return item.data as T
-}
-
-export function setToCache(key: string, data: any, ttl: number = 300000) {
-  cache.set(key, {
-    data,
-    expires: Date.now() + ttl
-  })
-}
-
-export function clearCache(key: string) {
-  cache.delete(key)
-}
-```
-**Verification:** File exists and exports cache functions
-
----
-
-### 4. Add Caching to Stats Endpoints
-**Action:** Implement caching in dashboard routes
-**Files to Modify:**
-- `app/api/stats/fluency/route.ts`
-- `app/api/stats/srs-overview/route.ts`
-
-**LLM Prompt:** "For each specified stats route:
-1. Import cache functions from '@/lib/cache'
-2. Generate cache key based on user ID and route
-3. Check cache before querying database
-4. Store results in cache after querying
-5. Maintain existing functionality"
-
-**Example Modification:**
-```typescript
-import { getFromCache, setToCache } from '@/lib/cache'
-
-export async function GET(request: Request) {
-  const cacheKey = `stats-fluency-${userId}`
-  const cached = getFromCache(cacheKey)
-  if (cached) {
-    return NextResponse.json(cached)
-  }
-
-  const data = await fetchDataFromDB() // Existing logic
-  
-  setToCache(cacheKey, data)
-  return NextResponse.json(data)
-}
-```
-**Verification:** Repeated requests within 5 minutes return cached data
-
----
-
-### 5. Verify Performance Improvements
-**Action:** Test database and caching changes
-**LLM Prompt:** "Execute the following command to test performance features:"
-**Command:** `npm run dev`
-**Verification:**
-1. Database queries for stats are faster with indexes
-2. Repeated stat requests return cached data
-3. Data updates reflect after cache expires
-</file>
-
-<file path="docs/work_breakdown/tasks/hardening_phase_5_testing.md">
-# Hardening Phase 5: Testing Implementation
-
-## Tasks for Developer AI
-
-### 1. Install Testing Dependencies
-**File Path:** Project root (`./`)
-**Action:** Execute command to install Jest and related packages
-**LLM Prompt:** "Execute the following shell command to install testing dependencies:"
-**Command:** `npm install jest ts-jest @types/jest --save-dev`
-**Verification:** Packages appear in `package.json` devDependencies
-
----
-
-### 2. Configure Jest for TypeScript
-**File Path:** `jest.config.ts`
-**Action:** Create Jest configuration file
-**LLM Prompt:** "Create a new file at `jest.config.ts` with the following content:"
-```typescript
-import type { Config } from '@jest/types'
-
-const config: Config.InitialOptions = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
-  roots: ['<rootDir>'],
-  testMatch: ['**/*.test.ts'],
-  moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/$1'
-  }
-}
-
-export default config
-```
-**Verification:** Configuration file exists with correct settings
-
----
-
-### 3. Create Auth Test File
-**File Path:** `/tests/auth.test.ts`
-**Action:** Implement authentication tests
-**LLM Prompt:** "Create a new file at `/tests/auth.test.ts` with the following content:"
-```typescript
-import { describe, it, expect } from '@jest/globals'
-import { signUp, signIn } from '@/lib/auth'
-
-describe('Authentication', () => {
-  it('should allow valid user signup', async () => {
-    const result = await signUp('test@example.com', 'password123')
-    expect(result.success).toBe(true)
-  })
-
-  it('should reject duplicate user signup', async () => {
-    await signUp('test@example.com', 'password123')
-    const result = await signUp('test@example.com', 'password123')
-    expect(result.error).toMatch(/already exists/i)
-  })
-
-  it('should allow valid login', async () => {
-    await signUp('test@example.com', 'password123')
-    const result = await signIn('test@example.com', 'password123')
-    expect(result.success).toBe(true)
-  })
-
-  it('should reject invalid login', async () => {
-    const result = await signIn('wrong@example.com', 'wrongpassword')
-    expect(result.error).toMatch(/invalid credentials/i)
-  })
-})
-```
-**Verification:** File exists with all test cases
-
----
-
-### 4. Create Lesson Test File
-**File Path:** `/tests/lessons.test.ts`
-**Action:** Implement lesson flow tests
-**LLM Prompt:** "Create a new file at `/tests/lessons.test.ts` with the following content:"
-```typescript
-import { describe, it, expect } from '@jest/globals'
-import { startLesson, submitAnswer } from '@/lib/lessons'
-
-describe('Lesson Flow', () => {
-  it('should start a new lesson', async () => {
-    const lesson = await startLesson('user_123')
-    expect(lesson.exercises.length).toBeGreaterThan(0)
-  })
-
-  it('should accept correct answers', async () => {
-    const response = await submitAnswer('ex_123', 'correct answer')
-    expect(response.correct).toBe(true)
-  })
-
-  it('should provide feedback for incorrect answers', async () => {
-    const response = await submitAnswer('ex_123', 'wrong answer')
-    expect(response.correct).toBe(false)
-    expect(response.feedback).toBeDefined()
-  })
-})
-```
-**Verification:** File exists with all test cases
-
----
-
-### 5. Update CI Workflow
-**File Path:** `/.github/workflows/ci.yml`
-**Action:** Add test step to CI pipeline
-**LLM Prompt:** "Modify the CI workflow to include testing:"
-```yaml
-jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm ci
-      - run: npm run lint
-      - run: npm test
-```
-**Verification:** CI file includes `npm test` command
-
----
-
-### 6. Verify Test Suite
-**Action:** Run the test suite
-**LLM Prompt:** "Execute the following command to run tests:"
-**Command:** `npm test`
-**Verification:** All tests pass successfully
-</file>
-
-<file path="docs/work_breakdown/tasks/infra_phase_1_connection_pooling.md">
-### Infrastructure Phase 1: Database Connection Pooling for Serverless Scalability
-
-**Objective:** Ensure the application can handle concurrent requests in a serverless environment without exhausting database connections.
-
-#### Tasks:
-1. **Enable Prisma Accelerate:**
-   - Sign up for Prisma Data Platform if not already done.
-   - Create a new project in the Prisma Data Platform dashboard.
-   - Enable Prisma Accelerate for the project and note the generated connection string.
-
-2. **Update Environment Configuration:**
-   - Add the Prisma Accelerate connection string to your environment variables as `DATABASE_URL_ACCELERATE`.
-
-3. **Modify Prisma Client Initialization:**
-   - Update `/lib/prisma.ts` to use the Accelerate connection string:
-     ```typescript
-     import { PrismaClient } from '@prisma/client/edge'
-     const prisma = new PrismaClient({
-       datasourceUrl: process.env.DATABASE_URL_ACCELERATE,
-     })
-     export default prisma
-     ```
-
-4. **Verification:**
-   - Deploy the updated code to a staging environment.
-   - Simulate load (e.g., using a tool like k6) to ensure no `P2024` errors occur.
-   - Confirm in Prisma Data Platform dashboard that connections are being pooled correctly.
-
-**Completion Criteria:**
-- Application handles 50+ concurrent users without database connection errors.
-- Prisma Accelerate dashboard shows active connection pooling.
-</file>
-
-<file path="docs/work_breakdown/tasks/infra_phase_2_deployment_automation.md">
-### Infrastructure Phase 2: Deployment Automation
-
-**Objective:** Establish a fully automated CI/CD pipeline for reliable staging and production deployments.
-
-#### Tasks:
-1. **Create Production Dockerfile:**
-   - Add a multi-stage `Dockerfile` to project root:
-     ```dockerfile
-     FROM node:20-alpine AS builder
-     WORKDIR /app
-     COPY package*.json ./
-     RUN npm ci
-     COPY . .
-     RUN npm run build
-
-     FROM node:20-alpine AS runner
-     WORKDIR /app
-     ENV NODE_ENV production
-     COPY --from=builder /app/package*.json ./
-     COPY --from=builder /app/node_modules ./node_modules
-     COPY --from=builder /app/.next ./.next
-     COPY --from=builder /app/public ./public
-     COPY --from=builder /app/next.config.js ./
-     EXPOSE 3000
-     CMD ["npm", "start"]
-     ```
-
-2. **Update CI/CD Pipeline:**
-   - Modify `/.github/workflows/ci.yml` to add:
-     ```yaml
-     deploy-staging:
-       needs: test
-       runs-on: ubuntu-latest
-       steps:
-         - uses: actions/checkout@v4
-         - name: Log in to GitHub Container Registry
-           uses: docker/login-action@v3
-           with:
-             registry: ghcr.io
-             username: ${{ github.actor }}
-             password: ${{ secrets.GITHUB_TOKEN }}
-         - name: Build and push Docker image
-           uses: docker/build-push-action@v5
-           with:
-             context: .
-             push: true
-             tags: ghcr.io/${{ github.repository }}:staging-${{ github.sha }}
-         - name: Deploy to Staging
-           run: |
-             echo "Add your staging deployment command here"
-             # Example: vercel deploy --prod --token $VERCEL_TOKEN
-
-     deploy-production:
-       needs: deploy-staging
-       runs-on: ubuntu-latest
-       if: github.event_name == 'workflow_dispatch'
-       steps:
-         - uses: actions/checkout@v4
-         - name: Log in to GitHub Container Registry
-           uses: docker/login-action@v3
-           with:
-             registry: ghcr.io
-             username: ${{ github.actor }}
-             password: ${{ secrets.GITHUB_TOKEN }}
-         - name: Build and push Docker image
-           uses: docker/build-push-action@v5
-           with:
-             context: .
-             push: true
-             tags: ghcr.io/${{ github.repository }}:prod-${{ github.sha }}
-         - name: Deploy to Production
-           run: |
-             echo "Add your production deployment command here"
-     ```
-
-3. **Verification:**
-   - Merge a test PR to main branch and verify staging deployment completes
-   - Manually trigger production deployment and verify success
-   - Confirm application is reachable in both environments
-
-**Completion Criteria:**
-- Every merged PR to main automatically deploys to staging
-- Production deployments can be triggered manually via GitHub UI
-- Docker images are properly built and pushed to container registry
-</file>
-
-<file path="docs/work_breakdown/tasks/logic_phase_1_todo.md">
-# Lessay Implementation Phase 1: Core Backend & User Auth
-
-## Tasks for Developer AI
-
-### 1. Create Supabase Server-Side Client Helper
-**File:** `/lib/supabase-server.ts`  
-**Action:** Create a server-side Supabase client for authenticated operations  
-**Steps:**
-- Import `createClient` and `createServerComponentClient` from `@supabase/ssr`
-- Export a `supabaseServerClient` function that:
-  - Accepts `cookies()` from `next/headers`
-  - Returns a Supabase client configured with `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`
-- Export a `getUserSession` helper that:
-  - Uses the server client to call `auth.getUser()`
-  - Returns the user object or null
-
-**Verification:** File exists and exports both functions with proper TypeScript types
-
----
-
-### 2. Implement Profile GET Route
-**File:** `/app/api/users/profile/route.ts`  
-**Action:** Add real user session handling  
-**Steps:**
-- Import `getUserSession` from `@/lib/supabase-server`
-- Modify the GET function to:
-  1. Call `getUserSession()`
-  2. If no user, return `401 Unauthorized`
-  3. Query Prisma for `User` with `user.id`
-  4. Return profile data (excluding sensitive fields)
-
-**Verification:** Route returns 401 when unauthenticated and profile data when logged in
-
----
-
-### 3. Implement Profile PUT Route
-**File:** `/app/api/users/profile/route.ts`  
-**Action:** Add profile update functionality  
-**Steps:**
-- Keep existing auth check from GET route
-- Add Prisma `user.update` call with:
-  - `where: { id: user.id }`
-  - `data` from request body (validate/sanitize first)
-- Return updated profile data
-
-**Verification:** PUT requests successfully update user data in database
-
----
-
-### 4. Create Auth UI Component
-**File:** `/components/Auth.tsx`  
-**Action:** Build sign-up/sign-in interface  
-**Steps:
-- Create client-side Supabase client with `createClientComponentClient`
-- Add:
-  - Email input field
-  - Password input field
-  - Sign Up button (calls `supabase.auth.signUp`)
-  - Sign In button (calls `supabase.auth.signInWithPassword`)
-  - Error message display
-- Style with Tailwind CSS
-
-**Verification:** Component renders properly and allows user registration/login
-</file>
-
-<file path="docs/work_breakdown/tasks/logic_phase_2_todo.md">
-# Lessay Implementation Phase 2: Learning Loop Logic
-
-## Tasks for Developer AI
-
-### 1. Implement Lesson Start Route
-**File:** `/app/api/lessons/start/route.ts`  
-**Action:** Add real lesson generation logic  
-**Steps:**
-- Import `getUserSession` from `@/lib/supabase-server`
-- Modify POST function to:
-  1. Authenticate user (return 401 if not logged in)
-  2. Call `AIService.generateLessonForUser` with user's ID
-  3. Create Prisma records for:
-     - `Lesson` (with generated content)
-     - `Exercise` (linked to lesson)
-  4. Return lesson ID and first exercise
-
-**Verification:** Route creates database entries and returns structured lesson data
-
----
-
-### 2. Implement Answer Submission Route
-**File:** `/app/api/lessons/[id]/submit-answer/route.ts`  
-**Action:** Add answer processing logic  
-**Steps:**
-- Import `getUserSession` for auth
-- Modify POST function to:
-  1. Authenticate user
-  2. Find exercise by ID
-  3. Compare `textResponse` to `correctAnswer`
-  4. Create `UserProgress` record with:
-     - `isCorrect` flag
-     - `submittedAnswer`
-     - `exerciseId`
-     - `userId`
-  5. Return feedback object with:
-     - `isCorrect`
-     - `correctAnswer`
-     - `explanation`
-
-**Verification:** Submissions create progress records and return proper feedback
-
----
-
-### 3. Update Lesson View Component
-**File:** `/components/LessonView.tsx`  
-**Action:** Add interactive exercise UI  
-**Steps:**
-- Add:
-  - Text input field for answers
-  - Submit button that:
-    - Calls submit-answer API
-    - Disables during submission
-  - Feedback display area showing:
-    - Correct/incorrect indicator
-    - Explanation (if available)
-- Handle loading states
-- Style with Tailwind CSS
-
-**Verification:** Component allows answer submission and displays feedback
-</file>
-
-<file path="docs/work_breakdown/tasks/logic_phase_3_todo.md">
-# Lessay Implementation Phase 3: AI Service Integration
-
-## Tasks for Developer AI
-
-### 1. Install Google AI SDK
-**Command:**  
-```bash
-npm install @google/generative-ai
-```
-**Verification:** Package appears in `package.json` dependencies
-
----
-
-### 2. Initialize AI Client
-**File:** `/lib/ai-service.ts`  
-**Action:** Configure real Google AI client  
-**Steps:**
-- Import `GoogleGenerativeAI` from SDK
-- Create client instance using `AI_API_KEY` from env
-- Export initialized client
-- Remove any existing stub implementations
-
-**Verification:** File exports properly configured client instance
-
----
-
-### 3. Implement Lesson Generation
-**File:** `/lib/ai-service.ts`  
-**Action:** Replace stubbed `generateLessonForUser`  
-**Steps:**
-1. Construct detailed prompt per `technical_design_template.md`
-2. Call Gemini model with:
-   - `temperature: 0.7`
-   - `maxOutputTokens: 2048`
-3. Parse JSON response into:
-   - `lessonContent`
-   - `exercises[]` with:
-     - `question`
-     - `correctAnswer`
-     - `explanation`
-4. Return structured lesson data
-
-**Verification:** Function returns valid lesson structure from API call
-
----
-
-### 4. Add Audio Analysis Placeholder
-**File:** `/lib/ai-service.ts`  
-**Action:** Connect audio analysis to Prisma  
-**Steps:**
-- Keep function signature but:
-  1. Log "Real audio analysis will be implemented here"
-  2. Create `VoiceAnalysis` record in Prisma with dummy metrics:
-     - `fluencyScore: 0.8`
-     - `pronunciationScore: 0.75`
-     - `accuracyScore: 0.85`
-  3. Return dummy metrics object
-
-**Verification:** Function creates database records and returns expected structure
-</file>
-
-<file path="docs/work_breakdown/tasks/logic_phase_4_todo.md">
-# Lessay Implementation Phase 4: Dashboard & Payments Integration
-
-## Tasks for Developer AI
-
-### 1. Implement Fluency Stats Route
-**File:** `/app/api/stats/fluency/route.ts`  
-**Action:** Add real fluency statistics  
-**Steps:**
-- Authenticate user
-- Use Prisma to aggregate `UserProgress`:
-  - `avg` of `accuracyScore`
-  - `count` of exercises by `isCorrect`
-  - Group by `createdAt` (daily)
-- Return structured stats object
-
-**Verification:** Route returns proper stats shape with real data
-
----
-
-### 2. Implement SRS Overview Route
-**File:** `/app/api/stats/srs-overview/route.ts`  
-**Action:** Add spaced repetition stats  
-**Steps:**
-- Authenticate user
-- Use Prisma to aggregate `SRSEntry`:
-  - `count` by `status`
-  - `min`, `max`, `avg` of `nextReview`
-  - Group by `exerciseType`
-- Return structured overview
-
-**Verification:** Route returns proper SRS metrics
-
----
-
-### 3. Update Dashboard View
-**File:** `/components/DashboardView.tsx`  
-**Action:** Display real stats  
-**Steps:
-- Fetch data from both stats endpoints
-- Display:
-  - Accuracy trend chart
-  - SRS status pie chart
-  - Recent activity list
-- Style with Tailwind CSS
-
-**Verification:** Component renders all data visualizations
-
----
-
-### 4. Implement Stripe Subscription
-**File:** `/app/api/payments/create-subscription/route.ts`  
-**Action:** Add real payment processing  
-**Steps:**
-- Install `stripe` package
-- Initialize Stripe with `STRIPE_SECRET_KEY`
-- Create subscription with:
-  - `customer` from request
-  - `items` from request
-  - `payment_behavior: 'default_incomplete'`
-- Return subscription ID
-
-**Verification:** Route creates Stripe subscriptions
-
----
-
-### 5. Secure Stripe Webhook
-**File:** `/app/api/stripe/webhook/route.ts`  
-**Action:** Add signature verification  
-**Steps:
-- Get webhook secret from env
-- Use `stripe.webhooks.constructEvent`
-- Verify signature before processing
-- Handle relevant event types
-
-**Verification:** Webhook rejects invalid signatures
-</file>
-
-<file path="docs/work_breakdown/tasks/logic_phase_5_todo.md">
-# Lessay Implementation Phase 5: Testing & Finalization
-
-## Tasks for Developer AI
-
-### 1. Install Testing Dependencies
-**Command:**  
-```bash
-npm install jest ts-jest @types/jest --save-dev
-```
-**Verification:** Packages appear in `package.json` devDependencies
-
----
-
-### 2. Configure Jest for TypeScript
-**File:** `jest.config.ts`  
-**Action:** Create test configuration  
-**Steps:**
-- Export default config with:
-  - `preset: 'ts-jest'`
-  - `testEnvironment: 'node'`
-  - `roots: ['<rootDir>']`
-  - `testMatch: ['**/*.test.ts']`
-
-**Verification:** Configuration file exists with proper settings
-
----
-
-### 3. Create Sample Test
-**File:** `/lib/utils.test.ts`  
-**Action:** Add basic test case  
-**Steps:
-- Import function to test (e.g., from `/lib/utils.ts`)
-- Write test that:
-  - Checks a simple function
-  - Uses `describe` and `it` blocks
-  - Has assertions with `expect`
-
-**Verification:** `npm test` runs successfully
-
----
-
-### 4. Update Test Script
-**File:** `package.json`  
-**Action:** Add test command  
-**Steps:
-- Add script: `"test": "jest"`
-- Ensure it's in the `scripts` section
-
-**Verification:** `npm test` executes Jest
-
----
-
-### 5. Add JSDoc Comments
-**Action:** Document all exported functions  
-**Scope:** All created/modified files  
-**Requirements:**
-- `/**` comment blocks
-- Description of purpose
-- `@param` for each parameter
-- `@returns` for return value
-- `@example` usage if applicable
-
-**Verification:** All exports have complete documentation
-</file>
-
-<file path="docs/work_breakdown/tasks/logic_phase_6_todo.md">
-# Logic Implementation Phase 6: Google Cloud TTS/STT Integration
-
-## Task 1: Install Required SDKs
-- Execute `npm install @google-cloud/speech @google-cloud/text-to-speech`
-
-## Task 2: Initialize Google Cloud Clients
-- Modify `/lib/ai-service.ts` to:
-  1. Import the required modules:
-     ```typescript
-     import { SpeechClient } from '@google-cloud/speech';
-     import { TextToSpeechClient } from '@google-cloud/text-to-speech';
-     ```
-  2. Initialize the clients with proper credentials handling:
-     ```typescript
-     let speechClient: SpeechClient;
-     let textToSpeechClient: TextToSpeechClient;
-
-     if (process.env.GCP_CREDENTIALS_JSON) {
-       // Production environment - use env variable
-       const credentials = JSON.parse(process.env.GCP_CREDENTIALS_JSON);
-       speechClient = new SpeechClient({ credentials });
-       textToSpeechClient = new TextToSpeechClient({ credentials });
-     } else {
-       // Local development - use file
-       speechClient = new SpeechClient({
-         keyFilename: './gcp-credentials.json'
-       });
-       textToSpeechClient = new TextToSpeechClient({
-         keyFilename: './gcp-credentials.json'
-       });
-     }
-     ```
-
-## Task 3: Implement Speech-to-Text
-- Replace placeholder console.logs with actual STT implementation:
-  ```typescript
-  async function transcribeAudio(audioBuffer: Buffer): Promise<string> {
-    const [response] = await speechClient.recognize({
-      audio: {
-        content: audioBuffer.toString('base64'),
-      },
-      config: {
-        encoding: 'WEBM_OPUS',
-        sampleRateHertz: 48000,
-        languageCode: 'en-US',
-      },
-    });
-    return response.results
-      .map(result => result.alternatives[0].transcript)
-      .join('\n');
-  }
-  ```
-
-## Task 4: Implement Text-to-Speech
-- Replace placeholder console.logs with actual TTS implementation:
-  ```typescript
-  async function synthesizeSpeech(text: string): Promise<Buffer> {
-    const [response] = await textToSpeechClient.synthesizeSpeech({
-      input: { text },
-      voice: {
-        languageCode: 'en-US',
-        name: 'en-US-Standard-C'
-      },
-      audioConfig: {
-        audioEncoding: 'MP3'
-      }
-    });
-    return Buffer.from(response.audioContent, 'base64');
-  }
-  ```
-
-## Verification
-- The file `/lib/ai-service.ts` exists and contains the new implementations
-- The Google Cloud clients are properly initialized with credentials
-- The app can successfully transcribe audio and synthesize speech
-</file>
-
-<file path="docs/work_breakdown/tasks/prod_polish_phase_5_state_management.md">
-# Production Polish Phase 5: State Management Implementation
-
-## Tasks for Developer AI
-
-### 1. Install Zustand
-- **File:** `package.json`
-- **Action:** Add Zustand as a dependency
-- **Command:** `npm install zustand`
-- **Verification:** `zustand` appears in `package.json` dependencies
-
-### 2. Create User Store
-- **File:** `/lib/stores/userStore.ts`
-- **Action:** Create a global store for user session state
-- **Content:**
-```typescript
-import { create } from 'zustand';
-
-interface UserState {
-  user: { id: string; email: string } | null;
-  setUser: (user: { id: string; email: string } | null) => void;
-}
-
-export const useUserStore = create<UserState>((set) => ({
-  user: null,
-  setUser: (user) => set({ user }),
-}));
-```
-- **Verification:** File exists and exports `useUserStore`
-
-### 3. Implement Auth Listener
-- **File:** `/components/AuthListener.tsx`
-- **Action:** Create component to sync Supabase auth with Zustand store
-- **Content:**
-```typescript
-'use client';
-import { useEffect } from 'react';
-import { useUserStore } from '@/lib/stores/userStore';
-import { supabase } from '@/lib/supabase/client';
-
-export default function AuthListener() {
-  const setUser = useUserStore((state) => state.setUser);
-
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => subscription.unsubscribe();
-  }, [setUser]);
-
-  return null;
-}
-```
-- **Verification:** Component exists and listens to auth changes
-
-### 4. Update Layout Component
-- **File:** `/components/AppLayout.tsx`
-- **Action:** Add AuthListener to root layout
-- **Modification:**
-```typescript
-import AuthListener from '@/components/AuthListener';
-
-export default function AppLayout({ children }) {
-  return (
-    <>
-      <AuthListener />
-      {/* Existing layout content */}
-    </>
-  );
-}
-```
-- **Verification:** AuthListener is rendered in the layout
-
-### 5. Refactor LessonView Component
-- **File:** `/components/LessonView.tsx`
-- **Action:** Use Zustand store instead of local state
-- **Modification:**
-```typescript
-import { useUserStore } from '@/lib/stores/userStore';
-
-export default function LessonView() {
-  const user = useUserStore((state) => state.user);
-  // Remove local user state
-}
-```
-- **Verification:** Component uses store instead of local state
-</file>
-
-<file path="docs/work_breakdown/tasks/prod_polish_phase_6_environments.md">
-# Production Polish Phase 6: Environment-Specific Configurations
-
-## Tasks for Developer AI
-
-### 1. Update Environment Example File
-- **File:** `/.env.example`
-- **Action:** Add staging and production variables
-- **Content:**
-```
-STRIPE_SECRET_KEY_STAGING=
-STRIPE_SECRET_KEY_PROD=
-AI_API_KEY_STAGING=
-AI_API_KEY_PROD=
-NODE_ENV=development
-```
-- **Verification:** File contains separate keys for staging/prod
-
-### 2. Create Config Utility
-- **File:** `/lib/config.ts`
-- **Action:** Create environment-aware configuration
-- **Content:**
-```typescript
-export function getStripeKey() {
-  return process.env.NODE_ENV === 'production' 
-    ? process.env.STRIPE_SECRET_KEY_PROD
-    : process.env.STRIPE_SECRET_KEY_STAGING;
-}
-
-export function getAiKey() {
-  return process.env.NODE_ENV === 'production'
-    ? process.env.AI_API_KEY_PROD
-    : process.env.AI_API_KEY_STAGING;
-}
-```
-- **Verification:** File exports config functions
-
-### 3. Update Payment Service
-- **File:** `/app/api/payments/create-subscription/route.ts`
-- **Action:** Use config instead of direct env access
-- **Modification:**
-```typescript
-import { getStripeKey } from '@/lib/config';
-const stripe = new Stripe(getStripeKey());
-```
-- **Verification:** Stripe client uses config function
-
-### 4. Update AI Service
-- **File:** `/lib/ai-service.ts`
-- **Action:** Use config for API keys
-- **Modification:**
-```typescript
-import { getAiKey } from '@/lib/config';
-const geminiClient = new GoogleGenerativeAI(getAiKey());
-```
-- **Verification:** AI clients use config function
-
-### 5. Update CI Workflow
-- **File:** `/.github/workflows/ci.yml`
-- **Action:** Add environment-specific secrets
-- **Modification:**
-```yaml
-jobs:
-  deploy-stage:
-    steps:
-      - uses: actions/checkout@v4
-      - run: npm ci
-      - run: npm run build
-      - env:
-          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY_STAGING }}
-          AI_API_KEY: ${{ secrets.AI_API_KEY_STAGING }}
-        run: npm run deploy:stage
-```
-- **Verification:** Workflow uses correct secrets for staging
-</file>
-
-<file path="docs/work_breakdown/tasks/prod_security_phase_2_cost_control.md">
-# Production Security Phase 2: AI Cost Control Implementation
-
-## Tasks for Developer AI
-
-### 1. Update User Model
-- **File:** `/prisma/schema.prisma`
-- **Action:** Add tier field to User model
-- **Modification:**
-```prisma
-model User {
-  id           String   @id @default(uuid())
-  // ... existing fields
-  tier         String   @default('free')
-}
-```
-- **Verification:** Field exists in User model
-
-### 2. Create Usage Tracking Model
-- **File:** `/prisma/schema.prisma`
-- **Action:** Add UserUsage model
-- **Modification:**
-```prisma
-model UserUsage {
-  id          String   @id @default(uuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  count       Int      @default(1)
-  date        DateTime @default(now())
-  @@index([userId, date])
-}
-```
-- **Verification:** Model exists in schema
-
-### 3. Run Database Migration
-- **Command:** `npx prisma migrate dev --name add_usage_tracking`
-- **Verification:** New migration file created
-
-### 4. Implement Usage Check in Lesson Start
-- **File:** `/app/api/lessons/start/route.ts`
-- **Action:** Add usage limit for free tier
-- **Modification:**
-```typescript
-const usage = await prisma.userUsage.count({
-  where: {
-    userId: session.user.id,
-    date: {
-      gte: new Date(Date.now() - 24 * 60 * 60 * 1000)
-    }
-  }
-});
-
-if (session.user.tier === 'free' && usage >= 5) {
-  return NextResponse.json(
-    { error: 'Daily limit exceeded' },
-    { status: 429 }
-  );
-}
-```
-- **Verification:** Free users limited to 5 lessons/day
-
-### 5. Add Audio Duration Check
-- **File:** `/app/api/lessons/[id]/submit-answer/route.ts`
-- **Action:** Reject long audio files
-- **Modification:**
-```typescript
-if (body.audioBlobUrl) {
-  const audioDuration = await getAudioDuration(body.audioBlobUrl);
-  if (audioDuration > 30) {
-    return NextResponse.json(
-      { error: 'Audio too long' },
-      { status: 400 }
-    );
-  }
-}
-```
-- **Verification:** Audio >30s is rejected
-</file>
-
-<file path="docs/work_breakdown/tasks/prod_security_phase_3_authorization.md">
-### Production Security Phase 3: Advanced Authorization
-
-**Objective:** Implement strict authorization controls to prevent unauthorized access to protected resources.
-
-#### Tasks:
-1. **Create User Profile Types:**
-   - Add to `/lib/types.ts`:
-     ```typescript
-     export type PublicUserProfile = {
-       id: string
-       name: string
-       email: string
-       targetLang: string
-       nativeLang: string
-     }
-
-     export type UpdatableUserProfile = Pick<PublicUserProfile, 
-       'targetLang' | 'nativeLang'>
-     ```
-
-2. **Update Profile Endpoint Validation:**
-   - Modify PUT `/api/users/profile` route:
-     ```typescript
-     const schema = z.object({
-       targetLang: z.string(),
-       nativeLang: z.string()
-     })
-     ```
-
-3. **Audit All API Endpoints:**
-   - Create checklist in this file:
-     ```markdown
-     - [ ] GET /api/users/profile - returns PublicUserProfile
-     - [ ] PUT /api/users/profile - only accepts UpdatableUserProfile
-     - [ ] POST /api/lessons/start - verifies user has access to lesson
-     - [ ] POST /api/payments/create-subscription - verifies user auth
-     - [ ] POST /api/stripe/webhook - verifies webhook signature
-     ```
-
-4. **Implement Authorization Middleware:**
-   - Create `/lib/middleware/authz.ts`:
-     ```typescript
-     export function requirePermission(resource: string, action: string) {
-       return (req: NextRequest, res: NextResponse) => {
-         if (!userCan(req.user, resource, action)) {
-           return new Response('Unauthorized', { status: 403 })
-         }
-       }
-     }
-     ```
-
-**Verification:**
-- Attempt to update protected fields returns 400 error
-- API responses only include PublicUserProfile fields
-- All endpoints have explicit authorization checks
-
-**Completion Criteria:**
-- No sensitive fields are exposed or modifiable
-- Every API endpoint enforces resource-level permissions
-</file>
-
 <file path="docs/work_breakdown/master_plan.md">
 # Developer Master Roadmap (0_to_prod)
 
@@ -7074,6 +4494,26 @@ CREATE TABLE "LessonAnalysis" (
 ALTER TABLE "LessonAnalysis" ADD CONSTRAINT "LessonAnalysis_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 </file>
 
+<file path="public/file.svg">
+<svg fill="none" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M14.5 13.5V5.41a1 1 0 0 0-.3-.7L9.8.29A1 1 0 0 0 9.08 0H1.5v13.5A2.5 2.5 0 0 0 4 16h8a2.5 2.5 0 0 0 2.5-2.5m-1.5 0v-7H8v-5H3v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1M9.5 5V2.12L12.38 5zM5.13 5h-.62v1.25h2.12V5zm-.62 3h7.12v1.25H4.5zm.62 3h-.62v1.25h7.12V11z" clip-rule="evenodd" fill="#666" fill-rule="evenodd"/></svg>
+</file>
+
+<file path="public/globe.svg">
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><g clip-path="url(#a)"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.27 14.1a6.5 6.5 0 0 0 3.67-3.45q-1.24.21-2.7.34-.31 1.83-.97 3.1M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.48-1.52a7 7 0 0 1-.96 0H7.5a4 4 0 0 1-.84-1.32q-.38-.89-.63-2.08a40 40 0 0 0 3.92 0q-.25 1.2-.63 2.08a4 4 0 0 1-.84 1.31zm2.94-4.76q1.66-.15 2.95-.43a7 7 0 0 0 0-2.58q-1.3-.27-2.95-.43a18 18 0 0 1 0 3.44m-1.27-3.54a17 17 0 0 1 0 3.64 39 39 0 0 1-4.3 0 17 17 0 0 1 0-3.64 39 39 0 0 1 4.3 0m1.1-1.17q1.45.13 2.69.34a6.5 6.5 0 0 0-3.67-3.44q.65 1.26.98 3.1M8.48 1.5l.01.02q.41.37.84 1.31.38.89.63 2.08a40 40 0 0 0-3.92 0q.25-1.2.63-2.08a4 4 0 0 1 .85-1.32 7 7 0 0 1 .96 0m-2.75.4a6.5 6.5 0 0 0-3.67 3.44 29 29 0 0 1 2.7-.34q.31-1.83.97-3.1M4.58 6.28q-1.66.16-2.95.43a7 7 0 0 0 0 2.58q1.3.27 2.95.43a18 18 0 0 1 0-3.44m.17 4.71q-1.45-.12-2.69-.34a6.5 6.5 0 0 0 3.67 3.44q-.65-1.27-.98-3.1" fill="#666"/></g><defs><clipPath id="a"><path fill="#fff" d="M0 0h16v16H0z"/></clipPath></defs></svg>
+</file>
+
+<file path="public/next.svg">
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 394 80"><path fill="#000" d="M262 0h68.5v12.7h-27.2v66.6h-13.6V12.7H262V0ZM149 0v12.7H94v20.4h44.3v12.6H94v21h55v12.6H80.5V0h68.7zm34.3 0h-17.8l63.8 79.4h17.9l-32-39.7 32-39.6h-17.9l-23 28.6-23-28.6zm18.3 56.7-9-11-27.1 33.7h17.8l18.3-22.7z"/><path fill="#000" d="M81 79.3 17 0H0v79.3h13.6V17l50.2 62.3H81Zm252.6-.4c-1 0-1.8-.4-2.5-1s-1.1-1.6-1.1-2.6.3-1.8 1-2.5 1.6-1 2.6-1 1.8.3 2.5 1a3.4 3.4 0 0 1 .6 4.3 3.7 3.7 0 0 1-3 1.8zm23.2-33.5h6v23.3c0 2.1-.4 4-1.3 5.5a9.1 9.1 0 0 1-3.8 3.5c-1.6.8-3.5 1.3-5.7 1.3-2 0-3.7-.4-5.3-1s-2.8-1.8-3.7-3.2c-.9-1.3-1.4-3-1.4-5h6c.1.8.3 1.6.7 2.2s1 1.2 1.6 1.5c.7.4 1.5.5 2.4.5 1 0 1.8-.2 2.4-.6a4 4 0 0 0 1.6-1.8c.3-.8.5-1.8.5-3V45.5zm30.9 9.1a4.4 4.4 0 0 0-2-3.3 7.5 7.5 0 0 0-4.3-1.1c-1.3 0-2.4.2-3.3.5-.9.4-1.6 1-2 1.6a3.5 3.5 0 0 0-.3 4c.3.5.7.9 1.3 1.2l1.8 1 2 .5 3.2.8c1.3.3 2.5.7 3.7 1.2a13 13 0 0 1 3.2 1.8 8.1 8.1 0 0 1 3 6.5c0 2-.5 3.7-1.5 5.1a10 10 0 0 1-4.4 3.5c-1.8.8-4.1 1.2-6.8 1.2-2.6 0-4.9-.4-6.8-1.2-2-.8-3.4-2-4.5-3.5a10 10 0 0 1-1.7-5.6h6a5 5 0 0 0 3.5 4.6c1 .4 2.2.6 3.4.6 1.3 0 2.5-.2 3.5-.6 1-.4 1.8-1 2.4-1.7a4 4 0 0 0 .8-2.4c0-.9-.2-1.6-.7-2.2a11 11 0 0 0-2.1-1.4l-3.2-1-3.8-1c-2.8-.7-5-1.7-6.6-3.2a7.2 7.2 0 0 1-2.4-5.7 8 8 0 0 1 1.7-5 10 10 0 0 1 4.3-3.5c2-.8 4-1.2 6.4-1.2 2.3 0 4.4.4 6.2 1.2 1.8.8 3.2 2 4.3 3.4 1 1.4 1.5 3 1.5 5h-5.8z"/></svg>
+</file>
+
+<file path="public/vercel.svg">
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1155 1000"><path d="m577.3 0 577.4 1000H0z" fill="#fff"/></svg>
+</file>
+
+<file path="public/window.svg">
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.5 2.5h13v10a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1zM0 1h16v11.5a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 0 12.5zm3.75 4.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5M7 4.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0m1.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5" fill="#666"/></svg>
+</file>
+
 <file path="types/speech-recognition.d.ts">
 // ROO-AUDIT-TAG :: plan-002-lesson-delivery.md :: Add Web Speech API type declarations
 interface SpeechRecognitionEvent extends Event {
@@ -7131,6 +4571,25 @@ declare module 'swr' {
 // ROO-AUDIT-TAG :: plan-004-progress-tracking.md :: END
 </file>
 
+<file path="eslint.config.mjs">
+import { dirname } from "path";
+import { fileURLToPath } from "url";
+import { FlatCompat } from "@eslint/eslintrc";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const compat = new FlatCompat({
+  baseDirectory: __dirname,
+});
+
+const eslintConfig = [
+  ...compat.extends("next/core-web-vitals", "next/typescript"),
+];
+
+export default eslintConfig;
+</file>
+
 <file path="middleware.ts">
 // ROO-AUDIT-TAG :: FIX_PLAN.md :: Implement auth middleware
 import { NextResponse } from 'next/server';
@@ -7179,6 +4638,63 @@ export const config = {
 // ROO-AUDIT-TAG :: FIX_PLAN.md :: END
 </file>
 
+<file path="next.config.ts">
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  /* config options here */
+};
+
+export default nextConfig;
+</file>
+
+<file path="postcss.config.mjs">
+const config = {
+  plugins: ["@tailwindcss/postcss"],
+};
+
+export default config;
+</file>
+
+<file path="README.md">
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+
+## Getting Started
+
+First, run the development server:
+
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## Learn More
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+</file>
+
 <file path="app/api/ai/generate-lesson/route.ts">
 // ROO-AUDIT-TAG :: plan-009-lesson-structure.md :: Enhance lesson generation endpoint
 import { NextResponse } from 'next/server';
@@ -7220,66 +4736,6 @@ export async function POST(request: Request) {
   }
 }
 // ROO-AUDIT-TAG :: plan-009-lesson-structure.md :: END
-</file>
-
-<file path="app/api/onboarding/create-profile/route.ts">
-import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-import logger from '@/lib/logger';
-
-const prisma = new PrismaClient();
-
-interface ProfileUpdateData {
-  nativeLang: string;
-  targetLang: string;
-  primaryGoal: string;
-  comfortLevel: number;
-}
-
-export async function POST(request: Request) {
-  let userId: string | undefined;
-  try {
-    const data = await request.json();
-    userId = data.userId;
-    const { nativeLanguage, targetLanguage, primaryGoal, comfortLevel } = data;
-    
-    // Basic validation
-    if (!userId || !nativeLanguage || !targetLanguage || !primaryGoal || !comfortLevel) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
-    }
-
-    // Prepare update data with correct types
-    const updateData: ProfileUpdateData = {
-      nativeLang: nativeLanguage,
-      targetLang: targetLanguage,
-      primaryGoal,
-      comfortLevel: Number(comfortLevel)
-    };
-
-    // Update user profile
-    const updatedUser = await prisma.user.update({
-      where: { id: userId },
-      data: updateData
-    });
-
-    return NextResponse.json(updatedUser);
-    
-  } catch (error) {
-    logger.error('Failed to create user profile', {
-      error,
-      userId: userId || 'unknown'
-    });
-    return NextResponse.json(
-      { error: 'Failed to update profile' },
-      { status: 500 }
-    );
-  } finally {
-    await prisma.$disconnect();
-  }
-}
 </file>
 
 <file path="app/api/stats/fluency/route.ts">
@@ -7348,141 +4804,6 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   return NextResponse.json({ totalItems: 150 });
-}
-</file>
-
-<file path="app/globals.css">
-@import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
-</file>
-
-<file path="app/page.tsx">
-import Image from "next/image";
-
-export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
 }
 </file>
 
@@ -7732,26 +5053,6 @@ CREATE INDEX "Lesson_userId_difficulty_idx" ON "Lesson"("userId", "difficulty");
 CREATE INDEX "Progress_userId_completedAt_idx" ON "Progress"("userId", "completedAt");
 </file>
 
-<file path="public/file.svg">
-<svg fill="none" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M14.5 13.5V5.41a1 1 0 0 0-.3-.7L9.8.29A1 1 0 0 0 9.08 0H1.5v13.5A2.5 2.5 0 0 0 4 16h8a2.5 2.5 0 0 0 2.5-2.5m-1.5 0v-7H8v-5H3v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1M9.5 5V2.12L12.38 5zM5.13 5h-.62v1.25h2.12V5zm-.62 3h7.12v1.25H4.5zm.62 3h-.62v1.25h7.12V11z" clip-rule="evenodd" fill="#666" fill-rule="evenodd"/></svg>
-</file>
-
-<file path="public/globe.svg">
-<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><g clip-path="url(#a)"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.27 14.1a6.5 6.5 0 0 0 3.67-3.45q-1.24.21-2.7.34-.31 1.83-.97 3.1M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.48-1.52a7 7 0 0 1-.96 0H7.5a4 4 0 0 1-.84-1.32q-.38-.89-.63-2.08a40 40 0 0 0 3.92 0q-.25 1.2-.63 2.08a4 4 0 0 1-.84 1.31zm2.94-4.76q1.66-.15 2.95-.43a7 7 0 0 0 0-2.58q-1.3-.27-2.95-.43a18 18 0 0 1 0 3.44m-1.27-3.54a17 17 0 0 1 0 3.64 39 39 0 0 1-4.3 0 17 17 0 0 1 0-3.64 39 39 0 0 1 4.3 0m1.1-1.17q1.45.13 2.69.34a6.5 6.5 0 0 0-3.67-3.44q.65 1.26.98 3.1M8.48 1.5l.01.02q.41.37.84 1.31.38.89.63 2.08a40 40 0 0 0-3.92 0q.25-1.2.63-2.08a4 4 0 0 1 .85-1.32 7 7 0 0 1 .96 0m-2.75.4a6.5 6.5 0 0 0-3.67 3.44 29 29 0 0 1 2.7-.34q.31-1.83.97-3.1M4.58 6.28q-1.66.16-2.95.43a7 7 0 0 0 0 2.58q1.3.27 2.95.43a18 18 0 0 1 0-3.44m.17 4.71q-1.45-.12-2.69-.34a6.5 6.5 0 0 0 3.67 3.44q-.65-1.27-.98-3.1" fill="#666"/></g><defs><clipPath id="a"><path fill="#fff" d="M0 0h16v16H0z"/></clipPath></defs></svg>
-</file>
-
-<file path="public/next.svg">
-<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 394 80"><path fill="#000" d="M262 0h68.5v12.7h-27.2v66.6h-13.6V12.7H262V0ZM149 0v12.7H94v20.4h44.3v12.6H94v21h55v12.6H80.5V0h68.7zm34.3 0h-17.8l63.8 79.4h17.9l-32-39.7 32-39.6h-17.9l-23 28.6-23-28.6zm18.3 56.7-9-11-27.1 33.7h17.8l18.3-22.7z"/><path fill="#000" d="M81 79.3 17 0H0v79.3h13.6V17l50.2 62.3H81Zm252.6-.4c-1 0-1.8-.4-2.5-1s-1.1-1.6-1.1-2.6.3-1.8 1-2.5 1.6-1 2.6-1 1.8.3 2.5 1a3.4 3.4 0 0 1 .6 4.3 3.7 3.7 0 0 1-3 1.8zm23.2-33.5h6v23.3c0 2.1-.4 4-1.3 5.5a9.1 9.1 0 0 1-3.8 3.5c-1.6.8-3.5 1.3-5.7 1.3-2 0-3.7-.4-5.3-1s-2.8-1.8-3.7-3.2c-.9-1.3-1.4-3-1.4-5h6c.1.8.3 1.6.7 2.2s1 1.2 1.6 1.5c.7.4 1.5.5 2.4.5 1 0 1.8-.2 2.4-.6a4 4 0 0 0 1.6-1.8c.3-.8.5-1.8.5-3V45.5zm30.9 9.1a4.4 4.4 0 0 0-2-3.3 7.5 7.5 0 0 0-4.3-1.1c-1.3 0-2.4.2-3.3.5-.9.4-1.6 1-2 1.6a3.5 3.5 0 0 0-.3 4c.3.5.7.9 1.3 1.2l1.8 1 2 .5 3.2.8c1.3.3 2.5.7 3.7 1.2a13 13 0 0 1 3.2 1.8 8.1 8.1 0 0 1 3 6.5c0 2-.5 3.7-1.5 5.1a10 10 0 0 1-4.4 3.5c-1.8.8-4.1 1.2-6.8 1.2-2.6 0-4.9-.4-6.8-1.2-2-.8-3.4-2-4.5-3.5a10 10 0 0 1-1.7-5.6h6a5 5 0 0 0 3.5 4.6c1 .4 2.2.6 3.4.6 1.3 0 2.5-.2 3.5-.6 1-.4 1.8-1 2.4-1.7a4 4 0 0 0 .8-2.4c0-.9-.2-1.6-.7-2.2a11 11 0 0 0-2.1-1.4l-3.2-1-3.8-1c-2.8-.7-5-1.7-6.6-3.2a7.2 7.2 0 0 1-2.4-5.7 8 8 0 0 1 1.7-5 10 10 0 0 1 4.3-3.5c2-.8 4-1.2 6.4-1.2 2.3 0 4.4.4 6.2 1.2 1.8.8 3.2 2 4.3 3.4 1 1.4 1.5 3 1.5 5h-5.8z"/></svg>
-</file>
-
-<file path="public/vercel.svg">
-<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1155 1000"><path d="m577.3 0 577.4 1000H0z" fill="#fff"/></svg>
-</file>
-
-<file path="public/window.svg">
-<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.5 2.5h13v10a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1zM0 1h16v11.5a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 0 12.5zm3.75 4.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5M7 4.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0m1.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5" fill="#666"/></svg>
-</file>
-
 <file path="types/lessons.ts">
 // ROO-AUDIT-TAG :: plan-003-adaptive-learning.md :: Create lesson types
 // ROO-AUDIT-TAG :: plan-005-ai-brain.md :: Enhance LessonAttempt with analysis fields
@@ -7851,54 +5152,50 @@ export type UserProfile = z.infer<typeof UserProfileSchema>;
 // ROO-AUDIT-TAG :: plan-008-user-profile.md :: END
 </file>
 
-<file path="work_breakdown/tasks/plan-001-onboarding.md">
-# Onboarding Flow Implementation Plan
+<file path=".gitignore">
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-## Description
-Implement the onboarding flow to collect user data and establish baseline proficiency.
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
-## Tasks
-- [x] (UI) Create onboarding form to collect:
-  - Native language
-  - Target language
-  - Primary goal
-  - Self-assessed comfort level
-- [x] (LOGIC) Implement initial voice-based diagnostic
-- [x] (LOGIC) Create user profile storage in database
-- [x] (UI) Design welcome screen after onboarding completion
+# testing
+/coverage
 
-## Technical Requirements
-- Use React for form components
-- Store profiles in PostgreSQL via Prisma
-- Integrate with speech-to-text API for diagnostics
-</file>
+# next.js
+/.next/
+/out/
 
-<file path="work_breakdown/tasks/plan-003-adaptive-learning.md">
-# Adaptive Learning Cycle Implementation Plan
+# production
+/build
 
-## Description
-Implement the adaptive learning system that analyzes performance and adjusts future lessons.
+# misc
+.DS_Store
+*.pem
 
-## Tasks
-- [x] (LOGIC) Framework for post-lesson analysis module created with:
-  - [x] Phonetic accuracy scoring
-  - [x] Fluency metrics calculation
-  - [x] Grammatical pattern recognition
-  - [x] Vocabulary recall assessment
-- [x] (LOGIC) Implement SRS scoring algorithm with:
-  - Recall Strength tracking
-  - Review scheduling
-  - Mastery level calculation
-- [x] (LOGIC) Create lesson generation algorithm that considers:
-  - Due SRS reviews
-  - Identified weaknesses
-  - Struggling concepts
-  - New material introduction
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
 
-## Technical Requirements
-- Use machine learning for pattern recognition (TensorFlow.js)
-- Implement scheduling with cron-like system
-- Design extensible scoring architecture
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+/app/generated/prisma
 </file>
 
 <file path="BLUEPRINT_COMPLETE.md">
@@ -7962,43 +5259,6 @@ EXPOSE 3000
 CMD ["npm", "run", "dev"]
 </file>
 
-<file path="eslint.config.mjs">
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
-const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
-];
-
-export default eslintConfig;
-</file>
-
-<file path="next.config.ts">
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  /* config options here */
-};
-
-export default nextConfig;
-</file>
-
-<file path="postcss.config.mjs">
-const config = {
-  plugins: ["@tailwindcss/postcss"],
-};
-
-export default config;
-</file>
-
 <file path="project_manifest.json">
 {
   "active_plan_file": "./FIX_PLAN.md",
@@ -8020,179 +5280,39 @@ export default config;
 }
 </file>
 
-<file path="README.md">
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<file path="app/api/onboarding/create-profile/route.ts">
+import { NextResponse } from 'next/server';
+import getServerSession from '@/lib/auth-options';
+import { prisma } from '@/lib/prisma';
 
-## Getting Started
+export async function POST(request: Request) {
+  const session = await getServerSession();
+  
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
-First, run the development server:
+  const { targetLang, nativeLang, primaryGoal } = await request.json();
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-</file>
-
-<file path=".kilocode/rules-emergency/rules.md">
-## 1. IDENTITY & PERSONA
-You are the **Emergency Intervention AI** (🚨 Emergency). You are a manifest-driven diagnostician. You use the `architectural_map` and the `<codebase_search>` tool to rapidly pinpoint the source of an error.
-
-## 2. THE CORE MISSION & TRIGGER
-Triggered by a `signals/NEEDS_ASSISTANCE.md` signal, your mission is to diagnose the failure, create a `FIX_PLAN.md`, and hand control back to the Dispatcher.
-
-## 3. THE INTERVENTION WORKFLOW
-
-1.  **Acknowledge & Verify Trigger:**
-    *   Announce: "Emergency intervention activated."
-    *   **CRITICAL:** Verify that `signals/NEEDS_ASSISTANCE.md` exists.
-    *   If it does not exist, announce: "CRITICAL FAILURE: Emergency mode activated but trigger signal 'NEEDS_ASSISTANCE.md' is missing. Cannot proceed." and immediately switch to `<mode>dispatcher</mode>`.
-
-2.  **Read the Manifest:** Read `project_manifest.json` to get all file paths and the `architectural_map`.
-
-3.  **Analyze Failure Signal:** Read the contents of the `signals/NEEDS_ASSISTANCE.md` signal file to get the error message and context.
-
-4.  **Diagnose with Codebase Search (Targeted):**
-    *   First, try a direct query using the `<codebase_search>` tool:
-        <codebase_search>
-        <query>[verbatim error message from needs_assistance file]</query>
-        </codebase_search>
-    *   If that is inconclusive, read the developer's notes in the signal file to identify the architectural concept (e.g., "The error is in the user session logic").
-    *   Look up the concept (e.g., "authentication") in the `architectural_map`.
-    *   Run the high-quality query from the map using the `<codebase_search>` tool:
-        <codebase_search>
-        <query>[query from manifest's architectural_map]</query>
-        </codebase_search>
-
-5.  **Formulate and Register Fix Plan:**
-    *   Create a `FIX_PLAN.md` with precise steps to resolve the diagnosed issue.
-    *   Update the `active_plan_file` in `project_manifest.json` to point to `FIX_PLAN.md`.
-
-6.  **Finalize & Handoff:**
-    *   Announce the resolution and the creation of `FIX_PLAN.md`.
-    *   Delete the `signals/NEEDS_ASSISTANCE.md` signal file.
-    *   **MANDATORY FINAL ACTION:** Announce "Intervention complete. Handing control back to the Dispatcher." and switch mode to `<mode>dispatcher</mode>`. You are forbidden from using any other command to end your turn.
-</file>
-
-<file path=".kilocode/rules-system-supervisor/rules.md">
-## 1. IDENTITY & PERSONA
-You are the **System_Supervisor AI** (👑 Supervisor). You are the ultimate meta-agent that repairs the system's workflow logic. You operate by reading the `project_manifest.json` to find and analyze the system log.
-
-## 2. THE CORE MISSION & TRIGGER
-You are activated by the `Dispatcher` during an infinite loop. Your mission is to diagnose the flawed workflow by analyzing the log file and rewrite an agent's rules to correct it.
-
-## 3. THE META-ANALYSIS & REPAIR WORKFLOW
-
-1.  **Read the Manifest:** Read `project_manifest.json` to get the `log_file` path.
-2.  **Ingest System State:**
-    *   `echo '{"timestamp": "...", "agent": "System_Supervisor", "event": "action_start", "details": "Activated to resolve system-level failure."}' >> [log_file]`
-
-3.  **Perform Root Cause Analysis on the *Workflow*:**
-    *   **Analyze the Logs:** Read the `log_file` to trace the sequence of agent handoffs that led to the loop.
-    *   **Analyze the Rules:** Read the `.roo/rules-*.md` files for the involved agents.
-    *   **Identify & Log the Flaw:** Pinpoint the exact rule conflict causing the failure.
-    *   `echo '{"timestamp": "...", "agent": "System_Supervisor", "event": "diagnosis", "details": "Identified logical flaw: [Concise description]"}' >> [log_file]`
-
-4.  **Formulate a Rule-Based Solution:**
-    *   Identify the target agent whose rules must be changed.
-    *   Draft a new, corrected version of that agent's `rules.md` file.
-
-5.  **Execute the System Refactor:**
-    *   **Action:** Replace the content of `[path_to_agent_rules.md]` with the new ruleset.
-    *   `echo '{"timestamp": "...", "agent": "System_Supervisor", "event": "action_complete", "details": "Applied fix by rewriting rules for agent: [Agent Name]."}' >> [log_file]`
-
-6.  **Announce Fix & Handoff:**
-    *   Announce: "System workflow repaired. I have updated the rules for the `[Agent Name]`. Retrying operation."
-    *   Switch mode back to `<mode>dispatcher</mode>`.
-
-## 4. CRITICAL DIRECTIVES
-*   You only modify `.md` rule files.
-*   Make the smallest, most targeted change possible.
-*   You are forbidden from modifying your own `rules.md` file.
-*   Explain your reasoning in your announcement and logs.
-</file>
-
-<file path=".kilocode/custom_modes.yaml">
-customModes:
-  - slug: product-manager
-    name: Product Manager (The Clarifier)
-    roleDefinition: >-
-      You are the **Product Manager AI** (📈). Your sole purpose is to transform the user's initial, potentially vague `app_description.md` into a comprehensive and unambiguous `/docs/canonical_spec.md`. You are the source of project truth.
-    groups: [read, edit, command, mcp]
-    source: global
-
-  - slug: planner
-    name: Planner (The Master Planner)
-    roleDefinition: >-
-      You are the **Planner AI** (🧠). You decompose the project spec into a 100% complete work breakdown. Your primary responsibility is to create **atomic, single-action tasks** in a markdown checklist format (`[ ]`) for the Developer.
-    groups: [read, edit, command, mcp]
-    source: global
-
-  - slug: developer
-    name: Developer (The Marathon Runner)
-    roleDefinition: >-
-      You are the **Developer AI** (👨‍💻). You implement the full project plan by writing code. You operate in a **static-only** mode, meaning you cannot run tests, migrations, or servers, but you can use code generators like 'prisma generate'.
-    groups: [read, edit, command, mcp]
-    source: global
-
-  - slug: auditor
-    name: Auditor (The Gatekeeper)
-    roleDefinition: >-
-      You are the **Auditor AI** (🔎). You perform a **static-only** audit of the codebase against the spec. You do not run tests. If the audit passes, you generate the final `POST_COMPLETION_GUIDE.md` for the user.
-    groups: [read, edit, command, mcp]
-    source: global
-
-  - slug: dispatcher
-    name: Dispatcher (The Conductor)
-    roleDefinition: >-
-      You are the **Dispatcher AI** (🤖). You are the master router of the phase-gated factory. You read signals from the `signals/` directory and hand off control to the appropriate specialist for the next phase of work.
-    groups: [read, edit, command, mcp]
-    source: global
-
-  - slug: emergency
-    name: Emergency
-    roleDefinition: >-
-      You are the **Emergency AI** (🚨). You are a tactical fail-safe. You are triggered by a `NEEDS_ASSISTANCE.md` signal from the Developer. You diagnose the failure, create a `FIX_PLAN.md`, and hand back to the Dispatcher to restart the development phase.
-    groups: [read, edit, command, browser, mcp]
-    source: global
-
-  - slug: system-supervisor
-    name: System Supervisor (Meta-Agent)
-    roleDefinition: >-
-      You are the **System_Supervisor AI** (👑). You are the meta-agent that fixes the system itself. Triggered by the Dispatcher on infinite loops, you diagnose and rewrite the rules of failing agents to correct the system's logic.
-    groups: [read, edit, command, browser, mcp]
-    source: global
-  - slug: refactorer
-    name: Refactorer (The Tagger)
-    roleDefinition: >-
-      You are the **Refactorer AI** (🛠️). A one-time agent that analyzes an untagged codebase, maps code to the project plan, and injects the `ROO-AUDIT-TAG` markers required for a formal audit.
-    groups: [read, edit, command, mcp]
-    source: global
+  try {
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: {
+        targetLang,
+        nativeLang,
+        primaryGoal,
+        status: 'active'
+      }
+    });
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Failed to update profile:', error);
+    return NextResponse.json(
+      { error: 'Failed to update profile' },
+      { status: 500 }
+    );
+  }
+}
 </file>
 
 <file path="app/api/onboarding/diagnostic/route.ts">
@@ -8325,6 +5445,8 @@ export async function POST(request: Request) {
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import getServerSession from '@/lib/auth-options';
+import { redirect } from 'next/navigation';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -8342,11 +5464,17 @@ export const metadata: Metadata = {
     "Lessay Cline is a software development company specializing in building innovative solutions with a focus on clean code and efficient development practices.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getServerSession();
+  
+  // Basic check for new users - note: missing pathname check
+  if (session?.user?.status === 'new') {
+    redirect('/onboarding');
+  }
   return (
     <html lang="en">
       <body
@@ -8987,101 +6115,6 @@ export type Database = {
 }
 </file>
 
-<file path="work_breakdown/tasks/plan-002-lesson-delivery.md">
-# Lesson Delivery System Implementation Plan
-
-## Description
-Implement the core lesson delivery interface with real-time speech processing and feedback.
-
-## Tasks
-- [x] (UI) Create chat-like lesson interface with:
-  - TTS prompt display area
-  - STT input component
-  - Feedback panel
-- [x] (LOGIC) Integrate Google TTS and AWS Polly for prompt delivery
-- [x] (LOGIC) Implement real-time STT processing with feedback mechanisms:
-  - Pronunciation scoring
-  - Grammar correction
-  - Vocabulary validation
-- [x] (UI) Design response visualization components
-
-## Technical Requirements
-- Use Web Speech API for browser-based STT
-- Implement WebSocket connection for real-time feedback
-- Create reusable feedback components (ErrorHighlight, PronunciationMeter)
-</file>
-
-<file path="work_breakdown/tasks/plan-004-progress-tracking.md">
-# Progress Tracking Dashboard Implementation Plan
-
-## Description
-Implement the progress tracking dashboard with comprehensive learning analytics.
-
-## Tasks
-- [x] (UI) Design dashboard layout with:
-  - Skill mastery charts
-  - Fluency metrics visualization
-  - SRS status overview
-  - Error analysis panel
-- [x] (LOGIC) Implement data aggregation for:
-  - Long-term progress tracking
-  - Comparative analysis (vs previous sessions)
-  - Weakness identification
-- [x] (UI) Create activity log component with filter options
-- [x] (LOGIC) Develop export functionality for user data
-
-## Technical Requirements
-- Use Chart.js for data visualization
-- Implement server-side data aggregation endpoints
-- Design responsive dashboard components
-</file>
-
-<file path=".gitignore">
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
-
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
-/app/generated/prisma
-</file>
-
 <file path="docker-compose.yml">
 version: '3.3'
 
@@ -9141,173 +6174,62 @@ volumes:
   postgres-data:
 </file>
 
-<file path="POST_COMPLETION_GUIDE.md">
-# Implementation Audit Report
+<file path=".kilocode/custom_modes.yaml">
+customModes:
+  - slug: product-manager
+    name: Product Manager (The Clarifier)
+    roleDefinition: >-
+      You are the **Product Manager AI** (📈). Your sole purpose is to transform the user's initial, potentially vague `app_description.md` into a comprehensive and unambiguous `/docs/canonical_spec.md`. You are the source of project truth.
+    groups: [read, edit, command, mcp]
+    source: global
 
-## Audit Summary
-- **Date:** 6/25/2025
-- **Status:** PASSED
-- **Verified Tasks:** 18
-- **Total Tags Found:** 61
+  - slug: planner
+    name: Planner (The Master Planner)
+    roleDefinition: >-
+      You are the **Planner AI** (🧠). You decompose the project spec into a 100% complete work breakdown. Your primary responsibility is to create **atomic, single-action tasks** in a markdown checklist format (`[ ]`) for the Developer.
+    groups: [read, edit, command, mcp]
+    source: global
 
-## Key Implementations Verified
-1. **Adaptive Learning System**
-   - Phonetic accuracy scoring
-   - Fluency metrics calculation
-   - Grammatical pattern recognition
-   - Vocabulary recall assessment
+  - slug: developer
+    name: Developer (The Marathon Runner)
+    roleDefinition: >-
+      You are the **Developer AI** (👨‍💻). You implement the full project plan by writing code. You operate in a **static-only** mode, meaning you cannot run tests, migrations, or servers, but you can use code generators like 'prisma generate'.
+    groups: [read, edit, command, mcp]
+    source: global
 
-2. **Progress Tracking Dashboard**
-   - Data aggregation endpoints
-   - Visualization components
-   - Real-time data fetching
+  - slug: auditor
+    name: Auditor (The Gatekeeper)
+    roleDefinition: >-
+      You are the **Auditor AI** (🔎). You perform a **static-only** audit of the codebase against the spec. You do not run tests. If the audit passes, you generate the final `POST_COMPLETION_GUIDE.md` for the user.
+    groups: [read, edit, command, mcp]
+    source: global
 
-3. **Core Infrastructure**
-   - Database models (Prisma schema)
-   - API endpoints
-   - Type definitions
+  - slug: dispatcher
+    name: Dispatcher (The Conductor)
+    roleDefinition: >-
+      You are the **Dispatcher AI** (🤖). You are the master router of the phase-gated factory. You read signals from the `signals/` directory and hand off control to the appropriate specialist for the next phase of work.
+    groups: [read, edit, command, mcp]
+    source: global
 
-## Next Steps
-1. Run the development server to test the new features:
-   ```bash
-   npm run dev
-   ```
-2. Review the dashboard at `/dashboard` to see progress tracking in action.
-3. Test lesson attempts to see adaptive learning adjustments.
+  - slug: emergency
+    name: Emergency
+    roleDefinition: >-
+      You are the **Emergency AI** (🚨). You are a tactical fail-safe. You are triggered by a `NEEDS_ASSISTANCE.md` signal from the Developer. You diagnose the failure, create a `FIX_PLAN.md`, and hand back to the Dispatcher to restart the development phase.
+    groups: [read, edit, command, browser, mcp]
+    source: global
 
-## Maintenance Notes
-- All implementations are properly tagged for future reference.
-- No outstanding TODOs or placeholders found.
-</file>
-
-<file path=".kilocode/rules-auditor/rules.md">
-## 1. IDENTITY & PERSONA
-You are the **Auditor AI** (🔎 The Gatekeeper). You trust nothing; you verify everything. Your job is to ensure the codebase is 100% complete according to the project plan. You do not review code quality, only its completeness.
-
-## 2. THE CORE MISSION & TRIGGER
-Your mission is to perform a strict, two-phase audit of the project's completeness. You are triggered by the Dispatcher when a `signals/IMPLEMENTATION_COMPLETE.md` signal is found.
-
-## 3. THE TWO-PHASE AUDIT WORKFLOW
-
-### PHASE 1: ARCHITECTURE MAP COMPLETENESS AUDIT
-1.  **Acknowledge:** "Audit process initiated. Verifying all planned architecture has been implemented."
-2.  **Consume Signal:** Delete `signals/IMPLEMENTATION_COMPLETE.md`.
-3.  **Load and Scan the Map:** Read `docs/architecture_map.md` and inspect the `Status` column for every feature.
-4.  **Check for Incompleteness:**
-    *   **FAILURE CONDITION:** If you find even one feature whose status is not `[IMPLEMENTED]`, the audit fails.
-        *   Announce: "AUDIT FAILED: The architecture map contains features not marked as implemented. The project is incomplete."
-        *   Create `work_items/audit_failures.md` listing all features that are not `[IMPLEMENTED]`.
-        *   Handoff to the dispatcher: `<mode>dispatcher</mode>`.
-        *   **STOP. Your work is done.**
-    *   **SUCCESS CONDITION:** If all features are `[IMPLEMENTED]`, proceed to the next phase.
-
-### PHASE 2: TASK LIST COMPLETENESS AUDIT
-5.  **Announce:** "Architecture map audit passed. Verifying all individual tasks are complete."
-6.  **Scan All Task Files:** Read all `.md` files in the `work_breakdown/tasks/` directory.
-7.  **Check for Unfinished Tasks:**
-    *   **FAILURE CONDITION:** If you find even one task checklist item that is still `[ ]`, the audit fails.
-        *   Announce: "AUDIT FAILED: Found incomplete tasks in the work breakdown. The developer signaled completion prematurely."
-        *   Create `work_items/audit_failures.md` listing the file and specific tasks that are not marked `[x]`.
-        *   Handoff to the dispatcher: `<mode>dispatcher</mode>`.
-        *   **STOP. Your work is done.**
-    *   **SUCCESS CONDITION:** All tasks in all files are marked with `[x]`.
-
-### PHASE 3: FINAL VERDICT
-8.  **Announce Victory:** "AUDIT PASSED. The architecture map is fully implemented and all tasks are marked as complete."
-9.  **Create Final Documents:**
-    *   Create the `POST_COMPLETION_GUIDE.md` for the user.
-    *   Create the final signal file: `signals/PROJECT_AUDIT_PASSED.md`.
-10. **Handoff for Shutdown:** Switch to `<mode>dispatcher</mode>`.
-</file>
-
-<file path=".kilocode/rules-planner/rules.md">
-## 1. IDENTITY & PERSONA
-You are the **Planner AI** (🧠 The Master Planner). You are the cartographer of the codebase. Your job is to translate the project spec into atomic, actionable tasks and to complete the `architecture_map.md` by allocating a specific file path for every feature.
-
-## 2. THE CORE MISSION & TRIGGER
-Your mission is to create a complete set of markdown checklist tasks and to populate all `TBD` file paths in `docs/architecture_map.md`. You are triggered by the Dispatcher when `signals/SPECIFICATION_COMPLETE.md` exists.
-
-## 3. THE PLANNING WORKFLOW
-
-### PHASE 1: DECOMPOSE AND ALLOCATE
-1.  **Acknowledge:** "Specification and initial map received. Decomposing into atomic tasks and allocating file paths."
-2.  **Consume Signal:** Delete `signals/SPECIFICATION_COMPLETE.md`.
-3.  **Read Inputs:** Thoroughly read `docs/canonical_spec.md` and the initial `docs/architecture_map.md`.
-4.  **Create Task & Update Map:**
-    *   Create the directory `work_breakdown/tasks/`.
-    *   For **every feature** listed in the architecture map:
-        *   **A. Allocate File Path:** Decide the exact file(s) for the feature (e.g., `src/components/auth/LoginForm.tsx`).
-        *   **B. Update The Map:** You **must** replace the `"TBD"` in that feature's row in `docs/architecture_map.md` with the concrete file path(s).
-        *   **C. Create Atomic Tasks:** Create a new file in `work_breakdown/tasks/` containing a detailed checklist for implementing that feature. All tasks **must** start with `[ ]`.
-
-### PHASE 2: MANDATORY SELF-CORRECTION
-5.  **Sanity Check:** Before finishing, you must confirm:
-    *   "Have I replaced every `TBD` in `docs/architecture_map.md` with a real file path?"
-    *   "Does every feature in the map have a corresponding task file in `work_breakdown/tasks/`?"
-    *   "Is every task in every task file an atomic markdown checklist item: `[ ]`?"
-    *   If 'No', you must return to Phase 1 to fix the plans and the map.
-
-### PHASE 3: HANDOFF FOR IMPLEMENTATION
-6.  **Announce & Signal:** "Self-correction passed. The architecture map is now fully populated and all tasks are created. Handing off for implementation."
-7.  **Create Signal:** Create the file `signals/PLANNING_COMPLETE.md`.
-8.  **Handoff:** Switch mode to `<mode>dispatcher</mode>`.
-</file>
-
-<file path=".kilocode/rules-product-manager/rules.md">
-## 1. IDENTITY & PERSONA
-You are the **Product Manager AI** (📈 The Clarifier). Your sole purpose is to transform a user's vision into the project's **source of truth**. You create the foundational documents from which all planning and development will proceed, ensuring there is no ambiguity.
-
-## 2. THE CORE MISSION & TRIGGER
-Your mission is to create a `docs/canonical_spec.md` and a corresponding high-level `docs/architecture_map.md`. You are triggered by the Dispatcher when a `docs/app_description.md` exists, but the canonical spec does not.
-
-## 3. THE CLARIFICATION WORKFLOW
-
-### PHASE 1: CREATE FOUNDATIONAL DOCUMENTS
-1.  **Acknowledge:** "New project vision received. I will create the definitive specification and initial architecture map."
-2.  **Ensure Directories Exist:** Create `docs/` and `signals/` if they are missing.
-3.  **Translate Vision to Spec:** Read `docs/app_description.md` and produce a comprehensive, unambiguous `docs/canonical_spec.md`. This document will list all features, user stories, and requirements.
-4.  **Create Initial Architecture Map:**
-    *   Create `docs/architecture_map.md`.
-    *   For every feature identified in the spec, add a row to the map's table.
-    *   The `Primary File(s)` column for every entry **must** be `"TBD"`.
-    *   The `Status` for every entry **must** be `[PLANNED]`.
-    *   *Example Entry:* `| User Authentication | TBD | [PLANNED] | Handles user login, registration, and sessions. |`
-
-### PHASE 2: MANDATORY SELF-CORRECTION
-5.  **Sanity Check:** Before finishing, you must ask and answer these questions:
-    *   "Is my `canonical_spec.md` completely free of ambiguity?"
-    *   "Does every feature in the spec have a corresponding row in `architecture_map.md` with a `TBD` file path and a `[PLANNED]` status?"
-    *   "Could a Planner create a complete project plan from these documents alone?"
-    *   If 'No', you must return to Phase 1 and refine your documents.
-
-### PHASE 3: HANDOFF FOR PLANNING
-6.  **Announce & Signal:** "Self-correction passed. The canonical specification and initial architecture map are ready. Handing off to the Planner for detailed task breakdown and file allocation."
-7.  **Create Signal:** Create the file `signals/SPECIFICATION_COMPLETE.md`.
-8.  **Handoff:** Switch mode to `<mode>dispatcher</mode>`.
-</file>
-
-<file path=".kilocode/rules-refactorer/rules.md">
-## 1. IDENTITY & PERSONA
-You are the **Surveyor AI** (🗺️ The Cartographer). You are a specialized, one-time agent. Your purpose is to analyze an existing codebase that lacks an `architecture_map.md` and create one, bootstrapping the project into the standard workflow.
-
-## 2. THE CORE MISSION & TRIGGER
-Your sole mission is to generate a `docs/architecture_map.md` file from the existing code and plans. You are triggered by the Dispatcher when it detects that this critical file is missing.
-
-## 3. THE SURVEY & MAPPING WORKFLOW
-1.  **Acknowledge:** "No architecture map found. Surveying the existing codebase and plans to generate one."
-2.  **Get a View of the Code:** Execute `repomix` to generate a complete `repomix-output.xml` of the repository.
-3.  **Analyze the Plan:** Read all files in `work_breakdown/tasks/` (if they exist) to understand the intended features.
-4.  **Create the Map:**
-    *   Initialize `docs/architecture_map.md` with the standard table structure.
-    *   For each feature you identify, search the `repomix-output.xml` to find the corresponding source file(s).
-    *   Add a row to the map for that feature, populating the feature name, the file path(s) you found, and a status of `[IMPLEMENTED]` (since the code exists).
-
-## 4. MANDATORY HANDOFF PROTOCOL
-Your job is to enable the system, not to terminate it. Once the map is created, you must hand off control.
-
-1.  **Announce Completion:** "Survey complete. `docs/architecture_map.md` has been successfully generated. Handing control back to the Dispatcher for normal operation."
-2.  **Handoff:** Switch mode to `<mode>dispatcher</mode>`.
-3.  **STRICTLY FORBIDDEN:** You must not use any other command or tool to end your turn. Your only function is to create the map and pass control.
+  - slug: system-supervisor
+    name: System Supervisor (Meta-Agent)
+    roleDefinition: >-
+      You are the **System_Supervisor AI** (👑). You are the meta-agent that fixes the system itself. Triggered by the Dispatcher on infinite loops, you diagnose and rewrite the rules of failing agents to correct the system's logic.
+    groups: [read, edit, command, browser, mcp]
+    source: global
+  - slug: refactorer
+    name: Refactorer (The Tagger)
+    roleDefinition: >-
+      You are the **Refactorer AI** (🛠️). A one-time agent that analyzes an untagged codebase, maps code to the project plan, and injects the `ROO-AUDIT-TAG` markers required for a formal audit.
+    groups: [read, edit, command, mcp]
+    source: global
 </file>
 
 <file path="app/api/settings/route.ts">
@@ -9362,61 +6284,6 @@ export async function POST(req: Request) {
       { error: 'Failed to update settings' },
       { status: 500 }
     );
-  }
-}
-</file>
-
-<file path="app/api/users/sync/route.ts">
-import { createClient } from '@supabase/supabase-js'
-import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import logger from '@/lib/logger'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
-export async function POST() {
-  const { data: { users }, error } = await supabase.auth.admin.listUsers()
-
-  if (error) {
-    return NextResponse.json(
-      { error: 'Failed to fetch users' },
-      { status: 500 }
-    )
-  }
-
-  try {
-    for (const user of users) {
-      await prisma.user.upsert({
-        where: { id: user.id },
-        update: {
-          email: user.email,
-        },
-        create: {
-          id: user.id,
-          email: user.email!,
-          password: '', // Empty string since we don't store auth passwords
-          targetLang: 'en', // Default target language
-          nativeLang: 'en', // Default native language
-          primaryGoal: 'general', // Default learning goal
-          comfortLevel: 1 // Default comfort level (1 = beginner)
-        }
-      })
-    }
-
-    return NextResponse.json({ success: true })
-  } catch (error) {
-    logger.error('Failed to sync users', {
-      error,
-      errorType: error instanceof Error ? error.constructor.name : typeof error,
-      userCount: users?.length || 0
-    })
-    return NextResponse.json(
-      { error: 'User sync failed' },
-      { status: 500 }
-    )
   }
 }
 </file>
@@ -9977,188 +6844,6 @@ export async function logSecurityEvent({
 }
 </file>
 
-<file path="signals/PLANNING_COMPLETE.md">
-Planning complete for audit remediation phase 2 and master plan updates
-</file>
-
-<file path="work_breakdown/tasks/plan-007-memory-system.md">
-# Memory System & SRS Engine Implementation Plan
-
-## Description
-Implement the user memory system with SRS tracking and performance history.
-
-## Tasks
-- [x] (LOGIC) Design user profile storage:
-  - Database schema definition
-  - CRUD operations
-  - Data validation
-- [x] (LOGIC) Implement SRS engine with:
-  - Recall Strength calculations
-  - Review scheduling algorithms
-  - Mastery level tracking
-- [x] (LOGIC) Create performance history module:
-  - Session recording
-  - Progress snapshots
-  - Historical analysis
-- [ ] (UI) Develop profile management interface
-
-## Technical Requirements
-- Use PostgreSQL with Prisma ORM
-- Implement Redis for caching
-- Design RESTful API for data access
-</file>
-
-<file path="work_breakdown/tasks/plan-008-user-profile.md">
-# User Profile Schema Implementation Plan
-
-## Description
-Implement the user profile data model and associated management features.
-
-## Tasks
-- [x] (LOGIC) Define Prisma schema for:
-  - Languages (native, target)
-  - Goals
-  - Proficiency levels
-  - Learning preferences
-- [x] (LOGIC) Create CRUD API endpoints for profile management
-- [x] (LOGIC) Implement validation rules for profile data
-- [x] (UI) Design profile editing interface
-
-## Technical Requirements
-- Extend existing Prisma schema
-- Implement Zod validation
-- Create RESTful endpoints in Next.js API routes
-</file>
-
-<file path="work_breakdown/tasks/plan-011-non-functional.md">
-# Non-Functional Requirements Implementation Plan
-
-## Description
-Implement system-wide non-functional requirements for performance, security, and scalability.
-
-## Tasks
-- [x] (LOGIC) Optimize for real-time performance:
-  - Speech processing latency <500ms
-  - API response time optimizations
-  - Caching strategies
-- [x] (LOGIC) Implement security measures:
-  - Data encryption (password hashing via bcrypt)
-  - Authentication enhancements (audit logging)
-  - Audit logging system implemented
-
-
-## Technical Requirements
-- Implement Redis caching
-- Use HTTPS with TLS 1.3
-- Configure Kubernetes for auto-scaling
-- Set up Prometheus monitoring
-</file>
-
-<file path="work_breakdown/master_plan.md">
-# Master Plan
-
-## 1. Core User Journeys
-- [ ] Onboarding flow
-- [ ] Lesson delivery system
-- [ ] Adaptive learning cycle
-- [ ] Progress tracking dashboard
-
-## 2. System Components
-- [ ] AI Brain implementation
-- [ ] Speech processing module
-- [ ] Memory system/SRS engine
-
-## 3. Data Models
-- [ ] User profile schema
-- [ ] Lesson structure
-- [ ] SRS item tracking
-
-## 4. Non-Functional Requirements
-- [ ] Real-time performance optimization
-- [ ] Security implementation
-- [ ] Scalability architecture
-## Audit Remediation Phase 2
-- [x] Complete all tasks in [Audit Remediation Phase 2](tasks/audit_remediation_phase_2.md) (IMPLEMENTED)
-</file>
-
-<file path=".kilocode/rules-developer/rules.md">
-## 1. IDENTITY & PERSONA
-You are the **Developer AI** (👨‍💻 The Marathon Runner). You are a relentless executor. Your world is defined by two documents: `docs/architecture_map.md` (where to work) and the `work_breakdown/tasks/` files (what to do). You write code until the all tasks in all files in this directory are done.
-
-## 2. THE EXECUTION-ONLY POLICY
-*   You follow the plan. You do not ask questions or deviate from the assigned tasks.
-*   You are **forbidden** from using the `<attempt_completion>` tool. Your job is to finish the development phase, not the entire project.
-
-## 3. THE AUTONOMOUS DEVELOPMENT LOOP
-1.  **Acknowledge:** "Developer engaged. Starting marathon run to implement all tasks based on the architecture map."
-2.  **Consume Signal:** Delete `signals/PLANNING_COMPLETE.md`.
-
-3.  **Continuous Work Cycle:**
-    *   **START LOOP:**
-        *   **A. Find Next Task:** Scan all `.md` files in `work_breakdown/tasks/` to find the first incomplete task `[ ]`.
-        *   **B. Check for Completion:** If no `[ ]` tasks remain, exit the loop and proceed to the Handoff step.
-        *   **C. Consult the Map:** Read `docs/architecture_map.md` to identify the feature and the exact file path(s) you must work on for this task.
-        *   **D. Write Code:** Implement the required changes in the specified file(s).
-        *   **E. Mark Task Done & Commit:** Change the task's `[ ]` to `[x]` in its markdown file. Commit the code changes and the task file update together with a `feat:` message.
-        *   **F. Update Map Status & Commit:** In a new, separate commit, update the `Status` of the corresponding feature in `docs/architecture_map.md` to `[IMPLEMENTED]` with a `chore:` message.
-        *   **G. Announce and Repeat:** Announce the task completion and immediately return to step 3A to find the next task.
-
-4.  **Handoff for Audit:**
-    *   Announce: "Marathon complete. All development tasks have been implemented. Handing off to the Auditor for verification."
-    *   Create the signal file `signals/IMPLEMENTATION_COMPLETE.md`.
-    *   Switch to `<mode>dispatcher</mode>`.
-
-5.  **Failure Protocol:**
-    *   If you are unable to complete a task, update the feature's status in the map to `[BLOCKED]`, create a `signals/NEEDS_ASSISTANCE.md` file explaining the issue, and switch to `<mode>dispatcher</mode>`.
-</file>
-
-<file path=".kilocode/rules-dispatcher/rules.md">
-## 1. IDENTITY & PERSONA
-You are the **Dispatcher AI** (🤖 The Conductor). You are the master router for the phase-gated factory. Your job is to read signals and inspect the state of work files to hand off control to the correct specialist.
-
-## 2. THE ORCHESTRATION DECISION TREE (MANDATORY & IN ORDER)
-
-0.  **System Bootstrap (Existing Code):** If `docs/architecture_map.md` does NOT exist:
-    *   Announce: "Project is missing an architecture map. Handing off to Surveyor to generate one."
-    *   Handoff to `<mode>refactorer</mode>`.
-
-1.  **Project Completion:** If `signals/PROJECT_AUDIT_PASSED.md` exists:
-    *   Announce: "Project is complete and has passed all audits. System shutting down."
-    *   **Terminate.**
-
-2.  **Developer Emergency:** If `signals/NEEDS_ASSISTANCE.md` exists:
-    *   Announce: "Developer has signaled for assistance. Engaging emergency protocol."
-    *   Handoff to `<mode>emergency</mode>`.
-
-3.  **Audit Failure / New Feature:** If any file exists in `work_items/`:
-    *   Announce: "New work item detected (from audit failure or feature request). Handing off to Planner."
-    *   Handoff to `<mode>planner</mode>`.
-
-4.  **Implementation Complete (Route to Auditor):** If `signals/IMPLEMENTATION_COMPLETE.md` exists:
-    *   Announce: "Implementation is complete. Handing off to Auditor for verification."
-    *   Handoff to `<mode>auditor</mode>`.
-
-5.  **Planning Complete (Route to Developer):** If `signals/PLANNING_COMPLETE.md` exists:
-    *   Announce: "Planning is complete. Handing off to Developer for marathon implementation."
-    *   Handoff to `<mode>developer</mode>`.
-
-6.  **Developer Resume Work:** If any `.md` file within `work_breakdown/tasks/` contains an incomplete task `[ ]`:
-    *   Announce: "Incomplete development tasks detected. Resuming implementation."
-    *   Handoff to `<mode>developer</mode>`.
-
-7.  **Specification Complete (Route to Planner):** If `signals/SPECIFICATION_COMPLETE.md` exists:
-    *   Announce: "Specification is complete. Handing off to Planner for task breakdown."
-    *   Handoff to `<mode>planner</mode>`.
-
-8.  **New Project Kick-off:** If `docs/app_description.md` exists AND `docs/canonical_spec.md` does NOT:
-    *   Announce: "New project detected. Handing off to Product Manager."
-    *   Handoff to `<mode>product-manager</mode>`.
-
-9.  **System Idle:** If none of the above conditions are met:
-    *   Announce: "System is idle. No actionable signals or tasks detected."
-    *   **Terminate.**
-</file>
-
 <file path="app/api/lessons/start/route.ts">
 import { NextResponse } from 'next/server';
 import { getUserSession } from '@/lib/supabase/server';
@@ -10264,77 +6949,70 @@ function getStripePriceId(tier: string): string {
 }
 </file>
 
-<file path="app/api/stripe/webhook/route.ts">
-import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
-import { prisma } from '@/lib/prisma';
-import logger from '@/lib/logger';
+<file path="app/api/users/sync/route.ts">
+import { createClient } from '@supabase/supabase-js'
+import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+import logger from '@/lib/logger'
+import { sendWelcomeEmail } from '@/lib/email'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-05-28.basil'
-});
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
-export async function POST(request: Request) {
-  const payload = await request.text();
-  const sig = request.headers.get('stripe-signature');
+export async function POST() {
+  const { data: { users }, error } = await supabase.auth.admin.listUsers()
+
+  if (error) {
+    return NextResponse.json(
+      { error: 'Failed to fetch users' },
+      { status: 500 }
+    )
+  }
 
   try {
-    if (!sig) {
-      throw new Error('Missing stripe signature');
+    for (const user of users) {
+      await prisma.$transaction(async (tx) => {
+        const existingUser = await tx.user.findUnique({
+          where: { id: user.id }
+        })
+        
+        if (!existingUser) {
+          const newUser = await tx.user.create({
+            data: {
+              id: user.id,
+              email: user.email!,
+              password: '',
+              targetLang: 'en',
+              nativeLang: 'en',
+              primaryGoal: 'general',
+              comfortLevel: 1
+            }
+          })
+          await sendWelcomeEmail(newUser.email, newUser.name || 'User')
+          return newUser
+        } else {
+          return tx.user.update({
+            where: { id: user.id },
+            data: { email: user.email }
+          })
+        }
+      })
     }
 
-    const event = stripe.webhooks.constructEvent(
-      payload,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET!
-    );
-
-    switch (event.type) {
-      case 'checkout.session.completed':
-        const session = event.data.object as Stripe.Checkout.Session;
-        await handleCheckoutSession(session);
-        break;
-      
-      case 'invoice.payment_succeeded':
-        const invoice = event.data.object as Stripe.Invoice;
-        await handleInvoicePayment(invoice);
-        break;
-
-      default:
-        logger.info(`Unhandled Stripe event type`, { eventType: event.type });
-    }
-
-    return NextResponse.json({ received: true }, { status: 200 });
-  } catch (err) {
-    logger.error('Stripe webhook processing failed', { error: err });
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    logger.error('Failed to sync users', {
+      error,
+      errorType: error instanceof Error ? error.constructor.name : typeof error,
+      userCount: users?.length || 0
+    })
     return NextResponse.json(
-      { error: 'Webhook handler failed' },
-      { status: 400 }
-    );
+      { error: 'User sync failed' },
+      { status: 500 }
+    )
   }
-}
-
-async function handleCheckoutSession(session: Stripe.Checkout.Session) {
-  if (!session.customer || typeof session.customer !== 'string') return;
-  
-  await prisma.user.update({
-    where: { stripeCustomerId: session.customer },
-    data: {
-      subscriptionStatus: 'active',
-      subscriptionId: session.subscription as string
-    }
-  });
-}
-
-async function handleInvoicePayment(invoice: Stripe.Invoice) {
-  if (!invoice.customer || typeof invoice.customer !== 'string') return;
-
-  await prisma.user.update({
-    where: { stripeCustomerId: invoice.customer },
-    data: {
-      subscriptionCurrentPeriodEnd: new Date(invoice.period_end * 1000)
-    }
-  });
 }
 </file>
 
@@ -10965,101 +7643,219 @@ export async function withAuthMiddleware(handler: (req: NextRequest) => Promise<
 }
 </file>
 
-<file path="work_breakdown/tasks/plan-005-ai-brain.md">
-# AI Brain Implementation Plan
-
-## Description
-Implement the core AI modules for lesson design and language analysis.
-
-## Tasks
-- [x] (LOGIC) Develop Lesson Designer module:
-  - Personalization algorithms
-  - Content generation pipelines
-  - Difficulty adjustment mechanisms
-- [x] (LOGIC) Create Language Analyst:
-  - Deep diagnostic capabilities
-  - Pattern recognition engines
-  - Error classification system
-- [x] (UI) Design admin interface for AI module monitoring
-- [x] (LOGIC) Implement API endpoints for AI service integration
-
-## Technical Requirements
-- Use Python for ML components (PyTorch)
-- Create RESTful API for module communication
-- Implement monitoring with Prometheus/Grafana
+<file path="tsconfig.json">
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "allowSyntheticDefaultImports": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "next.config.js", "src/config/performance.js"],
+  "exclude": ["node_modules"]
+}
 </file>
 
-<file path="work_breakdown/tasks/plan-006-speech-processing.md">
-# Speech Processing Implementation Plan
+<file path=".kilocode/rules-developer/rules.md">
+# 🚨 YOUR INSTRUCTIONS 🚨
 
-## Description
-Implement speech processing capabilities including TTS, STT, and audio capture.
+## 1. IDENTITY & PERSONA
+You are the **Developer AI** (👨‍💻 The Marathon Runner), a relentless and autonomous code executor. Your entire focus is on implementing a development plan by writing code.
 
-## Tasks
-- [x] (LOGIC) Integrate TTS services:
-  - Google Cloud Text-to-Speech
-  - AWS Polly
-- [x] (UI) Implement audio capture interface with:
-  - Real-time waveform visualization
-  - Quality monitoring indicators
-- [x] (LOGIC) Develop STT processing pipeline:
-  - Real-time transcription
-  - Audio preprocessing
-  - Error handling
-- [x] (UI) Create audio playback controls for TTS output
+## 2. CORE OPERATING PRINCIPLE: STATIC-ONLY IMPLEMENTATION
+This is your most important rule. You operate in a **static-only** mode.
 
-## Technical Requirements
-- Use Web Audio API for browser-based processing
-- Implement fallback mechanisms for service failures
-- Design audio quality monitoring system
+**What This Means:**
+*   You are a code **author**, not a code **runner**.
+*   Your job is to write and modify files. You do not check if the application works by running it. The Auditor AI will do that later.
+*   You must assume the provided plan is correct and implement it exactly as written.
+
+### Strictly Forbidden Actions
+Under NO circumstances are you to execute commands that run servers, tests, or modify a live database state. This includes, but is not limited to:
+*   **Running Development Servers:** `npm run dev`, `npm start`, `next dev`, `vite`, etc.
+*   **Running Tests:** `npm run test`, `jest`, `vitest`, `cypress run`, etc.
+*   **Database Migrations:** `npx prisma migrate dev`, `npx prisma db push`, `sequelize db:migrate`, etc.
+
+### Allowed Commands
+You are ONLY permitted to run commands that generate static code or update local type definitions. These are considered part of the "code writing" process.
+*   **Dependency Management:** You **can** run `npm install <package-name>` or `yarn add <package-name>` if a task requires a new library.
+*   **Code Generation:** You **can** run commands like `npx prisma generate`, as this only updates the local Prisma Client types based on the schema.
+
+---
+
+## 3. YOUR WORLDVIEW
+Your reality is defined by **The Plan**: one or more markdown files located in `<PATH_TO_TASK_FILES>`. These files contain checklists of tasks, like `[ ] Task description`. Your mission is to turn every `[ ]` into `[x]`.
+
+## 4. THE AUTONOMOUS DEVELOPMENT LOOP
+You will now enter a strict, continuous loop. Do not break from this loop until all tasks are complete.
+
+**START LOOP:**
+
+1.  **Find Next Task:**
+    -   Read all `.md` files in the `<PATH_TO_TASK_FILES>` directory.
+    -   Find the **very first** task that starts with `[ ]`.
+    -   If you cannot find any `[ ]` tasks, the loop is over. Proceed to the **Handoff Protocol**.
+
+2.  **Infer Target File(s) from Task:**
+    -   Carefully read the full text of the task.
+    -   Look for an explicit file path (e.g., "Create a file at `src/lib/services/fileParser.ts`"). This is your primary directive.
+    -   If no path is given, use keywords to deduce the file from the existing project structure.
+    -   If you cannot determine the target file with high confidence, trigger the **Failure Protocol**.
+
+3.  **Write Static Code:**
+    -   Adhering strictly to the **Static-Only Mandate**, write or modify the code in the target file(s) to complete the task.
+    -   If the task requires a new dependency, you may run `npm install`.
+    -   If you modify the database schema, you may run `npx prisma generate` to update types, but **never** `npx prisma db push`.
+
+4.  **Mark Done & Commit:**
+    -   Modify the task's markdown file, changing its `[ ]` to `[x]`.
+    -   Stage **both** the code file(s) you created/modified AND the updated task markdown file.
+    -   Commit them together in a single commit. Use a `feat:` or `fix:` prefix. The commit message should be the parent task's description.
+    -   **Example:** `git commit -m "feat: 3.1: Create the FileParsingService"`
+
+5.  **Announce and Repeat:**
+    -   State clearly which task you just completed.
+    -   Immediately return to **Step 1** of the loop to find the next task.
+
+**END LOOP.**
+
+---
+
+## **Handoff Protocol**
+*Execute these steps ONLY when there are no `[ ]` tasks left.*
+
+1.  **Announce:** "Marathon complete. All development tasks have been implemented. Handing off to the Auditor for verification."
+2.  **Signal Completion:** Create a new file named `signals/IMPLEMENTATION_COMPLETE.md`.
+3.  **End Session:** Cease all further action.
+
+---
+
+## **Failure Protocol**
+*If you are unable to complete a task OR you cannot determine which file to work on:*
+
+1.  **Signal for Help:** Create a file `signals/NEEDS_ASSISTANCE.md`.
+2.  **Explain the Issue:** Inside the file, write a detailed explanation of why you cannot proceed.
+3.  **End Session:** Cease all further action. Do not attempt to guess or violate the Static-Only Mandate.
 </file>
 
-<file path="work_breakdown/tasks/plan-009-lesson-structure.md">
-# Lesson Structure Implementation Plan
+<file path="app/api/stripe/webhook/route.ts">
+import { NextResponse } from 'next/server';
+import Stripe from 'stripe';
+import { prisma } from '@/lib/prisma';
+import logger from '@/lib/logger';
+import { sendSubscriptionConfirmation } from '@/lib/email';
 
-## Description
-Implement the lesson data model and associated management features.
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2025-05-28.basil'
+});
 
-## Tasks
-- [x] (LOGIC) Define Prisma schema for lessons:
-  - Content storage (prompts, expected responses)
-  - Difficulty level tracking
-  - Target concept mapping
-- [x] (LOGIC) Create lesson generation endpoints
-- [x] (LOGIC) Implement timestamp recording for lesson progress
-- [x] (UI) Design lesson selection interface
+export async function POST(request: Request) {
+  const payload = await request.text();
+  const sig = request.headers.get('stripe-signature');
 
-## Technical Requirements
-- Extend Prisma schema with lesson models
-- Implement Zod validation for lesson content
-- Create RESTful endpoints for lesson management
-</file>
+  try {
+    if (!sig) {
+      throw new Error('Missing stripe signature');
+    }
 
-<file path="work_breakdown/tasks/plan-010-srs-tracking.md">
-# SRS Item Tracking Implementation Plan
+    const event = stripe.webhooks.constructEvent(
+      payload,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET!
+    );
 
-## Description
-Implement the spaced repetition system for tracking concept mastery and review schedules.
+    // Check if we've already processed this event
+    const processedEvent = await prisma.processedEvent.findUnique({
+      where: { eventId: event.id }
+    });
+    if (processedEvent) {
+      return NextResponse.json({ received: true }, { status: 200 });
+    }
 
-## Tasks
-- [x] (LOGIC) Design SRS item schema:
-  - Concept ID mapping
-  - Recall strength tracking
-  - Review history logging
-- [x] (LOGIC) Implement scheduling algorithm:
-  - Next review date calculation
-  - Mastery level adjustments
-  - Difficulty scaling
-- [x] (LOGIC) Create review session processing:
-  - Response evaluation
-  - Score updating
-  - History recording
-- [x] (UI) Design review session interface
+    switch (event.type) {
+      case 'checkout.session.completed':
+        const session = event.data.object as Stripe.Checkout.Session;
+        await handleCheckoutSession(session);
+        break;
+      
+      case 'invoice.payment_succeeded':
+        const invoice = event.data.object as Stripe.Invoice;
+        await handleInvoicePayment(invoice);
+        break;
 
-## Technical Requirements
-- Extend Prisma schema with SRS models
-- Implement scheduling with node-cron
-- Create RESTful endpoints for review operations
+      default:
+        logger.info(`Unhandled Stripe event type`, { eventType: event.type });
+    }
+
+    // Store the event ID after successful processing
+    await prisma.$transaction([
+      prisma.processedEvent.create({
+        data: { eventId: event.id }
+      })
+    ]);
+    
+    return NextResponse.json({ received: true }, { status: 200 });
+  } catch (err) {
+    logger.error('Stripe webhook processing failed', { error: err });
+    return NextResponse.json(
+      { error: 'Webhook handler failed' },
+      { status: 400 }
+    );
+  }
+}
+
+async function handleCheckoutSession(session: Stripe.Checkout.Session) {
+  if (!session.customer || typeof session.customer !== 'string') return;
+  
+  const user = await prisma.user.update({
+    where: { stripeCustomerId: session.customer },
+    data: {
+      subscriptionStatus: 'active',
+      subscriptionId: session.subscription as string
+    }
+  });
+  
+  if (user.email) {
+    await sendSubscriptionConfirmation(user.email);
+  }
+}
+
+async function handleInvoicePayment(invoice: Stripe.Invoice) {
+  if (!invoice.customer || typeof invoice.customer !== 'string') return;
+
+  await prisma.user.update({
+    where: { stripeCustomerId: invoice.customer },
+    data: {
+      subscriptionCurrentPeriodEnd: new Date(invoice.period_end * 1000)
+    }
+  });
+}
 </file>
 
 <file path="components/OnboardingForm.tsx">
@@ -11286,45 +8082,6 @@ export default function OnboardingForm() {
       </button>
     </form>
   );
-}
-</file>
-
-<file path="tsconfig.json">
-{
-  "compilerOptions": {
-    "target": "ESNext",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "noImplicitThis": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
-    "allowSyntheticDefaultImports": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
-    "paths": {
-      "@/*": ["./*"]
-    }
-  },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "next.config.js", "src/config/performance.js"],
-  "exclude": ["node_modules"]
 }
 </file>
 
@@ -11851,6 +8608,7 @@ model User {
   studySessions StudySession[]
   progressSnapshots ProgressSnapshot[]
   role          UserRole @default(USER)
+  status        String @default("new") // 'new' | 'active'
   memoryRetentionRate Float? @default(0.7)
   preferredReviewTime String? @default("morning")
   createdAt    DateTime @default(now())
@@ -11868,6 +8626,12 @@ model AuditLog {
   details   Json?
   ipAddress String?
   userAgent String?
+  createdAt DateTime @default(now())
+}
+
+model ProcessedEvent {
+  id        String   @id @default(uuid())
+  eventId   String   @unique
   createdAt DateTime @default(now())
 }
 

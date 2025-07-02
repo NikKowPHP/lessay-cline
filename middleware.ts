@@ -1,7 +1,6 @@
-// ROO-AUDIT-TAG :: FIX_PLAN.md :: Implement auth middleware
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { getToken } from 'next-auth/jwt';
+import { createMiddlewareSupabaseClient } from '@supabase/auth-helpers-nextjs';
 
 const protectedRoutes = [
   '/api/profile',
@@ -14,16 +13,19 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   
   // Check if the current route is protected
-  const isProtected = protectedRoutes.some(route => 
+  const isProtected = protectedRoutes.some(route =>
     pathname.startsWith(route)
   );
 
   if (isProtected) {
-    const token = await getToken({ req: request });
+    const response = NextResponse.next();
+    const supabase = createMiddlewareSupabaseClient({ req: request, res: response });
+    const { data: { session } } = await supabase.auth.getSession();
     
-    if (!token) {
-      const url = new URL('/api/auth/unauthorized', request.url);
-      return NextResponse.rewrite(url);
+    if (!session) {
+      const url = new URL('/auth/signin', request.url);
+      url.searchParams.set('redirect', pathname);
+      return NextResponse.redirect(url);
     }
   }
 
@@ -42,4 +44,3 @@ export const config = {
     '/((?!_next/static|_next/image|favicon.ico|api/auth).*)',
   ],
 };
-// ROO-AUDIT-TAG :: FIX_PLAN.md :: END
