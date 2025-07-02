@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import logger from '@/lib/logger'
+import { sendWelcomeEmail } from '@/lib/email'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -20,19 +21,30 @@ export async function POST() {
 
   try {
     for (const user of users) {
-      await prisma.user.upsert({
-        where: { id: user.id },
-        update: {
-          email: user.email,
-        },
-        create: {
-          id: user.id,
-          email: user.email!,
-          password: '', // Empty string since we don't store auth passwords
-          targetLang: 'en', // Default target language
-          nativeLang: 'en', // Default native language
-          primaryGoal: 'general', // Default learning goal
-          comfortLevel: 1 // Default comfort level (1 = beginner)
+      await prisma.$transaction(async (tx) => {
+        const existingUser = await tx.user.findUnique({
+          where: { id: user.id }
+        })
+        
+        if (!existingUser) {
+          const newUser = await tx.user.create({
+            data: {
+              id: user.id,
+              email: user.email!,
+              password: '',
+              targetLang: 'en',
+              nativeLang: 'en',
+              primaryGoal: 'general',
+              comfortLevel: 1
+            }
+          })
+          await sendWelcomeEmail(newUser.email, newUser.name || 'User')
+          return newUser
+        } else {
+          return tx.user.update({
+            where: { id: user.id },
+            data: { email: user.email }
+          })
         }
       })
     }

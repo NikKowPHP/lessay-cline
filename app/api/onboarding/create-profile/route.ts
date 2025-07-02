@@ -1,57 +1,32 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-import logger from '@/lib/logger';
-
-const prisma = new PrismaClient();
-
-interface ProfileUpdateData {
-  nativeLang: string;
-  targetLang: string;
-  primaryGoal: string;
-  comfortLevel: number;
-}
+import getServerSession from '@/lib/auth-options';
+import { prisma } from '@/lib/prisma';
 
 export async function POST(request: Request) {
-  let userId: string | undefined;
+  const session = await getServerSession();
+  
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const { targetLang, nativeLang, primaryGoal } = await request.json();
+
   try {
-    const data = await request.json();
-    userId = data.userId;
-    const { nativeLanguage, targetLanguage, primaryGoal, comfortLevel } = data;
-    
-    // Basic validation
-    if (!userId || !nativeLanguage || !targetLanguage || !primaryGoal || !comfortLevel) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
-    }
-
-    // Prepare update data with correct types
-    const updateData: ProfileUpdateData = {
-      nativeLang: nativeLanguage,
-      targetLang: targetLanguage,
-      primaryGoal,
-      comfortLevel: Number(comfortLevel)
-    };
-
-    // Update user profile
-    const updatedUser = await prisma.user.update({
-      where: { id: userId },
-      data: updateData
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: {
+        targetLang,
+        nativeLang,
+        primaryGoal,
+        status: 'active'
+      }
     });
-
-    return NextResponse.json(updatedUser);
-    
+    return NextResponse.json({ success: true });
   } catch (error) {
-    logger.error('Failed to create user profile', {
-      error,
-      userId: userId || 'unknown'
-    });
+    console.error('Failed to update profile:', error);
     return NextResponse.json(
       { error: 'Failed to update profile' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }

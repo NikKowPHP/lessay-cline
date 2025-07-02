@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { prisma } from '@/lib/prisma';
 import logger from '@/lib/logger';
+import { sendSubscriptionConfirmation } from '@/lib/email';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-05-28.basil'
@@ -22,6 +23,14 @@ export async function POST(request: Request) {
       process.env.STRIPE_WEBHOOK_SECRET!
     );
 
+    // Check if we've already processed this event
+    const processedEvent = await prisma.processedEvent.findUnique({
+      where: { eventId: event.id }
+    });
+    if (processedEvent) {
+      return NextResponse.json({ received: true }, { status: 200 });
+    }
+
     switch (event.type) {
       case 'checkout.session.completed':
         const session = event.data.object as Stripe.Checkout.Session;
@@ -37,6 +46,13 @@ export async function POST(request: Request) {
         logger.info(`Unhandled Stripe event type`, { eventType: event.type });
     }
 
+    // Store the event ID after successful processing
+    await prisma.$transaction([
+      prisma.processedEvent.create({
+        data: { eventId: event.id }
+      })
+    ]);
+    
     return NextResponse.json({ received: true }, { status: 200 });
   } catch (err) {
     logger.error('Stripe webhook processing failed', { error: err });
@@ -50,13 +66,17 @@ export async function POST(request: Request) {
 async function handleCheckoutSession(session: Stripe.Checkout.Session) {
   if (!session.customer || typeof session.customer !== 'string') return;
   
-  await prisma.user.update({
+  const user = await prisma.user.update({
     where: { stripeCustomerId: session.customer },
     data: {
       subscriptionStatus: 'active',
       subscriptionId: session.subscription as string
     }
   });
+  
+  if (user.email) {
+    await sendSubscriptionConfirmation(user.email);
+  }
 }
 
 async function handleInvoicePayment(invoice: Stripe.Invoice) {

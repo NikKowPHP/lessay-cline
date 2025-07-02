@@ -32,6 +32,7 @@ model User {
   studySessions StudySession[]
   progressSnapshots ProgressSnapshot[]
   role          UserRole @default(USER)
+  status        String @default("new") // 'new' | 'active'
   memoryRetentionRate Float? @default(0.7)
   preferredReviewTime String? @default("morning")
   createdAt    DateTime @default(now())
@@ -49,6 +50,12 @@ model AuditLog {
   details   Json?
   ipAddress String?
   userAgent String?
+  createdAt DateTime @default(now())
+}
+
+model ProcessedEvent {
+  id        String   @id @default(uuid())
+  eventId   String   @unique
   createdAt DateTime @default(now())
 }
 
