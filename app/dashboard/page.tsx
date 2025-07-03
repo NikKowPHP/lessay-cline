@@ -1,10 +1,14 @@
 // ROO-AUDIT-TAG :: plan-004-progress-tracking.md :: Create dashboard page
 import Dashboard from '@/components/Dashboard';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth-options';
+import { createServerComponentSupabaseClient } from '@supabase/auth-helpers-nextjs';
+import { cookies, headers } from 'next/headers';
 
 export default async function DashboardPage() {
-  const session = await getServerSession(authOptions);
+  const supabase = createServerComponentSupabaseClient({
+    headers,
+    cookies,
+  });
+  const { data: { session } } = await supabase.auth.getSession();
   
   if (!session?.user) {
     return <div>Please sign in to view your dashboard</div>;

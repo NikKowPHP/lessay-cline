@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import logger from '@/lib/logger';
 import type { ReactElement } from 'react';
-import { useSession } from 'next-auth/react';
+import { useUser } from '@supabase/auth-helpers-react';
 
 interface FormData {
   email: string;
@@ -15,9 +15,9 @@ interface FormData {
 }
 
 export default function SettingsView(): ReactElement {
-  const { data: session } = useSession();
+  const user = useUser();
   const [formData, setFormData] = useState<FormData>({
-    email: session?.user?.email || '',
+    email: user?.email || '',
     currentPassword: '',
     newPassword: '',
     theme: 'light',

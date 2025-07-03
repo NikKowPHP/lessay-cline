@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import logger from '@/lib/logger';
-import { useSession } from 'next-auth/react';
+import { useUser } from '@supabase/auth-helpers-react';
 
 interface Notification {
   id: string;
@@ -12,13 +12,13 @@ interface Notification {
 }
 
 export default function Notifications() {
-  const { data: session } = useSession();
+  const user = useUser();
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    if (!session?.user?.id) return;
+    if (!user?.id) return;
 
     // Fetch initial notifications
     const fetchNotifications = async () => {
@@ -47,7 +47,7 @@ export default function Notifications() {
     return () => {
       eventSource.close();
     };
-  }, [session?.user?.id]);
+  }, [user?.id]);
 
   const markAsRead = async (id: string) => {
     try {

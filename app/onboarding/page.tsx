@@ -1,15 +1,21 @@
-import getServerSession from '@/lib/auth-options';
+import { createServerComponentSupabaseClient } from '@supabase/auth-helpers-nextjs';
+import { headers, cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import OnboardingFlow from '@/components/OnboardingFlow';
 
 export default async function OnboardingPage() {
-  const session = await getServerSession();
+  const supabase = createServerComponentSupabaseClient({
+    headers,
+    cookies,
+  });
+  const { data: { session } } = await supabase.auth.getSession();
   
   if (!session?.user) {
     redirect('/login');
   }
 
-  if (session.user.status === 'active') {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user?.user_metadata?.status === 'active') {
     redirect('/dashboard');
   }
 
